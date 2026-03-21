@@ -1,7 +1,7 @@
 {
-  "name": "Energy Flow Pro Card",
+  "name": "Tesla Style Energy Flow",
   "content_in_root": true,
-  "filename": "energy-flow-pro-card.js",
+  "filename": "tesla-style-energy-flow.js",
   "render_readme": true,
   "homeassistant": "2024.1.0"
 }

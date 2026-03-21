@@ -1,8 +1,8 @@
-/* Energy Flow Pro Card
+/* Tesla Style Energy Flow
  * Public Home Assistant custom card with configurable sensors, background, and flow paths.
  */
 (function () {
-  const CARD_TYPE = 'energy-flow-pro-card';
+  const CARD_TYPE = 'tesla-style-energy-flow';
   const FLOW_MIN_W = 50;
   const SUPPORTED_LANGS = ['it', 'en', 'es', 'fr', 'de'];
   const DEFAULT_LANG = 'it';
@@ -79,7 +79,7 @@
     },
     en: {
       card: {
-        default_title: 'Energy Flow',
+        default_title: 'Tesla Style Energy Flow',
         node: {
           solar: 'Solar',
           grid: 'Grid',
@@ -643,11 +643,11 @@
 
   const DEFAULT_CONFIG = Object.freeze({
     type: `custom:${CARD_TYPE}`,
-    title: 'Energy Flow',
+    title: 'Tesla Style Energy Flow',
     language: 'auto',
-    background: '/local/community/energy-flow-pro-card/backgrounds/scene_day_clear_idle.png',
+    background: '/local/community/tesla-style-energy-flow/backgrounds/scene_day_clear_idle.png',
     dynamic_background: true,
-    background_asset_base: '/local/community/energy-flow-pro-card/backgrounds',
+    background_asset_base: '/local/community/tesla-style-energy-flow/backgrounds',
     show_labels: true,
     ev_hide_when_idle: false,
     scene_scale: 1.06,
@@ -820,7 +820,7 @@
 
   class EnergyFlowProCard extends HTMLElement {
     static getConfigElement() {
-      return document.createElement('energy-flow-pro-card-editor');
+      return document.createElement('tesla-style-energy-flow-editor');
     }
 
     static getStubConfig() {
@@ -949,7 +949,7 @@
     }
 
     _defaultBackgroundMap() {
-      const base = this._config.background_asset_base || '/local/community/energy-flow-pro-card/backgrounds';
+      const base = this._config.background_asset_base || '/local/community/tesla-style-energy-flow/backgrounds';
       const out = {};
       Object.entries(SCENE_IMAGE_MAP).forEach(([k, v]) => {
         out[k] = joinAsset(base, v);
@@ -1006,7 +1006,7 @@
         ? SCENE_IMAGE_MAP.day_clear_charging
         : SCENE_IMAGE_MAP.day_clear_idle;
       const legacyFallback = joinAsset(
-        cfg.background_asset_base || '/local/community/energy-flow-pro-card/backgrounds',
+        cfg.background_asset_base || '/local/community/tesla-style-energy-flow/backgrounds',
         fallbackFile
       );
       if (legacyFallback) return legacyFallback;
@@ -1686,7 +1686,7 @@
               <label>${this._t('editor.field_background', 'Background URL')}</label>
               <input data-path="background" value="${cfg.background || ''}">
               <label>${this._t('editor.field_background_base', 'Background Assets Base (auto)')}</label>
-              <input data-path="background_asset_base" value="${cfg.background_asset_base || '/local/community/energy-flow-pro-card/backgrounds'}">
+              <input data-path="background_asset_base" value="${cfg.background_asset_base || '/local/community/tesla-style-energy-flow/backgrounds'}">
               <div class="row">
                 <label>${this._t('editor.field_grid_invert', 'Invert grid sign')}</label>
                 <input type="checkbox" data-path="grid_invert" ${cfg.grid_invert ? 'checked' : ''}>
@@ -1786,15 +1786,15 @@
   if (!customElements.get(CARD_TYPE)) {
     customElements.define(CARD_TYPE, EnergyFlowProCard);
   }
-  if (!customElements.get('energy-flow-pro-card-editor')) {
-    customElements.define('energy-flow-pro-card-editor', EnergyFlowProCardEditor);
+  if (!customElements.get('tesla-style-energy-flow-editor')) {
+    customElements.define('tesla-style-energy-flow-editor', EnergyFlowProCardEditor);
   }
 
   window.customCards = window.customCards || [];
   if (!window.customCards.find((c) => c.type === CARD_TYPE)) {
     window.customCards.push({
       type: CARD_TYPE,
-      name: 'Energy Flow Pro Card',
+      name: 'Tesla Style Energy Flow',
       description: 'Flow card with background, configurable entities, and color logic.'
     });
   }

@@ -1,4 +1,4 @@
-# Energy Flow Pro Card
+# Tesla Style Energy Flow
 
 Custom Home Assistant Lovelace card for energy flows on a house scene, with dynamic weather/day-night backgrounds and EV-aware layout switching.
 
@@ -29,20 +29,20 @@ Custom Home Assistant Lovelace card for energy flows on a house scene, with dyna
 1. HACS -> Frontend -> Custom repositories
 2. Add this GitHub repo URL
 3. Category: `Dashboard`
-4. Install `Energy Flow Pro Card`
+4. Install `Tesla Style Energy Flow`
 5. Refresh browser cache
 
 ### Manual
 
 1. Copy package files to:
-   - `/config/www/community/energy-flow-pro-card/energy-flow-pro-card.js`
-   - `/config/www/community/energy-flow-pro-card/backgrounds/*`
+   - `/config/www/community/tesla-style-energy-flow/tesla-style-energy-flow.js`
+   - `/config/www/community/tesla-style-energy-flow/backgrounds/*`
 2. Add Lovelace resource:
 
 ```yaml
 lovelace:
   resources:
-    - url: /local/community/energy-flow-pro-card/energy-flow-pro-card.js
+    - url: /local/community/tesla-style-energy-flow/tesla-style-energy-flow.js
       type: module
 ```
 
@@ -51,12 +51,12 @@ lovelace:
 ## Usage
 
 ```yaml
-type: custom:energy-flow-pro-card
-title: Energy Flow
+type: custom:tesla-style-energy-flow
+title: Tesla Style Energy Flow
 language: auto
-background: /local/community/energy-flow-pro-card/backgrounds/scene_day_clear_idle.png
+background: /local/community/tesla-style-energy-flow/backgrounds/scene_day_clear_idle.png
 dynamic_background: true
-background_asset_base: /local/community/energy-flow-pro-card/backgrounds
+background_asset_base: /local/community/tesla-style-energy-flow/backgrounds
 grid_invert: true
 ev_hide_when_idle: false
 thresholds:
@@ -98,7 +98,7 @@ Night rain (idle)
 
 ## Files
 
-- `energy-flow-pro-card.js`: custom card source
+- `tesla-style-energy-flow.js`: custom card source
 - `backgrounds/`: built-in background assets used by default (`scene_day_clear_charging.png`, `scene_day_clear_idle.png`, `scene_day_rain_*`, `scene_night_*`)
 - `hacs.json`: HACS metadata
 - `examples/lovelace-card.yaml`: config example
@@ -107,7 +107,7 @@ Night rain (idle)
 ## Notes
 
 - This repository is ready for manual installation or HACS custom repository usage.
-- If you publish it on GitHub, keep the repository root as-is so `hacs.json` and `energy-flow-pro-card.js` stay in the expected locations.
+- If you publish it on GitHub, keep the repository root as-is so `hacs.json` and `tesla-style-energy-flow.js` stay in the expected locations.
 
 ## License
 

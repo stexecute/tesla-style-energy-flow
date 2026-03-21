@@ -1,9 +1,9 @@
-type: custom:energy-flow-pro-card
-title: Energy Flow
+type: custom:tesla-style-energy-flow
+title: Tesla Style Energy Flow
 language: auto
-background: /local/community/energy-flow-pro-card/backgrounds/scene_day_clear_idle.png
+background: /local/community/tesla-style-energy-flow/backgrounds/scene_day_clear_idle.png
 dynamic_background: true
-background_asset_base: /local/community/energy-flow-pro-card/backgrounds
+background_asset_base: /local/community/tesla-style-energy-flow/backgrounds
 grid_invert: true
 ev_hide_when_idle: false
 thresholds:
