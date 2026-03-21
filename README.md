@@ -4,6 +4,8 @@ Custom Home Assistant Lovelace card for energy flows on a house scene, with dyna
 
 ![Tesla Style Energy Flow preview](docs/screenshots/05-night-rain-grid-home-ev.png)
 
+[Watch demo video](docs/media/tesla-style-energy-flow-demo.mp4)
+
 ## Features
 
 - Smooth animated SVG flow lines
