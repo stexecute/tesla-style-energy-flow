@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.0 - 2026-03-21
+
+- Synced package code with the latest Home Assistant production version
+- Updated scene component coordinates for all major day/night and rain charging/idle backgrounds
+- Improved battery percentage positioning and readability across scenes
+- Kept battery percentage visible when battery flow is idle
+- Simplified status copy to focus on battery charging/discharging state
+- Removed unused node dots from the flow scene for a cleaner presentation
+
 ## 0.1.2 - 2026-02-14
 
 - Moved battery text block slightly lower (label, power, status)

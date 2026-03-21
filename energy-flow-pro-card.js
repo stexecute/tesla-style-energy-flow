@@ -327,6 +327,320 @@
     }
   });
 
+  const LEGACY_SCENE_IMAGES = new Set(['image.png', 'image2.png']);
+  const SCENE_IMAGE_MAP = Object.freeze({
+    day_clear_charging: 'scene_day_clear_charging.png',
+    day_clear_idle: 'scene_day_clear_idle.png',
+    day_cloudy_charging: 'scene_day_clear_charging.png',
+    day_cloudy_idle: 'scene_day_clear_idle.png',
+    day_rain_charging: 'scene_day_rain_charging.png',
+    day_rain_idle: 'scene_day_rain_idle.png',
+    day_snow_charging: 'scene_day_clear_charging.png',
+    day_snow_idle: 'scene_day_clear_idle.png',
+    day_storm_charging: 'scene_day_clear_charging.png',
+    day_storm_idle: 'scene_day_clear_idle.png',
+    night_clear_charging: 'scene_night_clear_charging.png',
+    night_clear_idle: 'scene_night_clear_idle.png',
+    night_cloudy_charging: 'scene_night_clear_charging.png',
+    night_cloudy_idle: 'scene_night_clear_idle.png',
+    night_rain_charging: 'scene_night_rain_charging.png',
+    night_rain_idle: 'scene_night_rain_idle.png',
+    night_snow_charging: 'scene_night_clear_charging.png',
+    night_snow_idle: 'scene_night_clear_idle.png',
+    night_storm_charging: 'scene_night_clear_charging.png',
+    night_storm_idle: 'scene_night_clear_idle.png'
+  });
+
+  const FLOW_PATH_KEYS = Object.freeze({
+    'line-solar-load': 'line_solar_load',
+    'line-grid-load': 'line_grid_load',
+    'line-battery-load': 'line_battery_load',
+    'line-junction-home-load': 'line_junction_home_load',
+    'line-wallbox-ev': 'line_wallbox_ev',
+    'line-solar-grid': 'line_solar_grid',
+    'line-solar-battery': 'line_solar_battery',
+    'line-grid-battery': 'line_grid_battery'
+  });
+
+  const DAY_CLEAR_IDLE_PATHS = Object.freeze({
+      'line-solar-load': 'M 351 292 L 352 338 L 352 338',
+      'line-solar-grid': 'M 350 292 L 352 378 L 436 404',
+      'line-solar-battery': 'M 350 292 L 352 340 L 310 348',
+      'line-grid-load': 'M 434 402 Q 434 402 351 375 Q 352 340 351 341',
+      'line-grid-battery': 'M 352 338 L 310 348',
+      'line-battery-load': 'M 310 348 Q 353 339 352 338',
+      'line-junction-home-load': 'M 354 338 Q 386 330 408 324',
+      'line-wallbox-ev': 'M 164 322 Q 160 368 182 344'
+  });
+
+  const DAY_CLEAR_CHARGING_PATHS = Object.freeze({
+      'line-solar-load': 'M 351 292 L 352 338 L 352 338',
+      'line-solar-grid': 'M 350 292 L 352 374 L 434 402',
+      'line-solar-battery': 'M 350 292 L 352 338 L 312 348',
+      'line-grid-load': 'M 434 402 Q 434 402 351 375 Q 352 340 351 341',
+      'line-grid-battery': 'M 352 340 L 312 348',
+      'line-battery-load': 'M 310 348 Q 353 339 352 338',
+      'line-junction-home-load': 'M 354 338 Q 386 330 408 324',
+      'line-wallbox-ev': 'M 164 322 Q 160 368 182 344'
+  });
+
+  const SCENE_FLOW_PATH_MAP = Object.freeze({
+    'scene_day_clear_idle.png': DAY_CLEAR_IDLE_PATHS,
+    'scene_day_clear_charging.png': DAY_CLEAR_CHARGING_PATHS,
+    'image2.png': DAY_CLEAR_IDLE_PATHS,
+    'image.png': DAY_CLEAR_CHARGING_PATHS,
+    'scene_day_rain_idle.png': Object.freeze({
+      'line-solar-load': 'M 351 292 L 352 338 L 352 338',
+      'line-solar-grid': 'M 350 288 L 352 376 L 436 402',
+      'line-solar-battery': 'M 350 288 L 352 332 L 310 342',
+      'line-grid-load': 'M 434 402 Q 434 402 351 375 Q 352 340 351 341',
+      'line-grid-battery': 'M 436 402 L 354 374',
+      'line-battery-load': 'M 310 342 Q 352 334 352 330',
+      'line-junction-home-load': 'M 350 332 Q 386 326 410 318',
+      'line-wallbox-ev': 'M 164 314 Q 160 368 182 344'
+    }),
+    'scene_day_rain_charging.png': Object.freeze({
+      'line-solar-load': 'M 380 272 L 382 316 L 436 304',
+      'line-solar-grid': 'M 380 272 L 382 354 L 468 378',
+      'line-solar-battery': 'M 380 276 L 382 314 L 334 324',
+      'line-grid-load': 'M 464 378 Q 464 376 382 354 Q 382 336 382 314',
+      'line-grid-battery': 'M 468 378 L 384 354',
+      'line-battery-load': 'M 336 324 Q 368 318 382 314',
+      'line-junction-home-load': 'M 382 314 Q 410 308 438 302',
+      'line-wallbox-ev': 'M 174 296 Q 164 342 188 314'
+    }),
+    'scene_night_clear_idle.png': Object.freeze({
+      'line-solar-load': 'M 351 292 L 352 338 L 352 338',
+      'line-solar-grid': 'M 352 296 L 352 376 L 440 406',
+      'line-solar-battery': 'M 350 292 L 350 338 L 312 346',
+      'line-grid-load': 'M 434 402 Q 434 402 351 375 Q 352 340 351 341',
+      'line-grid-battery': 'M 438 404 L 354 376',
+      'line-battery-load': 'M 310 348 Q 353 339 352 338',
+      'line-junction-home-load': 'M 354 338 Q 386 330 408 324',
+      'line-wallbox-ev': 'M 164 322 Q 160 368 182 344'
+    }),
+    'scene_night_clear_charging.png': Object.freeze({
+      'line-solar-load': 'M 376 278 L 382 322 L 432 312',
+      'line-solar-grid': 'M 378 282 L 382 360 L 480 392',
+      'line-solar-battery': 'M 378 280 L 380 324 L 332 330',
+      'line-grid-load': 'M 478 390 Q 454 384 382 360 Q 382 334 382 326',
+      'line-grid-battery': 'M 482 394 L 384 360',
+      'line-battery-load': 'M 336 330 Q 380 324 382 322',
+      'line-junction-home-load': 'M 382 322 Q 416 316 434 310',
+      'line-wallbox-ev': 'M 192 304 Q 184 352 206 326'
+    }),
+    'scene_night_rain_idle.png': Object.freeze({
+      'line-solar-load': 'M 351 292 L 352 338 L 352 338',
+      'line-solar-grid': 'M 350 284 L 354 366 L 432 392',
+      'line-solar-battery': 'M 350 286 L 350 324 L 314 330',
+      'line-grid-load': 'M 430 392 Q 432 394 356 366 Q 354 340 352 322',
+      'line-grid-battery': 'M 434 392 L 356 366',
+      'line-battery-load': 'M 310 330 Q 354 322 354 322',
+      'line-junction-home-load': 'M 352 324 Q 388 316 406 312',
+      'line-wallbox-ev': 'M 166 310 Q 160 354 184 334'
+    }),
+    'scene_night_rain_charging.png': Object.freeze({
+      'line-solar-load': 'M 351 292 L 352 338 L 352 338',
+      'line-solar-grid': 'M 350 290 L 350 376 L 434 402',
+      'line-solar-battery': 'M 350 290 L 352 334 L 310 342',
+      'line-grid-load': 'M 434 402 Q 434 402 351 375 Q 352 340 351 341',
+      'line-grid-battery': 'M 436 402 L 352 376',
+      'line-battery-load': 'M 310 348 Q 353 339 352 338',
+      'line-junction-home-load': 'M 352 334 Q 386 326 410 320',
+      'line-wallbox-ev': 'M 164 314 Q 160 356 182 332'
+    })
+  });
+
+  const DAY_CLEAR_IDLE_COMPONENTS = Object.freeze({
+    'solar-label': Object.freeze({ x: -16, y: -108 }),
+    'solar-power': Object.freeze({ x: 0, y: -86 }),
+    'solar-guide': Object.freeze({ x1: -20, y1: -78, x2: -20, y2: 2 }),
+    'grid-label': Object.freeze({ x: 8, y: 78 }),
+    'grid-power': Object.freeze({ x: 24, y: 100 }),
+    'grid-guide': Object.freeze({ x1: 4, y1: 34, x2: 4, y2: 64 }),
+    'load-label': Object.freeze({ x: -36, y: -36 }),
+    'load-power': Object.freeze({ x: -16, y: -14 }),
+    'load-guide': Object.freeze({ x1: -32, y1: -4, x2: -32, y2: 68 }),
+    'battery-label': Object.freeze({ x: -30, y: 98 }),
+    'battery-power': Object.freeze({ x: -20, y: 120 }),
+    'battery-pct': Object.freeze({ x: -2, y: 80 }),
+    'battery-status': Object.freeze({ x: 30, y: 98 }),
+    'battery-guide': Object.freeze({ x1: -38, y1: 56, x2: -38, y2: 86 }),
+    'ev-label': Object.freeze({ x: -20, y: -138 }),
+    'ev-power': Object.freeze({ x: -4, y: -110 }),
+    'ev-pct': Object.freeze({ x: -6, y: 6 }),
+    'ev-guide': Object.freeze({ x1: -22, y1: -100, x2: -22, y2: -30 })
+  });
+
+  const DAY_CLEAR_CHARGING_COMPONENTS = Object.freeze({
+    'solar-label': Object.freeze({ x: 4, y: -76 }),
+    'solar-power': Object.freeze({ x: 18, y: -52 }),
+    'solar-guide': Object.freeze({ x1: 0, y1: -50, x2: 0, y2: 30 }),
+    'grid-label': Object.freeze({ x: 8, y: 94 }),
+    'grid-power': Object.freeze({ x: 28, y: 116 }),
+    'grid-guide': Object.freeze({ x1: 6, y1: 36, x2: 6, y2: 80 }),
+    'load-label': Object.freeze({ x: -32, y: -20 }),
+    'load-power': Object.freeze({ x: -12, y: 2 }),
+    'load-guide': Object.freeze({ x1: -32, y1: 2, x2: -32, y2: 66 }),
+    'battery-label': Object.freeze({ x: -46, y: 100 }),
+    'battery-power': Object.freeze({ x: -34, y: 122 }),
+    'battery-pct': Object.freeze({ x: -14, y: 84 }),
+    'battery-status': Object.freeze({ x: 12, y: 100 }),
+    'battery-guide': Object.freeze({ x1: -44, y1: 52, x2: -44, y2: 80 }),
+    'ev-label': Object.freeze({ x: 2, y: -118 }),
+    'ev-power': Object.freeze({ x: 20, y: -100 }),
+    'ev-pct': Object.freeze({ x: 2, y: -14 }),
+    'ev-guide': Object.freeze({ x1: 0, y1: -98, x2: 0, y2: 4 })
+  });
+
+  const SCENE_FLOW_COMPONENT_MAP = Object.freeze({
+    'scene_day_clear_idle.png': DAY_CLEAR_IDLE_COMPONENTS,
+    'scene_day_clear_charging.png': DAY_CLEAR_CHARGING_COMPONENTS,
+    'image2.png': DAY_CLEAR_IDLE_COMPONENTS,
+    'image.png': DAY_CLEAR_CHARGING_COMPONENTS,
+    'scene_day_rain_idle.png': Object.freeze({
+      'solar-label': Object.freeze({ x: -16, y: -112 }),
+      'solar-power': Object.freeze({ x: 0, y: -86 }),
+      'solar-guide': Object.freeze({ x1: -18, y1: -82, x2: -18, y2: -2 }),
+      'grid-label': Object.freeze({ x: 24, y: 80 }),
+      'grid-power': Object.freeze({ x: 42, y: 106 }),
+      'grid-guide': Object.freeze({ x1: 22, y1: 32, x2: 22, y2: 62 }),
+      'load-label': Object.freeze({ x: -36, y: -38 }),
+      'load-power': Object.freeze({ x: -14, y: -12 }),
+      'load-guide': Object.freeze({ x1: -32, y1: -8, x2: -32, y2: 64 }),
+      'battery-label': Object.freeze({ x: -22, y: 88 }),
+      'battery-power': Object.freeze({ x: -10, y: 112 }),
+      'battery-pct': Object.freeze({ x: -12, y: 74 }),
+      'battery-status': Object.freeze({ x: 36, y: 88 }),
+      'battery-guide': Object.freeze({ x1: 0, y1: 12, x2: 0, y2: 42 }),
+      'ev-label': Object.freeze({ x: -26, y: -132 }),
+      'ev-power': Object.freeze({ x: -6, y: -106 }),
+      'ev-pct': Object.freeze({ x: -6, y: -90 }),
+      'ev-guide': Object.freeze({ x1: -26, y1: -94, x2: -26, y2: -22 })
+    }),
+    'scene_day_rain_charging.png': Object.freeze({
+      'solar-label': Object.freeze({ x: 14, y: -106 }),
+      'solar-power': Object.freeze({ x: 20, y: -86 }),
+      'solar-guide': Object.freeze({ x1: 0, y1: -84, x2: 0, y2: -4 }),
+      'grid-label': Object.freeze({ x: 6, y: 78 }),
+      'grid-power': Object.freeze({ x: 24, y: 98 }),
+      'grid-guide': Object.freeze({ x1: 6, y1: 32, x2: 6, y2: 62 }),
+      'load-label': Object.freeze({ x: 0, y: -58 }),
+      'load-power': Object.freeze({ x: 18, y: -34 }),
+      'load-guide': Object.freeze({ x1: 0, y1: -26, x2: 0, y2: 46 }),
+      'battery-label': Object.freeze({ x: -20, y: 82 }),
+      'battery-power': Object.freeze({ x: -6, y: 106 }),
+      'battery-pct': Object.freeze({ x: 4, y: 36 }),
+      'battery-status': Object.freeze({ x: 40, y: 82 }),
+      'battery-guide': Object.freeze({ x1: -12, y1: 28, x2: -12, y2: 70 }),
+      'ev-label': Object.freeze({ x: -16, y: -142 }),
+      'ev-power': Object.freeze({ x: 0, y: -118 }),
+      'ev-pct': Object.freeze({ x: 14, y: -46 }),
+      'ev-guide': Object.freeze({ x1: -18, y1: -114, x2: -20, y2: -24 })
+    }),
+    'scene_night_clear_idle.png': Object.freeze({
+      'solar-label': Object.freeze({ x: 4, y: -110 }),
+      'solar-power': Object.freeze({ x: 20, y: -86 }),
+      'solar-guide': Object.freeze({ x1: 0, y1: -92, x2: 0, y2: -12 }),
+      'grid-label': Object.freeze({ x: 18, y: 76 }),
+      'grid-power': Object.freeze({ x: 32, y: 102 }),
+      'grid-guide': Object.freeze({ x1: 18, y1: 30, x2: 18, y2: 60 }),
+      'load-label': Object.freeze({ x: -36, y: -28 }),
+      'load-power': Object.freeze({ x: -16, y: -2 }),
+      'load-guide': Object.freeze({ x1: -34, y1: 4, x2: -34, y2: 76 }),
+      'battery-label': Object.freeze({ x: -34, y: 96 }),
+      'battery-power': Object.freeze({ x: -18, y: 122 }),
+      'battery-pct': Object.freeze({ x: -12, y: 80 }),
+      'battery-status': Object.freeze({ x: 28, y: 96 }),
+      'battery-guide': Object.freeze({ x1: -38, y1: 54, x2: -38, y2: 84 }),
+      'ev-label': Object.freeze({ x: -22, y: -110 }),
+      'ev-power': Object.freeze({ x: -6, y: -82 }),
+      'ev-pct': Object.freeze({ x: 2, y: -24 }),
+      'ev-guide': Object.freeze({ x1: -18, y1: -72, x2: -18, y2: -6 })
+    }),
+    'scene_night_clear_charging.png': Object.freeze({
+      'solar-label': Object.freeze({ x: 4, y: -114 }),
+      'solar-power': Object.freeze({ x: 18, y: -88 }),
+      'solar-guide': Object.freeze({ x1: 0, y1: -92, x2: 0, y2: -12 }),
+      'grid-label': Object.freeze({ x: 36, y: 74 }),
+      'grid-power': Object.freeze({ x: 54, y: 100 }),
+      'grid-guide': Object.freeze({ x1: 34, y1: 30, x2: 34, y2: 60 }),
+      'load-label': Object.freeze({ x: -10, y: -40 }),
+      'load-power': Object.freeze({ x: 10, y: -16 }),
+      'load-guide': Object.freeze({ x1: -8, y1: -8, x2: -8, y2: 64 }),
+      'battery-label': Object.freeze({ x: -6, y: 96 }),
+      'battery-power': Object.freeze({ x: 8, y: 118 }),
+      'battery-pct': Object.freeze({ x: 18, y: 70 }),
+      'battery-status': Object.freeze({ x: 54, y: 96 }),
+      'battery-guide': Object.freeze({ x1: -8, y1: 44, x2: -8, y2: 74 }),
+      'ev-label': Object.freeze({ x: 10, y: -110 }),
+      'ev-power': Object.freeze({ x: 26, y: -86 }),
+      'ev-pct': Object.freeze({ x: 32, y: -34 }),
+      'ev-guide': Object.freeze({ x1: 8, y1: -78, x2: 10, y2: -30 })
+    }),
+    'scene_night_rain_idle.png': Object.freeze({
+      'solar-label': Object.freeze({ x: 2, y: -100 }),
+      'solar-power': Object.freeze({ x: 20, y: -80 }),
+      'solar-guide': Object.freeze({ x1: 0, y1: -80, x2: 0, y2: 0 }),
+      'grid-label': Object.freeze({ x: 0, y: 76 }),
+      'grid-power': Object.freeze({ x: 20, y: 102 }),
+      'grid-guide': Object.freeze({ x1: 0, y1: 34, x2: 0, y2: 64 }),
+      'load-label': Object.freeze({ x: -34, y: -42 }),
+      'load-power': Object.freeze({ x: -14, y: -18 }),
+      'load-guide': Object.freeze({ x1: -34, y1: -12, x2: -34, y2: 60 }),
+      'battery-label': Object.freeze({ x: -36, y: 98 }),
+      'battery-power': Object.freeze({ x: -20, y: 120 }),
+      'battery-pct': Object.freeze({ x: -12, y: 70 }),
+      'battery-status': Object.freeze({ x: 24, y: 98 }),
+      'battery-guide': Object.freeze({ x1: -38, y1: 48, x2: -38, y2: 78 }),
+      'ev-label': Object.freeze({ x: -12, y: -108 }),
+      'ev-power': Object.freeze({ x: 2, y: -84 }),
+      'ev-pct': Object.freeze({ x: 2, y: -32 }),
+      'ev-guide': Object.freeze({ x1: -20, y1: -78, x2: -20, y2: -48 })
+    }),
+    'scene_night_rain_charging.png': Object.freeze({
+      'solar-label': Object.freeze({ x: -22, y: -104 }),
+      'solar-power': Object.freeze({ x: -2, y: -82 }),
+      'solar-guide': Object.freeze({ x1: -22, y1: -78, x2: -22, y2: 2 }),
+      'grid-label': Object.freeze({ x: 10, y: 90 }),
+      'grid-power': Object.freeze({ x: 28, y: 112 }),
+      'grid-guide': Object.freeze({ x1: 8, y1: 42, x2: 8, y2: 72 }),
+      'load-label': Object.freeze({ x: -36, y: -30 }),
+      'load-power': Object.freeze({ x: -16, y: -8 }),
+      'load-guide': Object.freeze({ x1: -34, y1: -2, x2: -34, y2: 70 }),
+      'battery-label': Object.freeze({ x: -18, y: 92 }),
+      'battery-power': Object.freeze({ x: -8, y: 114 }),
+      'battery-pct': Object.freeze({ x: -10, y: 74 }),
+      'battery-status': Object.freeze({ x: 42, y: 92 }),
+      'battery-guide': Object.freeze({ x1: -30, y1: 52, x2: -30, y2: 82 }),
+      'ev-label': Object.freeze({ x: -18, y: -110 }),
+      'ev-power': Object.freeze({ x: -2, y: -88 }),
+      'ev-pct': Object.freeze({ x: 2, y: -28 }),
+      'ev-guide': Object.freeze({ x1: -22, y1: -82, x2: -22, y2: -40 })
+    })
+  });
+
+  const FLOW_COMPONENT_BINDINGS = Object.freeze({
+    'solar-label': Object.freeze({ id: 'flow-solar-label', attrs: Object.freeze(['x', 'y']) }),
+    'solar-power': Object.freeze({ id: 'flow-solar-power', attrs: Object.freeze(['x', 'y']) }),
+    'solar-guide': Object.freeze({ id: 'flow-solar-guide', attrs: Object.freeze(['x1', 'y1', 'x2', 'y2']) }),
+    'grid-label': Object.freeze({ id: 'flow-grid-label', attrs: Object.freeze(['x', 'y']) }),
+    'grid-power': Object.freeze({ id: 'flow-grid-power', attrs: Object.freeze(['x', 'y']) }),
+    'grid-guide': Object.freeze({ id: 'flow-grid-guide', attrs: Object.freeze(['x1', 'y1', 'x2', 'y2']) }),
+    'load-label': Object.freeze({ id: 'flow-load-label', attrs: Object.freeze(['x', 'y']) }),
+    'load-power': Object.freeze({ id: 'flow-load-power', attrs: Object.freeze(['x', 'y']) }),
+    'load-guide': Object.freeze({ id: 'flow-load-guide', attrs: Object.freeze(['x1', 'y1', 'x2', 'y2']) }),
+    'battery-label': Object.freeze({ id: 'flow-battery-label', attrs: Object.freeze(['x', 'y']) }),
+    'battery-power': Object.freeze({ id: 'flow-battery-power', attrs: Object.freeze(['x', 'y']) }),
+    'battery-pct': Object.freeze({ id: 'flow-battery-pct', attrs: Object.freeze(['x', 'y']) }),
+    'battery-status': Object.freeze({ id: 'flow-battery-status', attrs: Object.freeze(['x', 'y']) }),
+    'battery-guide': Object.freeze({ id: 'flow-battery-guide', attrs: Object.freeze(['x1', 'y1', 'x2', 'y2']) }),
+    'ev-label': Object.freeze({ id: 'flow-ev-label', attrs: Object.freeze(['x', 'y']) }),
+    'ev-power': Object.freeze({ id: 'flow-ev-power', attrs: Object.freeze(['x', 'y']) }),
+    'ev-pct': Object.freeze({ id: 'flow-ev-pct', attrs: Object.freeze(['x', 'y']) }),
+    'ev-guide': Object.freeze({ id: 'flow-ev-guide', attrs: Object.freeze(['x1', 'y1', 'x2', 'y2']) })
+  });
+
   const DEFAULT_CONFIG = Object.freeze({
     type: `custom:${CARD_TYPE}`,
     title: 'Energy Flow',
@@ -338,6 +652,7 @@
     ev_hide_when_idle: false,
     scene_scale: 1.06,
     grid_invert: true,
+    ev_min_w: 150,
     thresholds: {
       solar_min_w: 50,
       grid_min_w: 50,
@@ -380,9 +695,9 @@
       line_battery_load: 'M 310 348 Q 353 339 352 338',
       line_junction_home_load: 'M 354 338 Q 386 330 408 324',
       line_wallbox_ev: 'M 164 322 Q 160 368 182 344',
-      line_solar_grid: 'M 344 288 L 344 336 L 448 336',
-      line_solar_battery: 'M 344 288 L 344 330 L 314 330',
-      line_grid_battery: 'M 448 336 L 314 330'
+      line_solar_grid: 'M 350 292 L 352 374 L 434 402',
+      line_solar_battery: 'M 350 292 L 352 338 L 312 348',
+      line_grid_battery: 'M 352 340 L 312 348'
     }
   });
 
@@ -433,6 +748,26 @@
     if (!f) return '';
     if (f.startsWith('/') || /^https?:\/\//i.test(f)) return f;
     return b ? `${b}/${f.replace(/^\/+/, '')}` : f;
+  }
+
+  function sceneFileName(urlOrFile) {
+    const value = String(urlOrFile || '').trim();
+    if (!value) return '';
+    const clean = value.split('#')[0].split('?')[0];
+    const parts = clean.split('/');
+    return parts[parts.length - 1] || '';
+  }
+
+  function profileFromConfigPaths(pathsConfig) {
+    const src = pathsConfig || {};
+    const profile = {};
+    Object.entries(FLOW_PATH_KEYS).forEach(([pathId, configKey]) => {
+      const d = src[configKey];
+      if (typeof d === 'string' && d.trim()) {
+        profile[pathId] = d;
+      }
+    });
+    return profile;
   }
 
   function normalizeLanguageCode(value) {
@@ -499,7 +834,7 @@
           ev_power: 'sensor.wallbox_portal_charging_power',
           ev_battery: 'sensor.battery',
           ev_charge_switch: 'switch.lancia_y_charge',
-          weather: 'weather.home',
+          weather: 'weather.casa',
           sun: 'sun.sun'
         }
       });
@@ -512,11 +847,15 @@
       this._hass = null;
       this._initialized = false;
       this._renderLang = DEFAULT_LANG;
+      this._lastAppliedSceneFlowProfile = '';
+      this._lastAppliedSceneFlowComponentProfile = '';
     }
 
     setConfig(config) {
       this._config = deepMerge(DEFAULT_CONFIG, config || {});
       this._initialized = false;
+      this._lastAppliedSceneFlowProfile = '';
+      this._lastAppliedSceneFlowComponentProfile = '';
       this._render();
     }
 
@@ -553,7 +892,11 @@
 
     _toggleNode(id, active) {
       const el = this.shadowRoot.querySelector(id);
-      if (el) el.classList.toggle('active', !!active);
+      if (!el) return;
+      const isActive = !!active;
+      el.classList.toggle('active', isActive);
+      const group = el.closest('.flow-node') || el.closest('g');
+      if (group) group.classList.toggle('inactive', !isActive);
     }
 
     _activatePath(id, cls, watt, minW = FLOW_MIN_W) {
@@ -576,8 +919,9 @@
     }
 
     _isEvCharging(evPower) {
+      const evMinW = Math.max(0, safeNum(this._config.ev_min_w, 150));
       const evPowerEntity = this._entityState(this._config.entities.ev_power);
-      if (evPowerEntity) return evPower > 0;
+      if (evPowerEntity) return evPower > evMinW;
       const chargeSwitchState = this._entityState(this._config.entities.ev_charge_switch);
       return chargeSwitchState?.state === 'on';
     }
@@ -592,13 +936,13 @@
     }
 
     _scenePeriod(weatherState) {
-      const ws = String(weatherState || '').toLowerCase();
-      if (ws === 'clear-night') return 'night';
-
       const sunEntity = this._entityState(this._config.entities.sun || 'sun.sun');
       const sunState = String(sunEntity?.state || '').toLowerCase();
       if (sunState === 'above_horizon') return 'day';
       if (sunState === 'below_horizon') return 'night';
+
+      const ws = String(weatherState || '').toLowerCase();
+      if (ws === 'clear-night') return 'night';
 
       const hour = new Date().getHours();
       return hour >= 7 && hour < 19 ? 'day' : 'night';
@@ -606,35 +950,15 @@
 
     _defaultBackgroundMap() {
       const base = this._config.background_asset_base || '/local/community/energy-flow-pro-card/backgrounds';
-      const m = {
-        day_clear_charging: 'scene_day_clear_charging.png',
-        day_clear_idle: 'scene_day_clear_idle.png',
-        day_cloudy_charging: 'scene_day_clear_charging.png',
-        day_cloudy_idle: 'scene_day_clear_idle.png',
-        day_rain_charging: 'scene_day_rain_charging.png',
-        day_rain_idle: 'scene_day_rain_idle.png',
-        day_snow_charging: 'scene_day_clear_charging.png',
-        day_snow_idle: 'scene_day_clear_idle.png',
-        day_storm_charging: 'scene_day_clear_charging.png',
-        day_storm_idle: 'scene_day_clear_idle.png',
-        night_clear_charging: 'scene_night_clear_charging.png',
-        night_clear_idle: 'scene_night_clear_idle.png',
-        night_cloudy_charging: 'scene_night_clear_charging.png',
-        night_cloudy_idle: 'scene_night_clear_idle.png',
-        night_rain_charging: 'scene_night_rain_charging.png',
-        night_rain_idle: 'scene_night_rain_idle.png',
-        night_snow_charging: 'scene_night_clear_charging.png',
-        night_snow_idle: 'scene_night_clear_idle.png',
-        night_storm_charging: 'scene_night_clear_charging.png',
-        night_storm_idle: 'scene_night_clear_idle.png',
-        day_default: 'scene_day_clear_idle.png',
-        night_default: 'scene_night_clear_idle.png',
-        default: 'scene_day_clear_idle.png'
-      };
       const out = {};
-      Object.entries(m).forEach(([k, v]) => {
+      Object.entries(SCENE_IMAGE_MAP).forEach(([k, v]) => {
         out[k] = joinAsset(base, v);
       });
+
+      out.day_default = out.day_clear_idle || joinAsset(base, 'scene_day_clear_idle.png');
+      out.night_default = out.night_clear_idle || joinAsset(base, 'scene_night_clear_idle.png');
+      out.default = out.day_clear_idle || joinAsset(base, 'scene_day_clear_idle.png');
+
       // Alias senza charging state
       out.day_clear = out.day_clear_idle;
       out.day_cloudy = out.day_cloudy_idle;
@@ -662,16 +986,31 @@
         ...(cfg.background_map || {})
       };
 
-      const candidates = [
-        `${period}_${weatherGroup}_${chargeState}`,
-        `${period}_${weatherGroup}`,
-        `${period}_default`,
-        'default'
-      ];
-      for (const key of candidates) {
-        const url = String(map[key] || '').trim();
-        if (url) return url;
-      }
+      const exactKey = `${period}_${weatherGroup}_${chargeState}`;
+      const exactUrl = String(map[exactKey] || '').trim();
+      const exactFile = sceneFileName(exactUrl);
+      const isNightLegacy = period === 'night' && LEGACY_SCENE_IMAGES.has(exactFile);
+      if (exactUrl && !isNightLegacy) return exactUrl;
+
+      const clearKey = `${period}_clear_${chargeState}`;
+      const clearUrl = String(map[clearKey] || '').trim();
+      if (clearUrl) return clearUrl;
+
+      const periodDefault = String(map[`${period}_default`] || '').trim();
+      if (periodDefault) return periodDefault;
+
+      const defaultUrl = String(map.default || '').trim();
+      if (defaultUrl) return defaultUrl;
+
+      const fallbackFile = chargeState === 'charging'
+        ? SCENE_IMAGE_MAP.day_clear_charging
+        : SCENE_IMAGE_MAP.day_clear_idle;
+      const legacyFallback = joinAsset(
+        cfg.background_asset_base || '/local/community/energy-flow-pro-card/backgrounds',
+        fallbackFile
+      );
+      if (legacyFallback) return legacyFallback;
+
       return cfg.background;
     }
 
@@ -683,15 +1022,90 @@
       }
     }
 
+    _initialPathProfile() {
+      const configProfile = profileFromConfigPaths(this._config.paths);
+      const sceneKey = sceneFileName(this._config.background);
+      const sceneProfile = SCENE_FLOW_PATH_MAP[sceneKey];
+      if (!sceneProfile) return configProfile;
+      return { ...configProfile, ...sceneProfile };
+    }
+
+    _applyPathProfile(profile, marker) {
+      if (!profile || typeof profile !== 'object') return false;
+      let applied = false;
+      Object.keys(FLOW_PATH_KEYS).forEach((pathId) => {
+        const d = profile[pathId];
+        if (typeof d !== 'string' || !d.trim()) return;
+        const path = this.shadowRoot.querySelector(`#${pathId}`);
+        if (!path) return;
+        if (path.getAttribute('d') !== d) {
+          path.setAttribute('d', d);
+        }
+        applied = true;
+      });
+      if (applied && marker) this._lastAppliedSceneFlowProfile = marker;
+      return applied;
+    }
+
+    _applySceneFlowPaths(sceneHref) {
+      const sceneKey = sceneFileName(sceneHref);
+      const sceneProfile = SCENE_FLOW_PATH_MAP[sceneKey];
+      if (sceneProfile) {
+        if (this._lastAppliedSceneFlowProfile !== sceneKey) {
+          this._applyPathProfile(sceneProfile, sceneKey);
+        }
+        return;
+      }
+      if (this._lastAppliedSceneFlowProfile !== '__config__') {
+        const fallbackProfile = profileFromConfigPaths(this._config.paths);
+        this._applyPathProfile(fallbackProfile, '__config__');
+      }
+    }
+
+    _applyComponentProfile(profile, marker) {
+      if (!profile || typeof profile !== 'object') return false;
+      let applied = false;
+      Object.keys(FLOW_COMPONENT_BINDINGS).forEach((componentKey) => {
+        const binding = FLOW_COMPONENT_BINDINGS[componentKey];
+        const values = profile[componentKey];
+        if (!binding || !values || typeof values !== 'object') return;
+        const target = this.shadowRoot.querySelector(`#${binding.id}`);
+        if (!target) return;
+        binding.attrs.forEach((attr) => {
+          if (!Object.prototype.hasOwnProperty.call(values, attr)) return;
+          const nextValue = String(values[attr]);
+          if (target.getAttribute(attr) !== nextValue) {
+            target.setAttribute(attr, nextValue);
+          }
+          applied = true;
+        });
+      });
+      if (applied && marker) this._lastAppliedSceneFlowComponentProfile = marker;
+      return applied;
+    }
+
+    _applySceneFlowComponents(sceneHref) {
+      const sceneKey = sceneFileName(sceneHref);
+      const sceneProfile = SCENE_FLOW_COMPONENT_MAP[sceneKey] || SCENE_FLOW_COMPONENT_MAP['scene_day_clear_idle.png'];
+      const marker = SCENE_FLOW_COMPONENT_MAP[sceneKey] ? sceneKey : 'scene_day_clear_idle.png';
+      if (!sceneProfile) return;
+      if (this._lastAppliedSceneFlowComponentProfile !== marker) {
+        this._applyComponentProfile(sceneProfile, marker);
+      }
+    }
+
     _renderStatic() {
       const cfg = this._config;
-      const p = cfg.paths;
+      const p = this._initialPathProfile();
       const showLabelsClass = cfg.show_labels ? '' : 'hide-labels';
       const titleText = cfg.title === DEFAULT_CONFIG.title
         ? this._t('card.default_title', DEFAULT_CONFIG.title)
         : cfg.title;
       const titleHtml = titleText ? `<div class="card-title">${titleText}</div>` : '';
       const sceneScale = clamp(safeNum(cfg.scene_scale, 1.06), 0.6, 1.4);
+      const pathD = (id, configKey) => p[id] || cfg.paths?.[configKey] || DEFAULT_CONFIG.paths[configKey];
+      this._lastAppliedSceneFlowProfile = '';
+      this._lastAppliedSceneFlowComponentProfile = '';
 
       this.shadowRoot.innerHTML = `
         <style>
@@ -729,6 +1143,7 @@
           .flow-node-bg {
             fill: rgba(255,255,255,0.08);
             transition: fill 0.2s ease, filter 0.2s ease;
+            display: none;
           }
           .flow-node-bg.active {
             fill: rgba(255,255,255,0.72);
@@ -742,6 +1157,7 @@
           }
           .flow-label,
           .flow-power,
+          .flow-pct,
           .flow-status {
             fill: #f8fafc;
             text-shadow: 0 1px 2px rgba(2, 6, 23, 0.55);
@@ -758,18 +1174,41 @@
             font-size: 12px;
             font-weight: 700;
           }
+          .flow-pct {
+            font-size: 11px;
+            font-weight: 700;
+          }
           .flow-status {
             font-size: 8.5px;
             font-weight: 600;
             opacity: 0.9;
+            display: none;
+          }
+          #flow-battery-status {
+            display: inline;
+            font-size: 9px;
+            letter-spacing: 0.05em;
+          }
+          .flow-node.inactive .flow-label,
+          .flow-node.inactive .flow-power,
+          .flow-node.inactive .flow-pct,
+          .flow-node.inactive .flow-status {
+            fill: rgba(148, 163, 184, 0.72) !important;
+            opacity: 0.45;
+            text-shadow: none;
+          }
+          .flow-node.inactive #flow-battery-pct {
+            fill: #f8fafc !important;
+            opacity: 0.95;
+            text-shadow: 0 1px 2px rgba(2, 6, 23, 0.55);
           }
           .ev-hidden {
             display: none;
           }
           .flow-line {
             fill: none;
-            stroke: rgba(255,255,255,0.2);
-            stroke-width: 1.8;
+            stroke: rgba(191, 219, 254, 0.22);
+            stroke-width: 1.95;
             opacity: 0;
             stroke-linecap: round;
             stroke-linejoin: round;
@@ -777,25 +1216,38 @@
           }
           .flow-line.active {
             opacity: 1;
-            stroke-dasharray: 56 88;
-            animation: flowStream 2.05s linear infinite, flowPulse 1.5s ease-in-out infinite;
-            filter: drop-shadow(0 0 2px var(--flow-glow, rgba(255,255,255,0.25)))
-                    drop-shadow(0 0 7px var(--flow-glow, rgba(255,255,255,0.25)));
+            stroke-dasharray: var(--flow-seg, 62) var(--flow-gap, 82);
+            animation: flowStream var(--flow-speed, 1.9s) linear infinite, flowPulse var(--flow-fade, 1.45s) ease-in-out infinite;
+            filter: drop-shadow(0 0 3px var(--flow-glow, rgba(125, 249, 255, 0.4)))
+                    drop-shadow(0 0 12px var(--flow-glow, rgba(125, 249, 255, 0.4)));
           }
           .flow-line.active.flow-solar {
-            stroke: #facc15;
-            --flow-glow: rgba(250, 204, 21, 0.56);
+            stroke: #ffe066;
+            --flow-glow: rgba(255, 224, 102, 0.72);
+            --flow-seg: 64;
+            --flow-gap: 80;
+            --flow-speed: 1.75s;
+            --flow-fade: 1.35s;
           }
           .flow-line.active.flow-green {
-            stroke: #22c55e;
-            --flow-glow: rgba(34, 197, 94, 0.5);
+            stroke: #4ade80;
+            --flow-glow: rgba(74, 222, 128, 0.7);
+            --flow-seg: 62;
+            --flow-gap: 82;
+            --flow-speed: 1.9s;
+            --flow-fade: 1.45s;
           }
           .flow-line.active.flow-broken {
-            stroke: #ef4444;
-            --flow-glow: rgba(239, 68, 68, 0.5);
+            stroke: #ff5d73;
+            --flow-glow: rgba(255, 93, 115, 0.7);
+            --flow-seg: 40;
+            --flow-gap: 96;
+            --flow-speed: 1.35s;
+            --flow-fade: 1.15s;
           }
           .hide-labels .flow-label,
           .hide-labels .flow-power,
+          .hide-labels .flow-pct,
           .hide-labels .flow-status {
             display: none;
           }
@@ -803,8 +1255,9 @@
             to { stroke-dashoffset: -144; }
           }
           @keyframes flowPulse {
-            0%, 100% { opacity: 0.84; stroke-width: 1.9; }
-            45% { opacity: 1; stroke-width: 2.2; }
+            0%, 100% { opacity: 0.8; stroke-width: 2.1; }
+            45% { opacity: 1; stroke-width: 2.9; }
+            82% { opacity: 0.9; stroke-width: 2.4; }
           }
         </style>
         <ha-card>
@@ -815,48 +1268,55 @@
                 <image id="flow-scene-image" href="${cfg.background}" x="0" y="0" width="600" height="460" preserveAspectRatio="xMidYMid slice"></image>
                 <rect class="flow-scene-dim" x="0" y="0" width="600" height="460"></rect>
 
-                <path id="line-solar-load" class="flow-line" d="${p.line_solar_load}"></path>
-                <path id="line-grid-load" class="flow-line" d="${p.line_grid_load}"></path>
-                <path id="line-battery-load" class="flow-line" d="${p.line_battery_load}"></path>
-                <path id="line-junction-home-load" class="flow-line" d="${p.line_junction_home_load}"></path>
-                <path id="line-wallbox-ev" class="flow-line" d="${p.line_wallbox_ev}"></path>
-                <path id="line-solar-grid" class="flow-line" d="${p.line_solar_grid}"></path>
-                <path id="line-solar-battery" class="flow-line" d="${p.line_solar_battery}"></path>
-                <path id="line-grid-battery" class="flow-line" d="${p.line_grid_battery}"></path>
+                <path id="line-solar-load" class="flow-line" d="${pathD('line-solar-load', 'line_solar_load')}"></path>
+                <path id="line-grid-load" class="flow-line" d="${pathD('line-grid-load', 'line_grid_load')}"></path>
+                <path id="line-battery-load" class="flow-line" d="${pathD('line-battery-load', 'line_battery_load')}"></path>
+                <path id="line-junction-home-load" class="flow-line" d="${pathD('line-junction-home-load', 'line_junction_home_load')}"></path>
+                <path id="line-wallbox-ev" class="flow-line" d="${pathD('line-wallbox-ev', 'line_wallbox_ev')}"></path>
+                <path id="line-solar-grid" class="flow-line" d="${pathD('line-solar-grid', 'line_solar_grid')}"></path>
+                <path id="line-solar-battery" class="flow-line" d="${pathD('line-solar-battery', 'line_solar_battery')}"></path>
+                <path id="line-grid-battery" class="flow-line" d="${pathD('line-grid-battery', 'line_grid_battery')}"></path>
 
-                <g transform="translate(286, 155)">
-                  <line class="flow-node-guide" x1="0" y1="-92" x2="0" y2="-12"></line>
-                  <text class="flow-label" x="0" y="-96">${this._t('card.node.solar', 'Solare')}</text>
+                <g class="flow-node" transform="translate(286, 155)">
+                  <circle class="flow-node-bg" id="node-solar-bg" cx="0" cy="0" r="5"></circle>
+                  <line class="flow-node-guide" id="flow-solar-guide" x1="0" y1="-92" x2="0" y2="-12"></line>
+                  <text class="flow-label" id="flow-solar-label" x="0" y="-96">${this._t('card.node.solar', 'Solare')}</text>
                   <text class="flow-power" id="flow-solar-power" x="0" y="-78">0.0 kW</text>
                   <text class="flow-status" id="flow-solar-status" x="0" y="-62">${this._t('card.status.inactive', 'INATTIVO')}</text>
                 </g>
 
-                <g transform="translate(448, 336)">
-                  <line class="flow-node-guide" x1="0" y1="12" x2="0" y2="42"></line>
-                  <text class="flow-label" x="6" y="67">${this._t('card.node.grid', 'Rete')}</text>
+                <g class="flow-node" transform="translate(448, 336)">
+                  <circle class="flow-node-bg" id="node-grid-bg" cx="0" cy="0" r="5"></circle>
+                  <line class="flow-node-guide" id="flow-grid-guide" x1="0" y1="12" x2="0" y2="42"></line>
+                  <text class="flow-label" id="flow-grid-label" x="6" y="67">${this._t('card.node.grid', 'Rete')}</text>
                   <text class="flow-power" id="flow-grid-power" x="6" y="85">0.0 kW</text>
                   <text class="flow-status" id="flow-grid-status" x="6" y="100">${this._t('card.status.connected', 'CONNESSA')}</text>
                 </g>
 
-                <g transform="translate(465, 247)">
-                  <line class="flow-node-guide" x1="0" y1="-84" x2="0" y2="-12"></line>
-                  <text class="flow-label" x="0" y="-96">${this._t('card.node.home', 'Casa')}</text>
+                <g class="flow-node" transform="translate(465, 247)">
+                  <circle class="flow-node-bg" id="node-load-bg" cx="0" cy="0" r="5"></circle>
+                  <line class="flow-node-guide" id="flow-load-guide" x1="0" y1="-84" x2="0" y2="-12"></line>
+                  <text class="flow-label" id="flow-load-label" x="0" y="-96">${this._t('card.node.home', 'Casa')}</text>
                   <text class="flow-power" id="flow-load-power" x="0" y="-78">0.0 kW</text>
                   <text class="flow-status" id="flow-load-status" x="0" y="-62">${this._t('card.status.consuming', 'IN CONSUMO')}</text>
                 </g>
 
-                <g transform="translate(314, 330)">
-                  <line class="flow-node-guide" x1="0" y1="12" x2="0" y2="42"></line>
-                  <text class="flow-label" x="0" y="67">${this._t('card.node.battery', 'Batteria')}</text>
-                  <text class="flow-power" id="flow-battery-power" x="0" y="85">0.0 kW</text>
-                  <text class="flow-status" id="flow-battery-status" x="0" y="100">${this._t('card.status.waiting', 'IN ATTESA')}</text>
+                <g class="flow-node" transform="translate(314, 330)">
+                  <circle class="flow-node-bg" id="node-battery-bg" cx="0" cy="0" r="5"></circle>
+                  <line class="flow-node-guide" id="flow-battery-guide" x1="0" y1="12" x2="0" y2="42"></line>
+                  <text class="flow-label" id="flow-battery-label" x="0" y="67">${this._t('card.node.battery', 'Batteria')}</text>
+                  <text class="flow-power" id="flow-battery-power" x="-2" y="97" text-anchor="end">0.0 kW</text>
+                  <text class="flow-pct" id="flow-battery-pct" x="4" y="97" text-anchor="start">--%</text>
+                  <text class="flow-status" id="flow-battery-status" x="0" y="118">${this._t('card.status.waiting', 'IN ATTESA')}</text>
                 </g>
 
-                <g id="ev-node-group" transform="translate(184, 332)">
-                  <line class="flow-node-guide" x1="0" y1="12" x2="0" y2="42"></line>
-                  <text class="flow-label" x="0" y="61">${this._t('card.node.ev', 'EV')}</text>
+                <g class="flow-node" id="ev-node-group" transform="translate(184, 332)">
+                  <circle class="flow-node-bg" id="node-ev-bg" cx="0" cy="0" r="5"></circle>
+                  <line class="flow-node-guide" id="flow-ev-guide" x1="0" y1="12" x2="0" y2="42"></line>
+                  <text class="flow-label" id="flow-ev-label" x="0" y="61">${this._t('card.node.ev', 'EV')}</text>
                   <text class="flow-power" id="flow-ev-power" x="0" y="79">0.0 kW</text>
-                  <text class="flow-status" id="flow-ev-status" x="0" y="94">${this._t('card.status.off', 'OFF')}</text>
+                  <text class="flow-pct" id="flow-ev-pct" x="0" y="95">--%</text>
+                  <text class="flow-status" id="flow-ev-status" x="0" y="110">${this._t('card.status.off', 'OFF')}</text>
                 </g>
               </svg>
             </div>
@@ -888,27 +1348,32 @@
       if (evNodeGroup) {
         evNodeGroup.classList.toggle('ev-hidden', evHideIdle && !evCharging);
       }
-      this._setBackground(this._resolveBackground(evCharging));
+      const sceneHref = this._resolveBackground(evCharging);
+      this._setBackground(sceneHref);
+      this._applySceneFlowPaths(sceneHref);
+      this._applySceneFlowComponents(sceneHref);
 
       this._setText('#flow-solar-power', this._formatKW(solarPower));
       this._setText('#flow-grid-power', this._formatKW(gridPower));
       this._setText('#flow-load-power', this._formatKW(loadPower));
-      this._setText('#flow-battery-power', `${this._formatKW(batteryPower)} | ${Math.round(batteryLevel)}%`);
-      this._setText('#flow-ev-power', `${this._formatKW(evPower)} | ${Math.round(evBattery)}%`);
+      this._setText('#flow-battery-power', this._formatKW(batteryPower));
+      this._setText('#flow-battery-pct', `${Math.round(batteryLevel)}%`);
+      this._setText('#flow-ev-power', this._formatKW(evPower));
+      this._setText('#flow-ev-pct', `${Math.round(evBattery)}%`);
 
-      this._setText('#flow-solar-status', solarPower > solarMin
-        ? this._t('card.status.producing', 'IN PRODUZIONE')
-        : this._t('card.status.inactive', 'INATTIVO'));
-      this._setText('#flow-load-status', loadPower > homeMin
-        ? this._t('card.status.consuming', 'IN CONSUMO')
-        : this._t('card.status.inactive', 'INATTIVO'));
-      this._setText('#flow-ev-status', evCharging
-        ? this._t('card.status.charging', 'IN CARICA')
-        : this._t('card.status.off', 'OFF'));
-
-      if (batteryPower > batteryMin) this._setText('#flow-battery-status', this._t('card.status.charging', 'IN CARICA'));
-      else if (batteryPower < -batteryMin) this._setText('#flow-battery-status', this._t('card.status.discharging', 'IN SCARICA'));
-      else this._setText('#flow-battery-status', this._t('card.status.waiting', 'IN ATTESA'));
+      const batteryStatusEl = this.shadowRoot.querySelector('#flow-battery-status');
+      if (batteryStatusEl) {
+        if (batteryPower > batteryMin) {
+          this._setText('#flow-battery-status', this._t('card.status.charging', 'IN CARICA'));
+          batteryStatusEl.style.display = 'inline';
+        } else if (batteryPower < -batteryMin) {
+          this._setText('#flow-battery-status', this._t('card.status.discharging', 'IN SCARICA'));
+          batteryStatusEl.style.display = 'inline';
+        } else {
+          this._setText('#flow-battery-status', '');
+          batteryStatusEl.style.display = 'none';
+        }
+      }
 
       this._toggleNode('#node-solar-bg', solarPower > solarMin);
       this._toggleNode('#node-grid-bg', Math.abs(gridPower) > gridMin);

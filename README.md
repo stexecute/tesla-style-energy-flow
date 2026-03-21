@@ -1,6 +1,6 @@
 # Energy Flow Pro Card
 
-Custom Home Assistant Lovelace card for energy flows on a house scene.
+Custom Home Assistant Lovelace card for energy flows on a house scene, with dynamic weather/day-night backgrounds and EV-aware layout switching.
 
 ## Features
 
@@ -10,6 +10,7 @@ Custom Home Assistant Lovelace card for energy flows on a house scene.
   - battery = green
   - grid = red
 - Dynamic background (weather + day/night + EV charging)
+- Scene-specific label/guide positioning for each background
 - Config editor with entity dropdowns
 - Multilanguage UI (`auto`, `it`, `en`, `es`, `fr`, `de`)
 - Configurable thresholds for flow visibility:
@@ -18,6 +19,8 @@ Custom Home Assistant Lovelace card for energy flows on a house scene.
   - `thresholds.battery_min_w`
 - EV flow without threshold (shows immediately when charging)
 - Optional `ev_hide_when_idle` to hide EV labels/guide when not charging
+- Battery percentage remains readable even when battery power is idle
+- Simplified node status text with battery-focused charging/discharging state
 
 ## Installation
 
@@ -73,7 +76,7 @@ entities:
   sun: sun.sun
 ```
 
-`paths` non e incluso nell'esempio: la card usa i path di default e puoi cambiarli solo se necessario.
+The card ships with built-in SVG flow paths and scene presets, so no extra `paths:` block is required for a normal install.
 
 ## Screenshots
 
@@ -100,6 +103,11 @@ Night rain (idle)
 - `hacs.json`: HACS metadata
 - `examples/lovelace-card.yaml`: config example
 - `docs/screenshots/`: preview images for README
+
+## Notes
+
+- This repository is ready for manual installation or HACS custom repository usage.
+- If you publish it on GitHub, keep the repository root as-is so `hacs.json` and `energy-flow-pro-card.js` stay in the expected locations.
 
 ## License
 
