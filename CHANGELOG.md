@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.1 - 2026-03-21
+
+- HACS packaging refresh release
+- Verified root package structure with bundled `backgrounds/` assets
+- Renamed package/public card identity to `Tesla Style Energy Flow`
+
 ## 0.2.0 - 2026-03-21
 
 - Synced package code with the latest Home Assistant production version
