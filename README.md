@@ -35,8 +35,8 @@ Custom Home Assistant Lovelace card for energy flows on a house scene, with dyna
 ### Manual
 
 1. Copy package files to:
-   - `/config/www/community/tesla-style-energy-flow/tesla-style-energy-flow.js`
-   - `/config/www/community/tesla-style-energy-flow/backgrounds/*`
+   - `dist/tesla-style-energy-flow.js` -> `/config/www/community/tesla-style-energy-flow/tesla-style-energy-flow.js`
+   - `dist/backgrounds/*` -> `/config/www/community/tesla-style-energy-flow/backgrounds/*`
 2. Add Lovelace resource:
 
 ```yaml
@@ -99,7 +99,8 @@ Night rain (idle)
 ## Files
 
 - `tesla-style-energy-flow.js`: custom card source
-- `backgrounds/`: built-in background assets used by default (`scene_day_clear_charging.png`, `scene_day_clear_idle.png`, `scene_day_rain_*`, `scene_night_*`)
+- `dist/tesla-style-energy-flow.js`: packaged card file used by HACS
+- `dist/backgrounds/`: packaged background assets used by HACS
 - `hacs.json`: HACS metadata
 - `examples/lovelace-card.yaml`: config example
 - `docs/screenshots/`: preview images for README

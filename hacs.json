@@ -1,6 +1,5 @@
 {
   "name": "Tesla Style Energy Flow",
-  "content_in_root": true,
   "filename": "tesla-style-energy-flow.js",
   "render_readme": true,
   "homeassistant": "2024.1.0"
