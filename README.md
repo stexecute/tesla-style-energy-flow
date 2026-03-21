@@ -2,6 +2,8 @@
 
 Custom Home Assistant Lovelace card for energy flows on a house scene, with dynamic weather/day-night backgrounds and EV-aware layout switching.
 
+![Tesla Style Energy Flow preview](docs/screenshots/05-night-rain-grid-home-ev.png)
+
 ## Features
 
 - Smooth animated SVG flow lines
@@ -95,6 +97,10 @@ Night clear (EV charging)
 Night rain (idle)
 
 ![Night rain idle](docs/screenshots/04-night-rain-idle.png)
+
+Night rain (grid + home + EV)
+
+![Night rain grid home ev](docs/screenshots/05-night-rain-grid-home-ev.png)
 
 ## Files
 
