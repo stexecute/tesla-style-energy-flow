@@ -826,15 +826,15 @@
     static getStubConfig() {
       return deepMerge(DEFAULT_CONFIG, {
         entities: {
-          solar_power: 'sensor.fotovoltaico_potenza',
-          grid_power: 'sensor.solaredge_i1_m1_ac_power',
-          battery_power: 'sensor.solaredge_i1_b1_dc_power',
-          load_power: 'sensor.consumo_casa_2',
-          battery_level: 'sensor.solaredge_i1_b1_state_of_energy',
-          ev_power: 'sensor.wallbox_portal_charging_power',
-          ev_battery: 'sensor.battery',
-          ev_charge_switch: 'switch.lancia_y_charge',
-          weather: 'weather.casa',
+          solar_power: 'sensor.solar_power',
+          grid_power: 'sensor.grid_power',
+          battery_power: 'sensor.battery_power',
+          load_power: 'sensor.home_load_power',
+          battery_level: 'sensor.battery_level',
+          ev_power: 'sensor.ev_charging_power',
+          ev_battery: 'sensor.ev_battery_level',
+          ev_charge_switch: 'switch.ev_charge',
+          weather: 'weather.home',
           sun: 'sun.sun'
         }
       });
