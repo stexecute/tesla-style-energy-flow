@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.1 - 2026-03-23
+
+- Show values below 1 kW in watts instead of rounding them down to `0.0 kW`
+- Animate the existing grid-home branch in reverse when battery discharge is exported to the grid
+
 ## 0.3.0 - 2026-03-23
 
 - Added optional dual-EV support with separate `ev2_power`, `ev2_battery`, and `ev2_charge_switch` entities
