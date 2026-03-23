@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.0 - 2026-03-23
+
+- Added optional dual-EV support with separate `ev2_power`, `ev2_battery`, and `ev2_charge_switch` entities
+- Kept the single-EV behavior unchanged when EV2 is not configured
+- Added a second EV flow branch and node rendering logic
+- Added support for `scene_path_map` and `scene_component_map` overrides for custom dual-EV backgrounds
+- Extended the Lovelace editor with EV2 entity selectors
+- Updated README usage and feature documentation for 2 EV setups
+
 ## 0.2.1 - 2026-03-21
 
 - HACS packaging refresh release

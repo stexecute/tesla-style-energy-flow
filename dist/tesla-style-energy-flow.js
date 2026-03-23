@@ -58,6 +58,9 @@
         sensor_ev_power: 'EV Power',
         sensor_ev_battery: 'EV Battery %',
         sensor_ev_switch: 'EV Charge Switch',
+        sensor_ev2_power: 'EV 2 Power',
+        sensor_ev2_battery: 'EV 2 Battery %',
+        sensor_ev2_switch: 'EV 2 Charge Switch',
         sensor_weather: 'Weather Entity',
         sensor_sun: 'Sun Entity',
         hint_entities: 'Menu pulito con entita filtrate per dominio.',
@@ -120,6 +123,9 @@
         sensor_ev_power: 'EV Power',
         sensor_ev_battery: 'EV Battery %',
         sensor_ev_switch: 'EV Charge Switch',
+        sensor_ev2_power: 'EV 2 Power',
+        sensor_ev2_battery: 'EV 2 Battery %',
+        sensor_ev2_switch: 'EV 2 Charge Switch',
         sensor_weather: 'Weather Entity',
         sensor_sun: 'Sun Entity',
         hint_entities: 'Clean menu with domain-filtered entities.',
@@ -182,6 +188,9 @@
         sensor_ev_power: 'Potencia EV',
         sensor_ev_battery: 'Bateria EV %',
         sensor_ev_switch: 'Switch carga EV',
+        sensor_ev2_power: 'Potencia EV 2',
+        sensor_ev2_battery: 'Bateria EV 2 %',
+        sensor_ev2_switch: 'Switch carga EV 2',
         sensor_weather: 'Entidad clima',
         sensor_sun: 'Entidad sol',
         hint_entities: 'Menu limpio con entidades filtradas por dominio.',
@@ -244,6 +253,9 @@
         sensor_ev_power: 'Puissance EV',
         sensor_ev_battery: 'Batterie EV %',
         sensor_ev_switch: 'Switch charge EV',
+        sensor_ev2_power: 'Puissance EV 2',
+        sensor_ev2_battery: 'Batterie EV 2 %',
+        sensor_ev2_switch: 'Switch charge EV 2',
         sensor_weather: 'Entite meteo',
         sensor_sun: 'Entite soleil',
         hint_entities: 'Menu propre avec entites filtrees par domaine.',
@@ -306,6 +318,9 @@
         sensor_ev_power: 'EV Leistung',
         sensor_ev_battery: 'EV Batterie %',
         sensor_ev_switch: 'EV Lade-Switch',
+        sensor_ev2_power: 'EV 2 Leistung',
+        sensor_ev2_battery: 'EV 2 Batterie %',
+        sensor_ev2_switch: 'EV 2 Lade-Switch',
         sensor_weather: 'Wetter-Entitat',
         sensor_sun: 'Sonnen-Entitat',
         hint_entities: 'Sauberes Menu mit nach Domain gefilterten Entitaten.',
@@ -357,6 +372,7 @@
     'line-battery-load': 'line_battery_load',
     'line-junction-home-load': 'line_junction_home_load',
     'line-wallbox-ev': 'line_wallbox_ev',
+    'line-wallbox-ev2': 'line_wallbox_ev2',
     'line-solar-grid': 'line_solar_grid',
     'line-solar-battery': 'line_solar_battery',
     'line-grid-battery': 'line_grid_battery'
@@ -370,7 +386,8 @@
       'line-grid-battery': 'M 352 338 L 310 348',
       'line-battery-load': 'M 310 348 Q 353 339 352 338',
       'line-junction-home-load': 'M 354 338 Q 386 330 408 324',
-      'line-wallbox-ev': 'M 164 322 Q 160 368 182 344'
+      'line-wallbox-ev': 'M 164 322 Q 160 368 182 344',
+      'line-wallbox-ev2': 'M 148 312 Q 126 310 112 316'
   });
 
   const DAY_CLEAR_CHARGING_PATHS = Object.freeze({
@@ -381,7 +398,8 @@
       'line-grid-battery': 'M 352 340 L 312 348',
       'line-battery-load': 'M 310 348 Q 353 339 352 338',
       'line-junction-home-load': 'M 354 338 Q 386 330 408 324',
-      'line-wallbox-ev': 'M 164 322 Q 160 368 182 344'
+      'line-wallbox-ev': 'M 164 322 Q 160 368 182 344',
+      'line-wallbox-ev2': 'M 148 312 Q 126 310 112 316'
   });
 
   const SCENE_FLOW_PATH_MAP = Object.freeze({
@@ -397,7 +415,8 @@
       'line-grid-battery': 'M 436 402 L 354 374',
       'line-battery-load': 'M 310 342 Q 352 334 352 330',
       'line-junction-home-load': 'M 350 332 Q 386 326 410 318',
-      'line-wallbox-ev': 'M 164 314 Q 160 368 182 344'
+      'line-wallbox-ev': 'M 164 314 Q 160 368 182 344',
+      'line-wallbox-ev2': 'M 148 304 Q 126 302 112 308'
     }),
     'scene_day_rain_charging.png': Object.freeze({
       'line-solar-load': 'M 380 272 L 382 316 L 436 304',
@@ -407,7 +426,8 @@
       'line-grid-battery': 'M 468 378 L 384 354',
       'line-battery-load': 'M 336 324 Q 368 318 382 314',
       'line-junction-home-load': 'M 382 314 Q 410 308 438 302',
-      'line-wallbox-ev': 'M 174 296 Q 164 342 188 314'
+      'line-wallbox-ev': 'M 174 296 Q 164 342 188 314',
+      'line-wallbox-ev2': 'M 164 286 Q 134 280 106 292'
     }),
     'scene_night_clear_idle.png': Object.freeze({
       'line-solar-load': 'M 351 292 L 352 338 L 352 338',
@@ -417,7 +437,8 @@
       'line-grid-battery': 'M 438 404 L 354 376',
       'line-battery-load': 'M 310 348 Q 353 339 352 338',
       'line-junction-home-load': 'M 354 338 Q 386 330 408 324',
-      'line-wallbox-ev': 'M 164 322 Q 160 368 182 344'
+      'line-wallbox-ev': 'M 164 322 Q 160 368 182 344',
+      'line-wallbox-ev2': 'M 150 314 Q 128 312 112 318'
     }),
     'scene_night_clear_charging.png': Object.freeze({
       'line-solar-load': 'M 376 278 L 382 322 L 432 312',
@@ -427,7 +448,8 @@
       'line-grid-battery': 'M 482 394 L 384 360',
       'line-battery-load': 'M 336 330 Q 380 324 382 322',
       'line-junction-home-load': 'M 382 322 Q 416 316 434 310',
-      'line-wallbox-ev': 'M 192 304 Q 184 352 206 326'
+      'line-wallbox-ev': 'M 192 304 Q 184 352 206 326',
+      'line-wallbox-ev2': 'M 180 294 Q 148 286 118 300'
     }),
     'scene_night_rain_idle.png': Object.freeze({
       'line-solar-load': 'M 351 292 L 352 338 L 352 338',
@@ -437,7 +459,8 @@
       'line-grid-battery': 'M 434 392 L 356 366',
       'line-battery-load': 'M 310 330 Q 354 322 354 322',
       'line-junction-home-load': 'M 352 324 Q 388 316 406 312',
-      'line-wallbox-ev': 'M 166 310 Q 160 354 184 334'
+      'line-wallbox-ev': 'M 166 310 Q 160 354 184 334',
+      'line-wallbox-ev2': 'M 150 300 Q 126 296 110 306'
     }),
     'scene_night_rain_charging.png': Object.freeze({
       'line-solar-load': 'M 351 292 L 352 338 L 352 338',
@@ -447,7 +470,8 @@
       'line-grid-battery': 'M 436 402 L 352 376',
       'line-battery-load': 'M 310 348 Q 353 339 352 338',
       'line-junction-home-load': 'M 352 334 Q 386 326 410 320',
-      'line-wallbox-ev': 'M 164 314 Q 160 356 182 332'
+      'line-wallbox-ev': 'M 164 314 Q 160 356 182 332',
+      'line-wallbox-ev2': 'M 150 304 Q 128 300 112 308'
     })
   });
 
@@ -469,7 +493,11 @@
     'ev-label': Object.freeze({ x: -20, y: -138 }),
     'ev-power': Object.freeze({ x: -4, y: -110 }),
     'ev-pct': Object.freeze({ x: -6, y: 6 }),
-    'ev-guide': Object.freeze({ x1: -22, y1: -100, x2: -22, y2: -30 })
+    'ev-guide': Object.freeze({ x1: -22, y1: -100, x2: -22, y2: -30 }),
+    'ev2-label': Object.freeze({ x: -8, y: -42 }),
+    'ev2-power': Object.freeze({ x: 10, y: -20 }),
+    'ev2-pct': Object.freeze({ x: 10, y: -2 }),
+    'ev2-guide': Object.freeze({ x1: -10, y1: -30, x2: -10, y2: 0 })
   });
 
   const DAY_CLEAR_CHARGING_COMPONENTS = Object.freeze({
@@ -490,7 +518,11 @@
     'ev-label': Object.freeze({ x: 2, y: -118 }),
     'ev-power': Object.freeze({ x: 20, y: -100 }),
     'ev-pct': Object.freeze({ x: 2, y: -14 }),
-    'ev-guide': Object.freeze({ x1: 0, y1: -98, x2: 0, y2: 4 })
+    'ev-guide': Object.freeze({ x1: 0, y1: -98, x2: 0, y2: 4 }),
+    'ev2-label': Object.freeze({ x: -18, y: -84 }),
+    'ev2-power': Object.freeze({ x: 0, y: -60 }),
+    'ev2-pct': Object.freeze({ x: 0, y: -42 }),
+    'ev2-guide': Object.freeze({ x1: -16, y1: -70, x2: -16, y2: -12 })
   });
 
   const SCENE_FLOW_COMPONENT_MAP = Object.freeze({
@@ -516,7 +548,11 @@
       'ev-label': Object.freeze({ x: -26, y: -132 }),
       'ev-power': Object.freeze({ x: -6, y: -106 }),
       'ev-pct': Object.freeze({ x: -6, y: -90 }),
-      'ev-guide': Object.freeze({ x1: -26, y1: -94, x2: -26, y2: -22 })
+      'ev-guide': Object.freeze({ x1: -26, y1: -94, x2: -26, y2: -22 }),
+      'ev2-label': Object.freeze({ x: -14, y: -84 }),
+      'ev2-power': Object.freeze({ x: 2, y: -62 }),
+      'ev2-pct': Object.freeze({ x: 0, y: -44 }),
+      'ev2-guide': Object.freeze({ x1: -16, y1: -72, x2: -16, y2: -18 })
     }),
     'scene_day_rain_charging.png': Object.freeze({
       'solar-label': Object.freeze({ x: 14, y: -106 }),
@@ -536,7 +572,11 @@
       'ev-label': Object.freeze({ x: -16, y: -142 }),
       'ev-power': Object.freeze({ x: 0, y: -118 }),
       'ev-pct': Object.freeze({ x: 14, y: -46 }),
-      'ev-guide': Object.freeze({ x1: -18, y1: -114, x2: -20, y2: -24 })
+      'ev-guide': Object.freeze({ x1: -18, y1: -114, x2: -20, y2: -24 }),
+      'ev2-label': Object.freeze({ x: -22, y: -92 }),
+      'ev2-power': Object.freeze({ x: -4, y: -68 }),
+      'ev2-pct': Object.freeze({ x: 0, y: -48 }),
+      'ev2-guide': Object.freeze({ x1: -20, y1: -78, x2: -22, y2: -24 })
     }),
     'scene_night_clear_idle.png': Object.freeze({
       'solar-label': Object.freeze({ x: 4, y: -110 }),
@@ -556,7 +596,11 @@
       'ev-label': Object.freeze({ x: -22, y: -110 }),
       'ev-power': Object.freeze({ x: -6, y: -82 }),
       'ev-pct': Object.freeze({ x: 2, y: -24 }),
-      'ev-guide': Object.freeze({ x1: -18, y1: -72, x2: -18, y2: -6 })
+      'ev-guide': Object.freeze({ x1: -18, y1: -72, x2: -18, y2: -6 }),
+      'ev2-label': Object.freeze({ x: -14, y: -76 }),
+      'ev2-power': Object.freeze({ x: 2, y: -54 }),
+      'ev2-pct': Object.freeze({ x: 4, y: -34 }),
+      'ev2-guide': Object.freeze({ x1: -12, y1: -60, x2: -12, y2: -12 })
     }),
     'scene_night_clear_charging.png': Object.freeze({
       'solar-label': Object.freeze({ x: 4, y: -114 }),
@@ -576,7 +620,11 @@
       'ev-label': Object.freeze({ x: 10, y: -110 }),
       'ev-power': Object.freeze({ x: 26, y: -86 }),
       'ev-pct': Object.freeze({ x: 32, y: -34 }),
-      'ev-guide': Object.freeze({ x1: 8, y1: -78, x2: 10, y2: -30 })
+      'ev-guide': Object.freeze({ x1: 8, y1: -78, x2: 10, y2: -30 }),
+      'ev2-label': Object.freeze({ x: -10, y: -78 }),
+      'ev2-power': Object.freeze({ x: 6, y: -56 }),
+      'ev2-pct': Object.freeze({ x: 8, y: -36 }),
+      'ev2-guide': Object.freeze({ x1: -8, y1: -64, x2: -10, y2: -22 })
     }),
     'scene_night_rain_idle.png': Object.freeze({
       'solar-label': Object.freeze({ x: 2, y: -100 }),
@@ -596,7 +644,11 @@
       'ev-label': Object.freeze({ x: -12, y: -108 }),
       'ev-power': Object.freeze({ x: 2, y: -84 }),
       'ev-pct': Object.freeze({ x: 2, y: -32 }),
-      'ev-guide': Object.freeze({ x1: -20, y1: -78, x2: -20, y2: -48 })
+      'ev-guide': Object.freeze({ x1: -20, y1: -78, x2: -20, y2: -48 }),
+      'ev2-label': Object.freeze({ x: -14, y: -76 }),
+      'ev2-power': Object.freeze({ x: 4, y: -54 }),
+      'ev2-pct': Object.freeze({ x: 6, y: -36 }),
+      'ev2-guide': Object.freeze({ x1: -14, y1: -60, x2: -14, y2: -24 })
     }),
     'scene_night_rain_charging.png': Object.freeze({
       'solar-label': Object.freeze({ x: -22, y: -104 }),
@@ -616,7 +668,11 @@
       'ev-label': Object.freeze({ x: -18, y: -110 }),
       'ev-power': Object.freeze({ x: -2, y: -88 }),
       'ev-pct': Object.freeze({ x: 2, y: -28 }),
-      'ev-guide': Object.freeze({ x1: -22, y1: -82, x2: -22, y2: -40 })
+      'ev-guide': Object.freeze({ x1: -22, y1: -82, x2: -22, y2: -40 }),
+      'ev2-label': Object.freeze({ x: -16, y: -80 }),
+      'ev2-power': Object.freeze({ x: 2, y: -58 }),
+      'ev2-pct': Object.freeze({ x: 4, y: -38 }),
+      'ev2-guide': Object.freeze({ x1: -18, y1: -68, x2: -18, y2: -28 })
     })
   });
 
@@ -638,7 +694,11 @@
     'ev-label': Object.freeze({ id: 'flow-ev-label', attrs: Object.freeze(['x', 'y']) }),
     'ev-power': Object.freeze({ id: 'flow-ev-power', attrs: Object.freeze(['x', 'y']) }),
     'ev-pct': Object.freeze({ id: 'flow-ev-pct', attrs: Object.freeze(['x', 'y']) }),
-    'ev-guide': Object.freeze({ id: 'flow-ev-guide', attrs: Object.freeze(['x1', 'y1', 'x2', 'y2']) })
+    'ev-guide': Object.freeze({ id: 'flow-ev-guide', attrs: Object.freeze(['x1', 'y1', 'x2', 'y2']) }),
+    'ev2-label': Object.freeze({ id: 'flow-ev2-label', attrs: Object.freeze(['x', 'y']) }),
+    'ev2-power': Object.freeze({ id: 'flow-ev2-power', attrs: Object.freeze(['x', 'y']) }),
+    'ev2-pct': Object.freeze({ id: 'flow-ev2-pct', attrs: Object.freeze(['x', 'y']) }),
+    'ev2-guide': Object.freeze({ id: 'flow-ev2-guide', attrs: Object.freeze(['x1', 'y1', 'x2', 'y2']) })
   });
 
   const DEFAULT_CONFIG = Object.freeze({
@@ -667,6 +727,9 @@
       ev_power: '',
       ev_battery: '',
       ev_charge_switch: '',
+      ev2_power: '',
+      ev2_battery: '',
+      ev2_charge_switch: '',
       weather: '',
       sun: 'sun.sun'
     },
@@ -689,12 +752,15 @@
       night_clear_idle: '',
       night_clear_charging: ''
     },
+    scene_component_map: {},
+    scene_path_map: {},
     paths: {
       line_solar_load: 'M 351 292 L 352 338 L 352 338',
       line_grid_load: 'M 434 402 Q 434 402 351 375 Q 352 340 351 341',
       line_battery_load: 'M 310 348 Q 353 339 352 338',
       line_junction_home_load: 'M 354 338 Q 386 330 408 324',
       line_wallbox_ev: 'M 164 322 Q 160 368 182 344',
+      line_wallbox_ev2: 'M 148 312 Q 126 310 112 316',
       line_solar_grid: 'M 350 292 L 352 374 L 434 402',
       line_solar_battery: 'M 350 292 L 352 338 L 312 348',
       line_grid_battery: 'M 352 340 L 312 348'
@@ -834,6 +900,9 @@
           ev_power: 'sensor.ev_charging_power',
           ev_battery: 'sensor.ev_battery_level',
           ev_charge_switch: 'switch.ev_charge',
+          ev2_power: 'sensor.ev2_charging_power',
+          ev2_battery: 'sensor.ev2_battery_level',
+          ev2_charge_switch: 'switch.ev2_charge',
           weather: 'weather.home',
           sun: 'sun.sun'
         }
@@ -918,12 +987,63 @@
       return Math.max(0, value);
     }
 
-    _isEvCharging(evPower) {
+    _isEvCharging(evData) {
       const evMinW = Math.max(0, safeNum(this._config.ev_min_w, 150));
-      const evPowerEntity = this._entityState(this._config.entities.ev_power);
-      if (evPowerEntity) return evPower > evMinW;
-      const chargeSwitchState = this._entityState(this._config.entities.ev_charge_switch);
-      return chargeSwitchState?.state === 'on';
+      const vehicles = Array.isArray(evData?.vehicles) ? evData.vehicles : [];
+      if (vehicles.some((vehicle) => vehicle.hasPowerEntity)) {
+        return vehicles.some((vehicle) => vehicle.power > evMinW);
+      }
+      return vehicles.some((vehicle) => vehicle.switchOn);
+    }
+
+    _collectEvData() {
+      const evSlots = [
+        {
+          key: 'ev1',
+          powerEntity: this._config.entities.ev_power,
+          batteryEntity: this._config.entities.ev_battery,
+          chargeSwitchEntity: this._config.entities.ev_charge_switch
+        },
+        {
+          key: 'ev2',
+          powerEntity: this._config.entities.ev2_power,
+          batteryEntity: this._config.entities.ev2_battery,
+          chargeSwitchEntity: this._config.entities.ev2_charge_switch
+        }
+      ];
+
+      const vehicles = evSlots
+        .map((slot) => {
+          const configured = !!(slot.powerEntity || slot.batteryEntity || slot.chargeSwitchEntity);
+          const powerState = this._entityState(slot.powerEntity);
+          const batteryState = this._entityState(slot.batteryEntity);
+          const switchState = this._entityState(slot.chargeSwitchEntity);
+          return {
+            key: slot.key,
+            configured,
+            hasPowerEntity: !!powerState,
+            hasBatteryEntity: !!batteryState,
+            power: Math.max(0, toWatt(powerState)),
+            battery: toPct(batteryState, 0),
+            switchOn: switchState?.state === 'on'
+          };
+        })
+        .filter((vehicle) => vehicle.configured);
+
+      const hasSecondaryEv = vehicles.some((vehicle) => vehicle.key === 'ev2');
+      const normalized = vehicles.map((vehicle) => ({
+        ...vehicle,
+        labelText: vehicle.key === 'ev2'
+          ? 'EV 2'
+          : (hasSecondaryEv ? 'EV 1' : this._t('card.node.ev', 'EV')),
+        batteryText: vehicle.hasBatteryEntity ? `${Math.round(vehicle.battery)}%` : '--%'
+      }));
+
+      return {
+        vehicles: normalized,
+        totalPower: normalized.reduce((sum, vehicle) => sum + vehicle.power, 0),
+        hasSecondaryEv
+      };
     }
 
     _weatherGroup(weatherState) {
@@ -971,6 +1091,14 @@
       out.night_snow = out.night_snow_idle;
       out.night_storm = out.night_storm_idle;
       return out;
+    }
+
+    _sceneFlowPathMap() {
+      return deepMerge(SCENE_FLOW_PATH_MAP, this._config.scene_path_map || {});
+    }
+
+    _sceneFlowComponentMap() {
+      return deepMerge(SCENE_FLOW_COMPONENT_MAP, this._config.scene_component_map || {});
     }
 
     _resolveBackground(evCharging) {
@@ -1025,7 +1153,7 @@
     _initialPathProfile() {
       const configProfile = profileFromConfigPaths(this._config.paths);
       const sceneKey = sceneFileName(this._config.background);
-      const sceneProfile = SCENE_FLOW_PATH_MAP[sceneKey];
+      const sceneProfile = this._sceneFlowPathMap()[sceneKey];
       if (!sceneProfile) return configProfile;
       return { ...configProfile, ...sceneProfile };
     }
@@ -1049,7 +1177,7 @@
 
     _applySceneFlowPaths(sceneHref) {
       const sceneKey = sceneFileName(sceneHref);
-      const sceneProfile = SCENE_FLOW_PATH_MAP[sceneKey];
+      const sceneProfile = this._sceneFlowPathMap()[sceneKey];
       if (sceneProfile) {
         if (this._lastAppliedSceneFlowProfile !== sceneKey) {
           this._applyPathProfile(sceneProfile, sceneKey);
@@ -1086,8 +1214,9 @@
 
     _applySceneFlowComponents(sceneHref) {
       const sceneKey = sceneFileName(sceneHref);
-      const sceneProfile = SCENE_FLOW_COMPONENT_MAP[sceneKey] || SCENE_FLOW_COMPONENT_MAP['scene_day_clear_idle.png'];
-      const marker = SCENE_FLOW_COMPONENT_MAP[sceneKey] ? sceneKey : 'scene_day_clear_idle.png';
+      const map = this._sceneFlowComponentMap();
+      const sceneProfile = map[sceneKey] || map['scene_day_clear_idle.png'];
+      const marker = map[sceneKey] ? sceneKey : 'scene_day_clear_idle.png';
       if (!sceneProfile) return;
       if (this._lastAppliedSceneFlowComponentProfile !== marker) {
         this._applyComponentProfile(sceneProfile, marker);
@@ -1273,6 +1402,7 @@
                 <path id="line-battery-load" class="flow-line" d="${pathD('line-battery-load', 'line_battery_load')}"></path>
                 <path id="line-junction-home-load" class="flow-line" d="${pathD('line-junction-home-load', 'line_junction_home_load')}"></path>
                 <path id="line-wallbox-ev" class="flow-line" d="${pathD('line-wallbox-ev', 'line_wallbox_ev')}"></path>
+                <path id="line-wallbox-ev2" class="flow-line" d="${pathD('line-wallbox-ev2', 'line_wallbox_ev2')}"></path>
                 <path id="line-solar-grid" class="flow-line" d="${pathD('line-solar-grid', 'line_solar_grid')}"></path>
                 <path id="line-solar-battery" class="flow-line" d="${pathD('line-solar-battery', 'line_solar_battery')}"></path>
                 <path id="line-grid-battery" class="flow-line" d="${pathD('line-grid-battery', 'line_grid_battery')}"></path>
@@ -1318,6 +1448,15 @@
                   <text class="flow-pct" id="flow-ev-pct" x="0" y="95">--%</text>
                   <text class="flow-status" id="flow-ev-status" x="0" y="110">${this._t('card.status.off', 'OFF')}</text>
                 </g>
+
+                <g class="flow-node ev-hidden" id="ev2-node-group" transform="translate(106, 316)">
+                  <circle class="flow-node-bg" id="node-ev2-bg" cx="0" cy="0" r="5"></circle>
+                  <line class="flow-node-guide" id="flow-ev2-guide" x1="0" y1="-18" x2="0" y2="12"></line>
+                  <text class="flow-label" id="flow-ev2-label" x="0" y="-26">EV 2</text>
+                  <text class="flow-power" id="flow-ev2-power" x="0" y="-8">0.0 kW</text>
+                  <text class="flow-pct" id="flow-ev2-pct" x="0" y="8">--%</text>
+                  <text class="flow-status" id="flow-ev2-status" x="0" y="24">${this._t('card.status.off', 'OFF')}</text>
+                </g>
               </svg>
             </div>
           </div>
@@ -1335,18 +1474,24 @@
       const batteryPower = toWatt(this._entityState(cfg.entities.battery_power));
       const loadPower = toWatt(this._entityState(cfg.entities.load_power));
       const batteryLevel = toPct(this._entityState(cfg.entities.battery_level), 0);
-      const evPower = toWatt(this._entityState(cfg.entities.ev_power));
-      const evBattery = toPct(this._entityState(cfg.entities.ev_battery), 0);
+      const evData = this._collectEvData();
+      const evPower = evData.totalPower;
       const solarMin = this._flowThreshold('solar_min_w', FLOW_MIN_W);
       const gridMin = this._flowThreshold('grid_min_w', FLOW_MIN_W);
       const batteryMin = this._flowThreshold('battery_min_w', FLOW_MIN_W);
       const homeMin = Math.min(solarMin, gridMin, batteryMin);
 
-      const evCharging = this._isEvCharging(evPower);
+      const evCharging = this._isEvCharging(evData);
       const evHideIdle = !!cfg.ev_hide_when_idle;
       const evNodeGroup = this.shadowRoot.querySelector('#ev-node-group');
+      const ev2NodeGroup = this.shadowRoot.querySelector('#ev2-node-group');
+      const ev1 = evData.vehicles.find((vehicle) => vehicle.key === 'ev1') || { power: 0, batteryText: '--%', labelText: this._t('card.node.ev', 'EV'), switchOn: false, configured: false };
+      const ev2 = evData.vehicles.find((vehicle) => vehicle.key === 'ev2') || { power: 0, batteryText: '--%', labelText: 'EV 2', switchOn: false, configured: false };
       if (evNodeGroup) {
-        evNodeGroup.classList.toggle('ev-hidden', evHideIdle && !evCharging);
+        evNodeGroup.classList.toggle('ev-hidden', !ev1.configured || (evHideIdle && !(ev1.power > 0 || ev1.switchOn)));
+      }
+      if (ev2NodeGroup) {
+        ev2NodeGroup.classList.toggle('ev-hidden', !ev2.configured || (evHideIdle && !(ev2.power > 0 || ev2.switchOn)));
       }
       const sceneHref = this._resolveBackground(evCharging);
       this._setBackground(sceneHref);
@@ -1358,8 +1503,12 @@
       this._setText('#flow-load-power', this._formatKW(loadPower));
       this._setText('#flow-battery-power', this._formatKW(batteryPower));
       this._setText('#flow-battery-pct', `${Math.round(batteryLevel)}%`);
-      this._setText('#flow-ev-power', this._formatKW(evPower));
-      this._setText('#flow-ev-pct', `${Math.round(evBattery)}%`);
+      this._setText('#flow-ev-label', ev1.labelText || this._t('card.node.ev', 'EV'));
+      this._setText('#flow-ev-power', this._formatKW(ev1.power || 0));
+      this._setText('#flow-ev-pct', ev1.batteryText || '--%');
+      this._setText('#flow-ev2-label', ev2.labelText || 'EV 2');
+      this._setText('#flow-ev2-power', this._formatKW(ev2.power || 0));
+      this._setText('#flow-ev2-pct', ev2.batteryText || '--%');
 
       const batteryStatusEl = this.shadowRoot.querySelector('#flow-battery-status');
       if (batteryStatusEl) {
@@ -1379,7 +1528,8 @@
       this._toggleNode('#node-grid-bg', Math.abs(gridPower) > gridMin);
       this._toggleNode('#node-load-bg', loadPower > homeMin);
       this._toggleNode('#node-battery-bg', Math.abs(batteryPower) > batteryMin);
-      this._toggleNode('#node-ev-bg', evCharging);
+      this._toggleNode('#node-ev-bg', (ev1.power || 0) > 0 || ev1.switchOn);
+      this._toggleNode('#node-ev2-bg', (ev2.power || 0) > 0 || ev2.switchOn);
 
       this.shadowRoot.querySelectorAll('.flow-line').forEach((line) => {
         line.classList.remove('active', 'flow-solar', 'flow-green', 'flow-broken');
@@ -1392,6 +1542,8 @@
       const batteryCharge = Math.max(0, batteryPower);
       const batteryDischarge = Math.max(0, -batteryPower);
       const evDraw = evCharging ? Math.max(0, evPower) : 0;
+      const ev1Draw = Math.max(0, ev1.power || 0);
+      const ev2Draw = Math.max(0, ev2.power || 0);
 
       const solarToLoad = Math.min(solarPos, loadPos);
       const remainingLoad = Math.max(0, loadPos - solarToLoad);
@@ -1460,7 +1612,10 @@
 
       const evTotal = solarToEv + battToEv + gridToEv;
       const evCls = this._dominantFlowClass(solarToEv, battToEv, gridToEv, 'flow-green');
-      this._activatePath('line-wallbox-ev', evCls, evTotal, 1);
+      const ev1Share = evDraw > 0 ? ev1Draw / evDraw : 0;
+      const ev2Share = evDraw > 0 ? ev2Draw / evDraw : 0;
+      this._activatePath('line-wallbox-ev', evCls, evTotal * ev1Share, 1);
+      this._activatePath('line-wallbox-ev2', evCls, evTotal * ev2Share, 1);
     }
 
     _render() {
@@ -1721,6 +1876,9 @@
               ${this._entitySelectRow(this._t('editor.sensor_ev_power', 'EV Power'), 'entities.ev_power', sensorIds, this._t('editor.placeholder_sensor', '-- select sensor --'))}
               ${this._entitySelectRow(this._t('editor.sensor_ev_battery', 'EV Battery %'), 'entities.ev_battery', sensorIds, this._t('editor.placeholder_sensor', '-- select sensor --'))}
               ${this._entitySelectRow(this._t('editor.sensor_ev_switch', 'EV Charge Switch'), 'entities.ev_charge_switch', switchIds, this._t('editor.placeholder_switch', '-- select switch --'))}
+              ${this._entitySelectRow(this._t('editor.sensor_ev2_power', 'EV 2 Power'), 'entities.ev2_power', sensorIds, this._t('editor.placeholder_sensor', '-- select sensor --'))}
+              ${this._entitySelectRow(this._t('editor.sensor_ev2_battery', 'EV 2 Battery %'), 'entities.ev2_battery', sensorIds, this._t('editor.placeholder_sensor', '-- select sensor --'))}
+              ${this._entitySelectRow(this._t('editor.sensor_ev2_switch', 'EV 2 Charge Switch'), 'entities.ev2_charge_switch', switchIds, this._t('editor.placeholder_switch', '-- select switch --'))}
               ${this._entitySelectRow(this._t('editor.sensor_weather', 'Weather Entity'), 'entities.weather', weatherIds, this._t('editor.placeholder_weather', '-- select weather --'))}
               ${this._entitySelectRow(this._t('editor.sensor_sun', 'Sun Entity'), 'entities.sun', sunIds, this._t('editor.placeholder_sun', '-- select sun --'))}
             </div>

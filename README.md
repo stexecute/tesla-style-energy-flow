@@ -15,6 +15,8 @@ Custom Home Assistant Lovelace card for energy flows on a house scene, with dyna
   - grid = red
 - Dynamic background (weather + day/night + EV charging)
 - Scene-specific label/guide positioning for each background
+- Optional dual-EV support with separate EV1 / EV2 power, battery and charging switch entities
+- Optional `scene_path_map` and `scene_component_map` overrides for custom dual-EV backgrounds
 - Config editor with entity dropdowns
 - Multilanguage UI (`auto`, `it`, `en`, `es`, `fr`, `de`)
 - Configurable thresholds for flow visibility:
@@ -76,11 +78,41 @@ entities:
   ev_power: sensor.ev_charging_power
   ev_battery: sensor.ev_battery_level
   ev_charge_switch: switch.ev_charge
+  ev2_power: sensor.ev2_charging_power
+  ev2_battery: sensor.ev2_battery_level
+  ev2_charge_switch: switch.ev2_charge
   weather: weather.home
   sun: sun.sun
 ```
 
 The card ships with built-in SVG flow paths and scene presets, so no extra `paths:` block is required for a normal install.
+
+The second EV is optional. If `ev2_*` entities are not configured, the card behaves exactly like the single-EV version.
+
+For custom dual-EV scenes you can also override per-scene geometry through:
+
+- `scene_path_map`
+- `scene_component_map`
+
+## Local Testing
+
+You can preview the real packaged card locally without Home Assistant:
+
+```bash
+cd /path/to/tesla-style-energy-flow
+python3 -m http.server 8000
+```
+
+Then open:
+
+`http://localhost:8000/local-preview.html`
+
+The local preview page loads the packaged file from `dist/` and lets you simulate:
+
+- solar, grid, battery, home and EV power
+- battery / EV percentage
+- weather state
+- day / night scene switching
 
 ## Screenshots
 
