@@ -1295,6 +1295,9 @@
             text-shadow: 0 1px 2px rgba(2, 6, 23, 0.55);
             text-anchor: middle;
             font-family: sans-serif;
+            filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.95))
+                    drop-shadow(0 0 10px rgba(0, 0, 0, 0.78))
+                    drop-shadow(0 0 16px rgba(0, 0, 0, 0.52));
           }
           .flow-label {
             font-size: 11px;
@@ -1328,11 +1331,15 @@
             fill: rgba(148, 163, 184, 0.72) !important;
             opacity: 0.45;
             text-shadow: none;
+            filter: none;
           }
           .flow-node.inactive #flow-battery-pct {
             fill: #f8fafc !important;
             opacity: 0.95;
             text-shadow: 0 1px 2px rgba(2, 6, 23, 0.55);
+            filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.95))
+                    drop-shadow(0 0 10px rgba(0, 0, 0, 0.78))
+                    drop-shadow(0 0 16px rgba(0, 0, 0, 0.52));
           }
           .ev-hidden {
             display: none;
