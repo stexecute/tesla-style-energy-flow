@@ -1333,6 +1333,9 @@
             text-shadow: none;
             filter: none;
           }
+          .flow-node.inactive .flow-node-guide {
+            opacity: 0;
+          }
           .flow-node.inactive #flow-battery-pct {
             fill: #f8fafc !important;
             opacity: 0.95;

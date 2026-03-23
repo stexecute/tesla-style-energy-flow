@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.2 - 2026-03-23
+
+- Improved text readability on top of bright and dark backgrounds with a subtle dark glow
+- Hide node guide lines when the corresponding node is inactive, so idle solar/grid/EV labels do not leave detached guide markers
+
 ## 0.3.1 - 2026-03-23
 
 - Show values below 1 kW in watts instead of rounding them down to `0.0 kW`
