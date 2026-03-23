@@ -970,11 +970,12 @@
       if (group) group.classList.toggle('inactive', !isActive);
     }
 
-    _activatePath(id, cls, watt, minW = FLOW_MIN_W) {
+    _activatePath(id, cls, watt, minW = FLOW_MIN_W, reverse = false) {
       if (watt < minW) return;
       const el = this.shadowRoot.querySelector(`#${id}`);
       if (!el) return;
       el.classList.add('active', cls);
+      el.classList.toggle('flow-reverse', !!reverse);
     }
 
     _dominantFlowClass(solarW, batteryW, gridW, fallback) {
@@ -1352,6 +1353,9 @@
             filter: drop-shadow(0 0 3px var(--flow-glow, rgba(125, 249, 255, 0.4)))
                     drop-shadow(0 0 12px var(--flow-glow, rgba(125, 249, 255, 0.4)));
           }
+          .flow-line.active.flow-reverse {
+            animation: flowStreamReverse var(--flow-speed, 1.9s) linear infinite, flowPulse var(--flow-fade, 1.45s) ease-in-out infinite;
+          }
           .flow-line.active.flow-solar {
             stroke: #ffe066;
             --flow-glow: rgba(255, 224, 102, 0.72);
@@ -1384,6 +1388,9 @@
           }
           @keyframes flowStream {
             to { stroke-dashoffset: -144; }
+          }
+          @keyframes flowStreamReverse {
+            to { stroke-dashoffset: 144; }
           }
           @keyframes flowPulse {
             0%, 100% { opacity: 0.8; stroke-width: 2.1; }
@@ -1534,7 +1541,7 @@
       this._toggleNode('#node-ev2-bg', (ev2.power || 0) > 0 || ev2.switchOn);
 
       this.shadowRoot.querySelectorAll('.flow-line').forEach((line) => {
-        line.classList.remove('active', 'flow-solar', 'flow-green', 'flow-broken');
+        line.classList.remove('active', 'flow-solar', 'flow-green', 'flow-broken', 'flow-reverse');
       });
 
       const solarPos = Math.max(0, solarPower);
@@ -1586,6 +1593,8 @@
       }
 
       const solarExport = Math.min(gridExport, solarRemaining);
+      const remainingGridExport = Math.max(0, gridExport - solarExport);
+      const batteryToGrid = Math.min(remainingGridExport, battDischargeRemaining);
 
       let gridToLoadVisual = gridToLoad;
       // Fallback visuale: se il carico e sostenuto di fatto dalla rete ma il calcolo cade sotto soglia.
@@ -1602,7 +1611,8 @@
 
       this._activatePath('line-solar-load', 'flow-solar', solarToLoad, solarMin);
       this._activatePath('line-grid-load', 'flow-broken', gridToLoadVisual, gridMin);
-      this._activatePath('line-battery-load', 'flow-green', battToLoad, batteryMin);
+      this._activatePath('line-grid-load', 'flow-green', batteryToGrid, gridMin, true);
+      this._activatePath('line-battery-load', 'flow-green', Math.max(battToLoad, batteryToGrid), batteryMin);
 
       const homeTotal = solarToLoad + battToLoad + gridToLoadVisual;
       const homeCls = this._dominantFlowClass(solarToLoad, battToLoad, gridToLoadVisual, 'flow-solar');
