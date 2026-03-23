@@ -951,7 +951,9 @@
     }
 
     _formatKW(watt) {
-      return `${(Math.abs(watt) / 1000).toFixed(1)} kW`;
+      const value = Math.abs(safeNum(watt, 0));
+      if (value < 1000) return `${Math.round(value)} W`;
+      return `${(value / 1000).toFixed(1)} kW`;
     }
 
     _setText(id, value) {
