@@ -1848,6 +1848,7 @@
       this.attachShadow({ mode: 'open' });
       this._config = deepMerge(DEFAULT_CONFIG, {});
       this._hass = null;
+      this._configSignature = JSON.stringify(this._config);
     }
 
     setConfig(config) {
@@ -1859,7 +1860,11 @@
       ) {
         incoming.language = this._config.language;
       }
-      this._config = deepMerge(DEFAULT_CONFIG, incoming);
+      const nextConfig = deepMerge(DEFAULT_CONFIG, incoming);
+      const nextSignature = JSON.stringify(nextConfig);
+      if (nextSignature === this._configSignature) return;
+      this._config = nextConfig;
+      this._configSignature = nextSignature;
       this._render();
     }
 
@@ -1891,6 +1896,7 @@
       }
       cur[keys[keys.length - 1]] = value;
       this._config = deepMerge(DEFAULT_CONFIG, next);
+      this._configSignature = JSON.stringify(this._config);
       this._emitConfig();
       if (path === 'language') this._render();
     }
