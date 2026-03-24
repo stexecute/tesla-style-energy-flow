@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.4 - 2026-03-24
+
+- Improved the Lovelace entity picker UX with searchable inputs backed by suggestions
+- Entity selection fields now commit on change instead of re-rendering on every keystroke, preventing the picker from closing while you are selecting an entity
+
 ## 0.3.3 - 2026-03-24
 
 - Fixed automatic dynamic background resolution when `background_map` keys are left empty in the config editor

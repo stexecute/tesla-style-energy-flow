@@ -1746,22 +1746,34 @@
         .replace(/'/g, '&#39;');
     }
 
+    _entityDatalistId(path) {
+      return `entity-list-${String(path || '').replace(/[^a-zA-Z0-9_-]+/g, '-')}`;
+    }
+
     _entitySelectRow(label, path, options, placeholder) {
       const current = String(this._getByPath(path) || '');
       const values = Array.isArray(options) ? [...options] : [];
       if (current && !values.includes(current)) values.unshift(current);
       const opts = values
-        .map((id) => {
-          const selected = id === current ? ' selected' : '';
-          return `<option value="${this._escapeHtml(id)}"${selected}>${this._escapeHtml(id)}</option>`;
-        })
+        .map((id) => `<option value="${this._escapeHtml(id)}">${this._escapeHtml(id)}</option>`)
         .join('');
+      const listId = this._entityDatalistId(path);
       return `
         <label>${label}</label>
-        <select data-path="${path}">
-          <option value="">${this._escapeHtml(placeholder || this._t('editor.placeholder_select', '-- select --'))}</option>
+        <input
+          class="entity-picker"
+          data-path="${path}"
+          data-commit="change"
+          list="${listId}"
+          value="${this._escapeHtml(current)}"
+          placeholder="${this._escapeHtml(placeholder || this._t('editor.placeholder_select', '-- select --'))}"
+          autocomplete="off"
+          autocapitalize="off"
+          spellcheck="false"
+        >
+        <datalist id="${listId}">
           ${opts}
-        </select>
+        </datalist>
       `;
     }
 
@@ -1863,6 +1875,9 @@
           select {
             font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
           }
+          .entity-picker {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
+          }
         </style>
         <div class="wrap">
           <div class="block">
@@ -1960,7 +1975,7 @@
       this.shadowRoot.querySelectorAll('input, select, textarea').forEach((el) => {
         const path = el.dataset.path;
         if (!path) return;
-        const eventName = el.tagName === 'SELECT' || el.type === 'checkbox' ? 'change' : 'input';
+        const eventName = el.dataset.commit || (el.tagName === 'SELECT' || el.type === 'checkbox' ? 'change' : 'input');
         el.addEventListener(eventName, () => {
           if (el.type === 'checkbox') {
             this._update(path, el.checked);
