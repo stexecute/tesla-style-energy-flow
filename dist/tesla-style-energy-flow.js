@@ -867,6 +867,7 @@
     background_asset_base: '/local/community/tesla-style-energy-flow/backgrounds',
     show_header: true,
     show_labels: true,
+    power_unit_mode: 'auto',
     ev_hide_when_idle: false,
     scene_scale: 1.06,
     grid_invert: true,
@@ -1121,6 +1122,9 @@
 
     _formatKW(watt) {
       const value = Math.abs(safeNum(watt, 0));
+      const mode = String(this._config.power_unit_mode || 'auto').toLowerCase();
+      if (mode === 'w') return `${Math.round(value)} W`;
+      if (mode === 'kw') return `${(value / 1000).toFixed(1)} kW`;
       if (value < 1000) return `${Math.round(value)} W`;
       return `${(value / 1000).toFixed(1)} kW`;
     }
@@ -1812,8 +1816,8 @@
 
       this._activatePath('line-solar-load', 'flow-solar', solarToLoad, solarMin);
       this._activatePath('line-grid-load', 'flow-broken', gridToLoadVisual, gridMin);
-      this._activatePath('line-grid-load', 'flow-green', batteryToGrid, gridMin, true);
-      this._activatePath('line-battery-load', 'flow-green', Math.max(battToLoad, batteryToGrid), batteryMin);
+      this._activatePath('line-grid-load', 'flow-green', batteryToGrid, Math.max(1, Math.min(gridMin, batteryMin)), true);
+      this._activatePath('line-battery-load', 'flow-green', Math.max(battToLoad, batteryToGrid), Math.max(1, Math.min(gridMin, batteryMin)));
 
       const homeTotal = solarToLoad + battToLoad + gridToLoadVisual;
       const homeCls = this._dominantFlowClass(solarToLoad, battToLoad, gridToLoadVisual, 'flow-solar');
@@ -1988,6 +1992,24 @@
       `;
     }
 
+    _powerUnitModeRow() {
+      const current = String(this._config.power_unit_mode || 'auto').toLowerCase();
+      const options = [
+        { value: 'auto', label: 'Auto (W/kW)' },
+        { value: 'w', label: 'Always W' },
+        { value: 'kw', label: 'Always kW' }
+      ];
+      const opts = options
+        .map(({ value, label }) => `<option value="${value}"${value === current ? ' selected' : ''}>${this._escapeHtml(label)}</option>`)
+        .join('');
+      return `
+        <label>Power unit mode</label>
+        <select data-path="power_unit_mode">
+          ${opts}
+        </select>
+      `;
+    }
+
     _render() {
       const sensorIds = this._entityIdsByDomain('sensor');
       const switchIds = this._entityIdsByDomain('switch');
@@ -2087,6 +2109,7 @@
               <input data-path="background" value="${cfg.background || ''}">
               <label>${this._t('editor.field_background_base', 'Background Assets Base (auto)')}</label>
               <input data-path="background_asset_base" value="${cfg.background_asset_base || '/local/community/tesla-style-energy-flow/backgrounds'}">
+              ${this._powerUnitModeRow()}
               <div class="row">
                 <label>${this._t('editor.field_grid_invert', 'Invert grid sign')}</label>
                 <input type="checkbox" data-path="grid_invert" ${cfg.grid_invert ? 'checked' : ''}>

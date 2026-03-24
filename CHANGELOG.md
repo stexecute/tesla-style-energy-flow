@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.13 - 2026-03-24
+
+- Added a `power_unit_mode` option (`auto`, `w`, `kw`)
+- Improved visibility of battery export towards grid on the shared grid/home branch
+
 ## 0.3.9 - 2026-03-24
 
 - Improved editor stability by stopping full re-renders while editing normal fields
