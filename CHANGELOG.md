@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.9 - 2026-03-24
+
+- Improved editor stability by stopping full re-renders while editing normal fields
+- Added `scene_component_map` editing directly in the UI for label, percentage and guide positions
+
 ## 0.3.8 - 2026-03-24
 
 - The card title/header is now always rendered exactly as configured and is no longer auto-translated

@@ -1892,7 +1892,24 @@
       cur[keys[keys.length - 1]] = value;
       this._config = deepMerge(DEFAULT_CONFIG, next);
       this._emitConfig();
-      this._render();
+      if (path === 'language') this._render();
+    }
+
+    _updateJson(path, raw) {
+      try {
+        const parsed = raw.trim() ? JSON.parse(raw) : {};
+        if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return false;
+        this._update(path, parsed);
+        return true;
+      } catch (_error) {
+        return false;
+      }
+    }
+
+    _jsonString(path) {
+      const value = this._getByPath(path);
+      if (!value || typeof value !== 'object' || Array.isArray(value) || !Object.keys(value).length) return '{}';
+      return JSON.stringify(value, null, 2);
     }
 
     _entityIdsByDomain(domain) {
@@ -2028,6 +2045,9 @@
             resize: vertical;
             font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
           }
+          textarea.positions-json {
+            min-height: 240px;
+          }
           .row {
             display: grid;
             grid-template-columns: 1fr 42px;
@@ -2155,13 +2175,23 @@
             </div>
             <div class="hint">${this._t('editor.hint_bg_lookup', 'Lookup priority: period+weather+charging -> period+weather -> period_default -> default -> background.')}</div>
           </div>
+
+          <div class="block">
+            <h4>Scene Positions</h4>
+            <div class="grid">
+              <label>scene_component_map</label>
+              <textarea class="positions-json" data-json-path="scene_component_map" data-commit="change" spellcheck="false">${this._escapeHtml(this._jsonString('scene_component_map'))}</textarea>
+            </div>
+            <div class="hint">Advanced: edit label, percentage and guide positions per scene. Paths are intentionally excluded here.</div>
+          </div>
         </div>
       `;
 
       this.shadowRoot.querySelectorAll('input, select, textarea').forEach((el) => {
+        if (el.dataset.jsonPath) return;
         const path = el.dataset.path;
         if (!path) return;
-        const eventName = el.dataset.commit || (el.tagName === 'SELECT' || el.type === 'checkbox' ? 'change' : 'input');
+        const eventName = el.dataset.commit || 'change';
         el.addEventListener(eventName, () => {
           if (el.type === 'checkbox') {
             this._update(path, el.checked);
@@ -2169,6 +2199,18 @@
             this._update(path, safeNum(el.value, 0));
           } else {
             this._update(path, el.value);
+          }
+        });
+      });
+
+      this.shadowRoot.querySelectorAll('textarea[data-json-path]').forEach((el) => {
+        const path = el.dataset.jsonPath;
+        if (!path) return;
+        el.addEventListener('change', () => {
+          const ok = this._updateJson(path, el.value);
+          if (typeof el.setCustomValidity === 'function') {
+            el.setCustomValidity(ok ? '' : 'Invalid JSON');
+            el.reportValidity();
           }
         });
       });
