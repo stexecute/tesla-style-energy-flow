@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.8 - 2026-03-24
+
+- The card title/header is now always rendered exactly as configured and is no longer auto-translated
+
 ## 0.3.7 - 2026-03-24
 
 - Added a `show_header` option to hide the card title

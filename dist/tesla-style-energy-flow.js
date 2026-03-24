@@ -1412,9 +1412,7 @@
       const cfg = this._config;
       const p = this._initialPathProfile();
       const showLabelsClass = cfg.show_labels ? '' : 'hide-labels';
-      const titleText = cfg.title === DEFAULT_CONFIG.title
-        ? this._t('card.default_title', DEFAULT_CONFIG.title)
-        : cfg.title;
+      const titleText = String(cfg.title || '');
       const titleHtml = (cfg.show_header !== false && titleText) ? `<div class="card-title">${titleText}</div>` : '';
       const sceneScale = clamp(safeNum(cfg.scene_scale, 1.06), 0.6, 1.4);
       const pathD = (id, configKey) => p[id] || cfg.paths?.[configKey] || DEFAULT_CONFIG.paths[configKey];
