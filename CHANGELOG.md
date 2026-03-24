@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.3 - 2026-03-24
+
+- Fixed automatic dynamic background resolution when `background_map` keys are left empty in the config editor
+- Empty background overrides no longer replace the built-in default scene mappings
+
 ## 0.3.2 - 2026-03-23
 
 - Improved text readability on top of bright and dark backgrounds with a subtle dark glow

@@ -824,6 +824,17 @@
     return parts[parts.length - 1] || '';
   }
 
+  function compactStringMap(map) {
+    const out = {};
+    Object.entries(map || {}).forEach(([key, value]) => {
+      if (typeof value !== 'string') return;
+      const trimmed = value.trim();
+      if (!trimmed) return;
+      out[key] = trimmed;
+    });
+    return out;
+  }
+
   function profileFromConfigPaths(pathsConfig) {
     const src = pathsConfig || {};
     const profile = {};
@@ -1114,7 +1125,7 @@
       const chargeState = evCharging ? 'charging' : 'idle';
       const map = {
         ...this._defaultBackgroundMap(),
-        ...(cfg.background_map || {})
+        ...compactStringMap(cfg.background_map || {})
       };
 
       const exactKey = `${period}_${weatherGroup}_${chargeState}`;
