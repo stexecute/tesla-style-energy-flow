@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.14 - 2026-03-24
+
+- Changed the default grid sign handling to follow the sensor sign directly (`grid_invert: false`)
+- Improved grid export visibility by using the grid threshold for solar-to-grid export flow activation
+
 ## 0.3.13 - 2026-03-24
 
 - Added a `power_unit_mode` option (`auto`, `w`, `kw`)

@@ -870,7 +870,7 @@
     power_unit_mode: 'auto',
     ev_hide_when_idle: false,
     scene_scale: 1.06,
-    grid_invert: true,
+    grid_invert: false,
     ev_min_w: 150,
     thresholds: {
       solar_min_w: 50,
@@ -1825,7 +1825,7 @@
 
       this._activatePath('line-solar-battery', 'flow-solar', solarToBattery, batteryMin);
       this._activatePath('line-grid-battery', 'flow-broken', gridToBattery, batteryMin);
-      this._activatePath('line-solar-grid', 'flow-green', solarExport, solarMin);
+      this._activatePath('line-solar-grid', 'flow-green', solarExport, Math.max(1, gridMin));
 
       const evTotal = solarToEv + battToEv + gridToEv;
       const evCls = this._dominantFlowClass(solarToEv, battToEv, gridToEv, 'flow-green');
