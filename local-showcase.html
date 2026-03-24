@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tesla Style Energy Flow - Showcase</title>
+  <style>
+    :root {
+      --bg: #08111d;
+      --panel: rgba(15, 23, 42, 0.74);
+      --panel-border: rgba(255, 255, 255, 0.08);
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --accent: #60a5fa;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(96, 165, 250, 0.14), transparent 30%),
+        radial-gradient(circle at bottom right, rgba(34, 197, 94, 0.1), transparent 28%),
+        linear-gradient(180deg, #07111d 0%, #0b1220 100%);
+    }
+    .page {
+      max-width: 1420px;
+      margin: 0 auto;
+      padding: 28px;
+      display: grid;
+      grid-template-columns: 320px minmax(0, 1fr);
+      gap: 22px;
+      min-height: 100vh;
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 24px;
+      backdrop-filter: blur(14px);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.24);
+    }
+    .controls {
+      padding: 22px;
+      position: sticky;
+      top: 20px;
+      align-self: start;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+      line-height: 1.05;
+      letter-spacing: -0.04em;
+    }
+    .sub {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+      margin-bottom: 22px;
+    }
+    .group {
+      margin-bottom: 18px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .group:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: 0;
+    }
+    .group-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #cbd5e1;
+      margin-bottom: 12px;
+      font-weight: 700;
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    button {
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(96, 165, 250, 0.12);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 10px 12px;
+      cursor: pointer;
+      font-weight: 600;
+      text-align: left;
+    }
+    button:hover {
+      background: rgba(96, 165, 250, 0.2);
+    }
+    button.active {
+      background: rgba(96, 165, 250, 0.32);
+      border-color: rgba(96, 165, 250, 0.45);
+    }
+    .primary {
+      width: 100%;
+      justify-content: center;
+      text-align: center;
+    }
+    .stack {
+      display: grid;
+      gap: 10px;
+    }
+    .status {
+      display: grid;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    .status strong {
+      color: var(--text);
+    }
+    .preview {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .preview-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      padding: 8px 8px 0;
+    }
+    .preview-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .preview-note {
+      font-size: 13px;
+      color: var(--muted);
+    }
+    #card-host {
+      min-height: 640px;
+    }
+    @media (max-width: 1100px) {
+      .page {
+        grid-template-columns: 1fr;
+      }
+      .controls {
+        position: static;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="panel controls">
+      <h1>Showcase</h1>
+      <div class="sub">
+        Clean local demo for taking screenshots. No editor, no drag handles, just realistic scene presets.
+      </div>
+
+      <div class="group">
+        <div class="group-title">Single EV</div>
+        <div class="actions">
+          <button data-preset="single_day_idle">Day Clear Idle</button>
+          <button data-preset="single_day_charging">Day Clear Charging</button>
+          <button data-preset="single_rain_idle">Day Rain Idle</button>
+          <button data-preset="single_rain_charging">Day Rain Charging</button>
+          <button data-preset="single_night_idle">Night Clear Idle</button>
+          <button data-preset="single_night_charging">Night Clear Charging</button>
+          <button data-preset="single_night_rain_idle">Night Rain Idle</button>
+          <button data-preset="single_night_rain_charging">Night Rain Charging</button>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="group-title">Dual EV</div>
+        <div class="actions">
+          <button data-preset="dual_day_idle">Day Clear Idle</button>
+          <button data-preset="dual_day_charging">Day Clear Charging</button>
+          <button data-preset="dual_rain_idle">Day Rain Idle</button>
+          <button data-preset="dual_rain_charging">Day Rain Charging</button>
+          <button data-preset="dual_night_idle">Night Clear Idle</button>
+          <button data-preset="dual_night_charging">Night Clear Charging</button>
+          <button data-preset="dual_night_rain_idle">Night Rain Idle</button>
+          <button data-preset="dual_night_rain_charging">Night Rain Charging</button>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="group-title">Useful Shots</div>
+        <div class="actions">
+          <button class="primary" data-preset="solar_home_battery">Solar -> Home + Battery</button>
+          <button class="primary" data-preset="grid_home">Grid -> Home</button>
+          <button class="primary" data-preset="battery_to_grid">Battery -> Grid Export</button>
+          <button class="primary" data-preset="dual_ev_grid_charge">Dual EV Grid Charging</button>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="group-title">Current Scene</div>
+        <div class="status">
+          <div><strong id="scene-name">scene_day_clear_charging.png</strong></div>
+          <div id="scene-description">Dual EV · Day Clear · Charging</div>
+          <div id="scene-values">Solar 5.2 kW · Grid 0.6 kW · Battery -0.8 kW · Home 2.1 kW</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel preview">
+      <div class="preview-header">
+        <div>
+          <div class="preview-title">Tesla Style Energy Flow</div>
+          <div class="preview-note">Screenshot mode using the local dual-EV showcase presets.</div>
+        </div>
+      </div>
+      <div id="card-host"></div>
+    </div>
+  </div>
+
+  <script src="./local/tesla-style-energy-flow-dual-ev.local.js"></script>
+  <script>
+    const stateIds = {
+      solarPower: 'sensor.solar_power',
+      gridPower: 'sensor.grid_power',
+      batteryPower: 'sensor.battery_power',
+      loadPower: 'sensor.home_load_power',
+      batteryLevel: 'sensor.battery_level',
+      evPower: 'sensor.ev_charging_power',
+      evBattery: 'sensor.ev_battery_level',
+      evChargeSwitch: 'switch.ev_charge',
+      ev2Power: 'sensor.ev2_charging_power',
+      ev2Battery: 'sensor.ev2_battery_level',
+      ev2ChargeSwitch: 'switch.ev2_charge',
+      weather: 'weather.home',
+      sun: 'sun.sun',
+    };
+
+    let defaultComponentMap = window.TeslaStyleEnergyFlowLocalDefaults?.sceneComponentMap || {};
+    let defaultPathMap = window.TeslaStyleEnergyFlowLocalDefaults?.scenePathMap || {};
+
+    const dualBackgrounds = {
+      'scene_day_clear_idle.png': './dist/backgrounds/scene_day_clear_idle.png',
+      'scene_day_clear_charging.png': './local/backgrounds/scene_day_clear_charging.png',
+      'scene_day_rain_idle.png': './dist/backgrounds/scene_day_rain_idle.png',
+      'scene_day_rain_charging.png': './local/backgrounds/scene_day_rain_charging.png',
+      'scene_night_clear_idle.png': './dist/backgrounds/scene_night_clear_idle.png',
+      'scene_night_clear_charging.png': './local/backgrounds/scene_night_clear_charging.png',
+      'scene_night_rain_idle.png': './dist/backgrounds/scene_night_rain_idle.png',
+      'scene_night_rain_charging.png': './local/backgrounds/scene_night_rain_charging.png',
+    };
+
+    const singleBackgrounds = {
+      'scene_day_clear_idle.png': './dist/backgrounds/scene_day_clear_idle.png',
+      'scene_day_clear_charging.png': './dist/backgrounds/scene_day_clear_charging.png',
+      'scene_day_rain_idle.png': './dist/backgrounds/scene_day_rain_idle.png',
+      'scene_day_rain_charging.png': './dist/backgrounds/scene_day_rain_charging.png',
+      'scene_night_clear_idle.png': './dist/backgrounds/scene_night_clear_idle.png',
+      'scene_night_clear_charging.png': './dist/backgrounds/scene_night_clear_charging.png',
+      'scene_night_rain_idle.png': './dist/backgrounds/scene_night_rain_idle.png',
+      'scene_night_rain_charging.png': './dist/backgrounds/scene_night_rain_charging.png',
+    };
+
+    function sensorState(value, unit = 'W') {
+      return { state: String(value), attributes: { unit_of_measurement: unit } };
+    }
+
+    function pctState(value) {
+      return { state: String(value), attributes: { unit_of_measurement: '%' } };
+    }
+
+    function switchState(value) {
+      return { state: value ? 'on' : 'off', attributes: {} };
+    }
+
+    function scenePreset({
+      layout,
+      scene,
+      description,
+      solar,
+      grid,
+      battery,
+      load,
+      batteryLevel,
+      ev1Power = 0,
+      ev1Battery = 0,
+      ev1Charging = false,
+      ev2Power = 0,
+      ev2Battery = 0,
+      ev2Charging = false,
+      weather,
+      sun
+    }) {
+      return {
+        layout,
+        scene,
+        description,
+        summary: `Solar ${formatPower(solar)} · Grid ${formatPower(grid)} · Battery ${formatPower(battery)} · Home ${formatPower(load)}`,
+        hass: {
+          states: {
+            [stateIds.solarPower]: sensorState(solar),
+            [stateIds.gridPower]: sensorState(grid),
+            [stateIds.batteryPower]: sensorState(battery),
+            [stateIds.loadPower]: sensorState(load),
+            [stateIds.batteryLevel]: pctState(batteryLevel),
+            [stateIds.evPower]: sensorState(ev1Power),
+            [stateIds.evBattery]: pctState(ev1Battery),
+            [stateIds.evChargeSwitch]: switchState(ev1Charging),
+            [stateIds.ev2Power]: sensorState(ev2Power),
+            [stateIds.ev2Battery]: pctState(ev2Battery),
+            [stateIds.ev2ChargeSwitch]: switchState(ev2Charging),
+            [stateIds.weather]: { state: weather, attributes: {} },
+            [stateIds.sun]: { state: sun, attributes: {} },
+          }
+        }
+      };
+    }
+
+    function formatPower(watt) {
+      const abs = Math.abs(watt);
+      if (abs < 1000) return `${Math.round(abs)} W`;
+      return `${(abs / 1000).toFixed(1)} kW`;
+    }
+
+    const PRESETS = {
+      single_day_idle: scenePreset({
+        layout: 'single',
+        scene: 'scene_day_clear_idle.png',
+        description: 'Single EV · Day Clear · Idle',
+        solar: 0,
+        grid: 0,
+        battery: 0,
+        load: 0,
+        batteryLevel: 63,
+        ev1Battery: 42,
+        weather: 'sunny',
+        sun: 'above_horizon',
+      }),
+      single_day_charging: scenePreset({
+        layout: 'single',
+        scene: 'scene_day_clear_charging.png',
+        description: 'Single EV · Day Clear · Charging',
+        solar: 5200,
+        grid: 600,
+        battery: -800,
+        load: 2100,
+        batteryLevel: 63,
+        ev1Power: 2900,
+        ev1Battery: 42,
+        ev1Charging: true,
+        weather: 'sunny',
+        sun: 'above_horizon',
+      }),
+      single_rain_idle: scenePreset({
+        layout: 'single',
+        scene: 'scene_day_rain_idle.png',
+        description: 'Single EV · Day Rain · Idle',
+        solar: 0,
+        grid: 1400,
+        battery: -600,
+        load: 1800,
+        batteryLevel: 58,
+        ev1Battery: 42,
+        weather: 'rainy',
+        sun: 'above_horizon',
+      }),
+      single_rain_charging: scenePreset({
+        layout: 'single',
+        scene: 'scene_day_rain_charging.png',
+        description: 'Single EV · Day Rain · Charging',
+        solar: 400,
+        grid: 3600,
+        battery: -500,
+        load: 1700,
+        batteryLevel: 57,
+        ev1Power: 2400,
+        ev1Battery: 44,
+        ev1Charging: true,
+        weather: 'rainy',
+        sun: 'above_horizon',
+      }),
+      single_night_idle: scenePreset({
+        layout: 'single',
+        scene: 'scene_night_clear_idle.png',
+        description: 'Single EV · Night Clear · Idle',
+        solar: 0,
+        grid: 0,
+        battery: -1200,
+        load: 1200,
+        batteryLevel: 54,
+        ev1Battery: 41,
+        weather: 'clear-night',
+        sun: 'below_horizon',
+      }),
+      single_night_charging: scenePreset({
+        layout: 'single',
+        scene: 'scene_night_clear_charging.png',
+        description: 'Single EV · Night Clear · Charging',
+        solar: 0,
+        grid: 4200,
+        battery: 0,
+        load: 1300,
+        batteryLevel: 52,
+        ev1Power: 2900,
+        ev1Battery: 38,
+        ev1Charging: true,
+        weather: 'clear-night',
+        sun: 'below_horizon',
+      }),
+      single_night_rain_idle: scenePreset({
+        layout: 'single',
+        scene: 'scene_night_rain_idle.png',
+        description: 'Single EV · Night Rain · Idle',
+        solar: 0,
+        grid: 1900,
+        battery: 0,
+        load: 1900,
+        batteryLevel: 48,
+        ev1Battery: 40,
+        weather: 'rainy',
+        sun: 'below_horizon',
+      }),
+      single_night_rain_charging: scenePreset({
+        layout: 'single',
+        scene: 'scene_night_rain_charging.png',
+        description: 'Single EV · Night Rain · Charging',
+        solar: 0,
+        grid: 4700,
+        battery: -600,
+        load: 1800,
+        batteryLevel: 46,
+        ev1Power: 3100,
+        ev1Battery: 36,
+        ev1Charging: true,
+        weather: 'rainy',
+        sun: 'below_horizon',
+      }),
+      dual_day_idle: scenePreset({
+        layout: 'dual',
+        scene: 'scene_day_clear_idle.png',
+        description: 'Dual EV · Day Clear · Idle',
+        solar: 0,
+        grid: 0,
+        battery: 0,
+        load: 0,
+        batteryLevel: 63,
+        ev1Battery: 42,
+        ev2Battery: 68,
+        weather: 'sunny',
+        sun: 'above_horizon',
+      }),
+      dual_day_charging: scenePreset({
+        layout: 'dual',
+        scene: 'scene_day_clear_charging.png',
+        description: 'Dual EV · Day Clear · Charging',
+        solar: 6100,
+        grid: 1200,
+        battery: -1300,
+        load: 2200,
+        batteryLevel: 61,
+        ev1Power: 2300,
+        ev1Battery: 42,
+        ev1Charging: true,
+        ev2Power: 1800,
+        ev2Battery: 68,
+        ev2Charging: true,
+        weather: 'sunny',
+        sun: 'above_horizon',
+      }),
+      dual_rain_idle: scenePreset({
+        layout: 'dual',
+        scene: 'scene_day_rain_idle.png',
+        description: 'Dual EV · Day Rain · Idle',
+        solar: 0,
+        grid: 1600,
+        battery: -900,
+        load: 1900,
+        batteryLevel: 56,
+        ev1Battery: 44,
+        ev2Battery: 65,
+        weather: 'rainy',
+        sun: 'above_horizon',
+      }),
+      dual_rain_charging: scenePreset({
+        layout: 'dual',
+        scene: 'scene_day_rain_charging.png',
+        description: 'Dual EV · Day Rain · Charging',
+        solar: 300,
+        grid: 5200,
+        battery: -700,
+        load: 1800,
+        batteryLevel: 54,
+        ev1Power: 2100,
+        ev1Battery: 44,
+        ev1Charging: true,
+        ev2Power: 2000,
+        ev2Battery: 63,
+        ev2Charging: true,
+        weather: 'rainy',
+        sun: 'above_horizon',
+      }),
+      dual_night_idle: scenePreset({
+        layout: 'dual',
+        scene: 'scene_night_clear_idle.png',
+        description: 'Dual EV · Night Clear · Idle',
+        solar: 0,
+        grid: 0,
+        battery: -1400,
+        load: 1400,
+        batteryLevel: 53,
+        ev1Battery: 43,
+        ev2Battery: 61,
+        weather: 'clear-night',
+        sun: 'below_horizon',
+      }),
+      dual_night_charging: scenePreset({
+        layout: 'dual',
+        scene: 'scene_night_clear_charging.png',
+        description: 'Dual EV · Night Clear · Charging',
+        solar: 0,
+        grid: 5600,
+        battery: 0,
+        load: 1400,
+        batteryLevel: 50,
+        ev1Power: 2400,
+        ev1Battery: 39,
+        ev1Charging: true,
+        ev2Power: 1800,
+        ev2Battery: 58,
+        ev2Charging: true,
+        weather: 'clear-night',
+        sun: 'below_horizon',
+      }),
+      dual_night_rain_idle: scenePreset({
+        layout: 'dual',
+        scene: 'scene_night_rain_idle.png',
+        description: 'Dual EV · Night Rain · Idle',
+        solar: 0,
+        grid: 2100,
+        battery: 0,
+        load: 2100,
+        batteryLevel: 49,
+        ev1Battery: 40,
+        ev2Battery: 60,
+        weather: 'rainy',
+        sun: 'below_horizon',
+      }),
+      dual_night_rain_charging: scenePreset({
+        layout: 'dual',
+        scene: 'scene_night_rain_charging.png',
+        description: 'Dual EV · Night Rain · Charging',
+        solar: 0,
+        grid: 6200,
+        battery: -900,
+        load: 1800,
+        batteryLevel: 46,
+        ev1Power: 2500,
+        ev1Battery: 38,
+        ev1Charging: true,
+        ev2Power: 2200,
+        ev2Battery: 57,
+        ev2Charging: true,
+        weather: 'rainy',
+        sun: 'below_horizon',
+      }),
+      solar_home_battery: scenePreset({
+        layout: 'single',
+        scene: 'scene_day_clear_idle.png',
+        description: 'Solar -> Home + Battery',
+        solar: 5200,
+        grid: 0,
+        battery: 1600,
+        load: 2100,
+        batteryLevel: 63,
+        ev1Battery: 42,
+        weather: 'sunny',
+        sun: 'above_horizon',
+      }),
+      grid_home: scenePreset({
+        layout: 'single',
+        scene: 'scene_night_rain_idle.png',
+        description: 'Grid -> Home',
+        solar: 0,
+        grid: 1900,
+        battery: 0,
+        load: 1900,
+        batteryLevel: 48,
+        ev1Battery: 40,
+        weather: 'rainy',
+        sun: 'below_horizon',
+      }),
+      battery_to_grid: scenePreset({
+        layout: 'single',
+        scene: 'scene_night_clear_idle.png',
+        description: 'Battery -> Grid Export',
+        solar: 0,
+        grid: -1600,
+        battery: -2400,
+        load: 800,
+        batteryLevel: 55,
+        ev1Battery: 42,
+        weather: 'clear-night',
+        sun: 'below_horizon',
+      }),
+      dual_ev_grid_charge: scenePreset({
+        layout: 'dual',
+        scene: 'scene_night_rain_charging.png',
+        description: 'Dual EV Grid Charging',
+        solar: 0,
+        grid: 6500,
+        battery: 0,
+        load: 1600,
+        batteryLevel: 45,
+        ev1Power: 2600,
+        ev1Battery: 37,
+        ev1Charging: true,
+        ev2Power: 2200,
+        ev2Battery: 56,
+        ev2Charging: true,
+        weather: 'rainy',
+        sun: 'below_horizon',
+      }),
+    };
+
+    const sceneNameEl = document.getElementById('scene-name');
+    const sceneDescriptionEl = document.getElementById('scene-description');
+    const sceneValuesEl = document.getElementById('scene-values');
+    const buttons = Array.from(document.querySelectorAll('[data-preset]'));
+
+    let card;
+    let currentPresetName = 'dual_day_charging';
+
+    function buildConfig(preset) {
+      const backgrounds = preset.layout === 'dual' ? dualBackgrounds : singleBackgrounds;
+      return {
+        type: 'custom:tesla-style-energy-flow',
+        title: 'Tesla Style Energy Flow',
+        language: 'en',
+        dynamic_background: false,
+        background: backgrounds[preset.scene],
+        background_asset_base: './dist/backgrounds',
+        grid_invert: false,
+        ev_hide_when_idle: true,
+        scene_scale: 1.06,
+        thresholds: {
+          solar_min_w: 50,
+          grid_min_w: 50,
+          battery_min_w: 50,
+        },
+        entities: {
+          solar_power: stateIds.solarPower,
+          grid_power: stateIds.gridPower,
+          battery_power: stateIds.batteryPower,
+          load_power: stateIds.loadPower,
+          battery_level: stateIds.batteryLevel,
+          ev_power: stateIds.evPower,
+          ev_battery: stateIds.evBattery,
+          ev_charge_switch: stateIds.evChargeSwitch,
+          ev2_power: stateIds.ev2Power,
+          ev2_battery: stateIds.ev2Battery,
+          ev2_charge_switch: stateIds.ev2ChargeSwitch,
+          weather: stateIds.weather,
+          sun: stateIds.sun,
+        },
+        scene_component_map: defaultComponentMap,
+        scene_path_map: defaultPathMap,
+      };
+    }
+
+    function ensureCard() {
+      if (card) return card;
+      card = document.createElement('tesla-style-energy-flow');
+      document.getElementById('card-host').appendChild(card);
+      return card;
+    }
+
+    function applyPreset(name) {
+      const preset = PRESETS[name];
+      if (!preset) return;
+      currentPresetName = name;
+      const cardEl = ensureCard();
+      cardEl.setConfig(buildConfig(preset));
+      cardEl.hass = preset.hass;
+      sceneNameEl.textContent = preset.scene;
+      sceneDescriptionEl.textContent = preset.description;
+      sceneValuesEl.textContent = preset.summary;
+      buttons.forEach((button) => button.classList.toggle('active', button.dataset.preset === name));
+    }
+
+    async function loadLocalSceneOverrides() {
+      try {
+        const [componentsRes, pathsRes] = await Promise.all([
+          fetch('./local/dual-ev-scene-components.json'),
+          fetch('./local/dual-ev-scene-paths.json'),
+        ]);
+        if (componentsRes.ok) {
+          defaultComponentMap = await componentsRes.json();
+        }
+        if (pathsRes.ok) {
+          defaultPathMap = await pathsRes.json();
+        }
+      } catch (error) {
+        console.warn('Using embedded dual-EV defaults:', error);
+      }
+    }
+
+    loadLocalSceneOverrides().finally(() => {
+      applyPreset(currentPresetName);
+    });
+
+    buttons.forEach((button) => {
+      button.addEventListener('click', () => applyPreset(button.dataset.preset));
+    });
+  </script>
+</body>
+</html>
