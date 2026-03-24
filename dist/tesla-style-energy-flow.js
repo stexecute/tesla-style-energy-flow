@@ -1951,19 +1951,22 @@
 
     _entitySelectRow(label, path, options, placeholder) {
       const current = String(this._getByPath(path) || '');
-      const domains = Array.isArray(options)
-        ? Array.from(new Set(options.map((id) => String(id).split('.')[0]).filter(Boolean)))
-        : [];
+      const values = Array.isArray(options) ? [...options] : [];
+      if (current && !values.includes(current)) values.unshift(current);
+      const emptyLabel = this._escapeHtml(placeholder || this._t('editor.placeholder_select', '-- select --'));
+      const opts = [`<option value="">${emptyLabel}</option>`]
+        .concat(
+          values.map((id) => {
+            const selected = id === current ? ' selected' : '';
+            return `<option value="${this._escapeHtml(id)}"${selected}>${this._escapeHtml(id)}</option>`;
+          })
+        )
+        .join('');
       return `
         <label>${label}</label>
-        <ha-entity-picker
-          class="entity-picker-native"
-          data-path="${path}"
-          data-domains="${this._escapeHtml(domains.join(','))}"
-          data-value="${this._escapeHtml(current)}"
-          data-placeholder="${this._escapeHtml(placeholder || this._t('editor.placeholder_select', '-- select --'))}"
-          allow-custom-entity
-        ></ha-entity-picker>
+        <select class="entity-select" data-path="${path}">
+          ${opts}
+        </select>
       `;
     }
 
@@ -2069,11 +2072,8 @@
             font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
           }
           .entity-picker,
-          .entity-picker-native {
+          .entity-select {
             font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
-          }
-          ha-entity-picker {
-            display: block;
           }
         </style>
         <div class="wrap">
@@ -2197,23 +2197,6 @@
           } else {
             this._update(path, el.value);
           }
-        });
-      });
-
-      this.shadowRoot.querySelectorAll('ha-entity-picker[data-path]').forEach((el) => {
-        const path = el.dataset.path;
-        if (!path) return;
-        el.hass = this._hass;
-        el.value = String(this._getByPath(path) || '');
-        el.label = '';
-        const domains = String(el.dataset.domains || '')
-          .split(',')
-          .map((value) => value.trim())
-          .filter(Boolean);
-        if (domains.length) el.includeDomains = domains;
-        el.addEventListener('value-changed', (event) => {
-          event.stopPropagation();
-          this._update(path, event.detail?.value || '');
         });
       });
 
