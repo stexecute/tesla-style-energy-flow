@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.15 - 2026-03-25
+
+- Added optional roof array overlays for two arrays with power, voltage and current values
+- Added roof array entity fields to the editor and example config
+
 ## 0.3.14 - 2026-03-24
 
 - Changed the default grid sign handling to follow the sensor sign directly (`grid_invert: false`)

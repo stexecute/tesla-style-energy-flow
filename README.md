@@ -76,6 +76,12 @@ thresholds:
   battery_min_w: 50
 entities:
   solar_power: sensor.solar_power
+  roof_a_power: sensor.roof_array_a_power
+  roof_a_voltage: sensor.roof_array_a_voltage
+  roof_a_current: sensor.roof_array_a_current
+  roof_b_power: sensor.roof_array_b_power
+  roof_b_voltage: sensor.roof_array_b_voltage
+  roof_b_current: sensor.roof_array_b_current
   grid_power: sensor.grid_power
   battery_power: sensor.battery_power
   load_power: sensor.home_load_power
@@ -93,6 +99,15 @@ entities:
 The card ships with built-in SVG flow paths and scene presets, so no extra `paths:` block is required for a normal install.
 
 The second EV is optional. If `ev2_*` entities are not configured, the card behaves exactly like the single-EV version.
+
+Optional roof array sensors can also be added for two array overlays:
+
+- `roof_a_power`
+- `roof_a_voltage`
+- `roof_a_current`
+- `roof_b_power`
+- `roof_b_voltage`
+- `roof_b_current`
 
 For custom dual-EV scenes you can also override per-scene geometry through:
 

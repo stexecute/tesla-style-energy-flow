@@ -855,7 +855,15 @@
     'ev2-label': Object.freeze({ id: 'flow-ev2-label', attrs: Object.freeze(['x', 'y']) }),
     'ev2-power': Object.freeze({ id: 'flow-ev2-power', attrs: Object.freeze(['x', 'y']) }),
     'ev2-pct': Object.freeze({ id: 'flow-ev2-pct', attrs: Object.freeze(['x', 'y']) }),
-    'ev2-guide': Object.freeze({ id: 'flow-ev2-guide', attrs: Object.freeze(['x1', 'y1', 'x2', 'y2']) })
+    'ev2-guide': Object.freeze({ id: 'flow-ev2-guide', attrs: Object.freeze(['x1', 'y1', 'x2', 'y2']) }),
+    'roof-a-label': Object.freeze({ id: 'flow-roof-a-label', attrs: Object.freeze(['x', 'y']) }),
+    'roof-a-power': Object.freeze({ id: 'flow-roof-a-power', attrs: Object.freeze(['x', 'y']) }),
+    'roof-a-voltage': Object.freeze({ id: 'flow-roof-a-voltage', attrs: Object.freeze(['x', 'y']) }),
+    'roof-a-current': Object.freeze({ id: 'flow-roof-a-current', attrs: Object.freeze(['x', 'y']) }),
+    'roof-b-label': Object.freeze({ id: 'flow-roof-b-label', attrs: Object.freeze(['x', 'y']) }),
+    'roof-b-power': Object.freeze({ id: 'flow-roof-b-power', attrs: Object.freeze(['x', 'y']) }),
+    'roof-b-voltage': Object.freeze({ id: 'flow-roof-b-voltage', attrs: Object.freeze(['x', 'y']) }),
+    'roof-b-current': Object.freeze({ id: 'flow-roof-b-current', attrs: Object.freeze(['x', 'y']) })
   });
 
   const DEFAULT_CONFIG = Object.freeze({
@@ -879,6 +887,12 @@
     },
     entities: {
       solar_power: '',
+      roof_a_power: '',
+      roof_a_voltage: '',
+      roof_a_current: '',
+      roof_b_power: '',
+      roof_b_voltage: '',
+      roof_b_current: '',
       grid_power: '',
       battery_power: '',
       load_power: '',
@@ -1063,6 +1077,12 @@
       return deepMerge(DEFAULT_CONFIG, {
         entities: {
           solar_power: 'sensor.solar_power',
+          roof_a_power: 'sensor.roof_array_a_power',
+          roof_a_voltage: 'sensor.roof_array_a_voltage',
+          roof_a_current: 'sensor.roof_array_a_current',
+          roof_b_power: 'sensor.roof_array_b_power',
+          roof_b_voltage: 'sensor.roof_array_b_voltage',
+          roof_b_current: 'sensor.roof_array_b_current',
           grid_power: 'sensor.grid_power',
           battery_power: 'sensor.battery_power',
           load_power: 'sensor.home_load_power',
@@ -1503,6 +1523,25 @@
             opacity: 0.9;
             display: none;
           }
+          .roof-meta {
+            fill: #f8fafc;
+            text-shadow: 0 1px 2px rgba(2, 6, 23, 0.55);
+            text-anchor: middle;
+            font-family: sans-serif;
+            filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.95))
+                    drop-shadow(0 0 10px rgba(0, 0, 0, 0.78))
+                    drop-shadow(0 0 16px rgba(0, 0, 0, 0.52));
+          }
+          .roof-meta-label {
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+          }
+          .roof-meta-value {
+            font-size: 8px;
+            font-weight: 600;
+          }
           #flow-battery-status {
             display: inline;
             font-size: 9px;
@@ -1532,6 +1571,9 @@
             display: none;
           }
           .battery-hidden {
+            display: none;
+          }
+          .roof-hidden {
             display: none;
           }
           .flow-line {
@@ -1621,6 +1663,20 @@
                   <text class="flow-status" id="flow-solar-status" x="0" y="-62">${this._t('card.status.inactive', 'INATTIVO')}</text>
                 </g>
 
+                <g id="roof-array-a-group">
+                  <text class="roof-meta roof-meta-label" id="flow-roof-a-label" x="238" y="124">ARRAY A</text>
+                  <text class="roof-meta roof-meta-value" id="flow-roof-a-power" x="238" y="136">0.0 kW</text>
+                  <text class="roof-meta roof-meta-value" id="flow-roof-a-voltage" x="238" y="147">0 V</text>
+                  <text class="roof-meta roof-meta-value" id="flow-roof-a-current" x="238" y="158">0 A</text>
+                </g>
+
+                <g id="roof-array-b-group">
+                  <text class="roof-meta roof-meta-label" id="flow-roof-b-label" x="334" y="214">ARRAY B</text>
+                  <text class="roof-meta roof-meta-value" id="flow-roof-b-power" x="334" y="226">0.0 kW</text>
+                  <text class="roof-meta roof-meta-value" id="flow-roof-b-voltage" x="334" y="237">0 V</text>
+                  <text class="roof-meta roof-meta-value" id="flow-roof-b-current" x="334" y="248">0 A</text>
+                </g>
+
                 <g class="flow-node" transform="translate(448, 336)">
                   <circle class="flow-node-bg" id="node-grid-bg" cx="0" cy="0" r="5"></circle>
                   <line class="flow-node-guide" id="flow-grid-guide" x1="0" y1="12" x2="0" y2="42"></line>
@@ -1677,6 +1733,12 @@
       const solarPower = toWatt(this._entityState(cfg.entities.solar_power));
       const gridRaw = toWatt(this._entityState(cfg.entities.grid_power));
       const gridPower = cfg.grid_invert ? -gridRaw : gridRaw;
+      const roofAPower = toWatt(this._entityState(cfg.entities.roof_a_power));
+      const roofAVoltage = safeNum(this._entityState(cfg.entities.roof_a_voltage)?.state, 0);
+      const roofACurrent = safeNum(this._entityState(cfg.entities.roof_a_current)?.state, 0);
+      const roofBPower = toWatt(this._entityState(cfg.entities.roof_b_power));
+      const roofBVoltage = safeNum(this._entityState(cfg.entities.roof_b_voltage)?.state, 0);
+      const roofBCurrent = safeNum(this._entityState(cfg.entities.roof_b_current)?.state, 0);
       const batteryPower = toWatt(this._entityState(cfg.entities.battery_power));
       const loadPower = toWatt(this._entityState(cfg.entities.load_power));
       const batteryLevel = toPct(this._entityState(cfg.entities.battery_level), 0);
@@ -1693,6 +1755,8 @@
       const evNodeGroup = this.shadowRoot.querySelector('#ev-node-group');
       const ev2NodeGroup = this.shadowRoot.querySelector('#ev2-node-group');
       const batteryNodeGroup = this.shadowRoot.querySelector('#battery-node-group');
+      const roofAGroup = this.shadowRoot.querySelector('#roof-array-a-group');
+      const roofBGroup = this.shadowRoot.querySelector('#roof-array-b-group');
       const ev1 = evData.vehicles.find((vehicle) => vehicle.key === 'ev1') || { power: 0, batteryText: '--%', labelText: this._t('card.node.ev', 'EV'), switchOn: false, configured: false };
       const ev2 = evData.vehicles.find((vehicle) => vehicle.key === 'ev2') || { power: 0, batteryText: '--%', labelText: 'EV 2', switchOn: false, configured: false };
       if (evNodeGroup) {
@@ -1704,6 +1768,12 @@
       if (batteryNodeGroup) {
         batteryNodeGroup.classList.toggle('battery-hidden', !batteryConfigured);
       }
+      if (roofAGroup) {
+        roofAGroup.classList.toggle('roof-hidden', !(roofAPower > 0 || roofAVoltage > 0 || roofACurrent > 0));
+      }
+      if (roofBGroup) {
+        roofBGroup.classList.toggle('roof-hidden', !(roofBPower > 0 || roofBVoltage > 0 || roofBCurrent > 0));
+      }
       const sceneHref = this._resolveBackground(evCharging, evData.hasSecondaryEv);
       this._setBackground(sceneHref);
       this._applySceneFlowPaths(sceneHref);
@@ -1711,6 +1781,12 @@
 
       this._setText('#flow-solar-power', this._formatKW(solarPower));
       this._setText('#flow-grid-power', this._formatKW(gridPower));
+      this._setText('#flow-roof-a-power', this._formatKW(roofAPower));
+      this._setText('#flow-roof-a-voltage', `${Math.round(roofAVoltage)} V`);
+      this._setText('#flow-roof-a-current', `${roofACurrent.toFixed(1)} A`);
+      this._setText('#flow-roof-b-power', this._formatKW(roofBPower));
+      this._setText('#flow-roof-b-voltage', `${Math.round(roofBVoltage)} V`);
+      this._setText('#flow-roof-b-current', `${roofBCurrent.toFixed(1)} A`);
       this._setText('#flow-load-power', this._formatKW(loadPower));
       this._setText('#flow-battery-power', batteryConfigured ? this._formatKW(batteryPower) : '');
       this._setText('#flow-battery-pct', batteryConfigured ? `${Math.round(batteryLevel)}%` : '');
@@ -2143,6 +2219,12 @@
             <h4>${this._t('editor.section_sensors', 'Sensors')}</h4>
             <div class="grid">
               ${this._entitySelectRow(this._t('editor.sensor_solar', 'Solar Power'), 'entities.solar_power', sensorIds, this._t('editor.placeholder_sensor', '-- select sensor --'))}
+              ${this._entitySelectRow('Roof Array A Power', 'entities.roof_a_power', sensorIds, this._t('editor.placeholder_sensor', '-- select sensor --'))}
+              ${this._entitySelectRow('Roof Array A Voltage', 'entities.roof_a_voltage', sensorIds, this._t('editor.placeholder_sensor', '-- select sensor --'))}
+              ${this._entitySelectRow('Roof Array A Current', 'entities.roof_a_current', sensorIds, this._t('editor.placeholder_sensor', '-- select sensor --'))}
+              ${this._entitySelectRow('Roof Array B Power', 'entities.roof_b_power', sensorIds, this._t('editor.placeholder_sensor', '-- select sensor --'))}
+              ${this._entitySelectRow('Roof Array B Voltage', 'entities.roof_b_voltage', sensorIds, this._t('editor.placeholder_sensor', '-- select sensor --'))}
+              ${this._entitySelectRow('Roof Array B Current', 'entities.roof_b_current', sensorIds, this._t('editor.placeholder_sensor', '-- select sensor --'))}
               ${this._entitySelectRow(this._t('editor.sensor_grid', 'Grid Power'), 'entities.grid_power', sensorIds, this._t('editor.placeholder_sensor', '-- select sensor --'))}
               ${this._entitySelectRow(this._t('editor.sensor_battery', 'Battery Power'), 'entities.battery_power', sensorIds, this._t('editor.placeholder_sensor', '-- select sensor --'))}
               ${this._entitySelectRow(this._t('editor.sensor_load', 'Load Power'), 'entities.load_power', sensorIds, this._t('editor.placeholder_sensor', '-- select sensor --'))}
