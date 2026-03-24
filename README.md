@@ -2,6 +2,8 @@
 
 Custom Home Assistant Lovelace card for energy flows on a house scene, with dynamic weather/day-night backgrounds and EV-aware layout switching.
 
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=stexecute&repository=tesla-style-energy-flow&category=dashboard)
+
 ![Tesla Style Energy Flow dual EV day](docs/screenshots/06-dual-ev-day-clear.png)
 
 ![Tesla Style Energy Flow animated demo](docs/screenshots/07-night-rain-demo.gif)
