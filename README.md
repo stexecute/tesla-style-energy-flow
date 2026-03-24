@@ -8,13 +8,12 @@ Custom Home Assistant Lovelace card for energy flows on a house scene, with dyna
 
 [Watch demo video](docs/media/tesla-style-energy-flow-demo.mp4)
 
+[Features](#features) • [Installation](#installation) • [Usage](#usage) • [Screenshots](#screenshots) • [Files](#files) • [License](#license)
+
 ## Features
 
 - Smooth animated SVG flow lines
-- Flow colors by source:
-  - solar = yellow
-  - battery = green
-  - grid = red
+- Flow colors by source: solar = yellow, battery = green, grid = red
 - Dynamic background (weather + day/night + EV charging)
 - Scene-specific label/guide positioning for each background
 - Optional dual-EV support with separate EV1 / EV2 power, battery and charging switch entities
@@ -25,8 +24,10 @@ Custom Home Assistant Lovelace card for energy flows on a house scene, with dyna
   - `thresholds.solar_min_w`
   - `thresholds.grid_min_w`
   - `thresholds.battery_min_w`
-- EV flow without threshold (shows immediately when charging)
+  - `ev_min_w`
 - Optional `ev_hide_when_idle` to hide EV labels/guide when not charging
+- Optional `show_header` to show or hide the card title
+- Battery node hidden automatically when no battery entities are configured
 - Battery percentage remains readable even when battery power is idle
 - Simplified node status text with battery-focused charging/discharging state
 
@@ -61,12 +62,14 @@ lovelace:
 ```yaml
 type: custom:tesla-style-energy-flow
 title: Tesla Style Energy Flow
+show_header: true
 language: auto
 background: /local/community/tesla-style-energy-flow/backgrounds/scene_day_clear_idle.png
 dynamic_background: true
 background_asset_base: /local/community/tesla-style-energy-flow/backgrounds
 grid_invert: true
 ev_hide_when_idle: false
+ev_min_w: 150
 thresholds:
   solar_min_w: 50
   grid_min_w: 50
@@ -96,26 +99,6 @@ For custom dual-EV scenes you can also override per-scene geometry through:
 - `scene_path_map`
 - `scene_component_map`
 
-## Local Testing
-
-You can preview the real packaged card locally without Home Assistant:
-
-```bash
-cd /path/to/tesla-style-energy-flow
-python3 -m http.server 8000
-```
-
-Then open:
-
-`http://localhost:8000/local-preview.html`
-
-The local preview page loads the packaged file from `dist/` and lets you simulate:
-
-- solar, grid, battery, home and EV power
-- battery / EV percentage
-- weather state
-- day / night scene switching
-
 ## Screenshots
 
 Day clear (idle)
@@ -140,17 +123,11 @@ Night rain (grid + home + EV)
 
 ## Files
 
-- `tesla-style-energy-flow.js`: custom card source
 - `dist/tesla-style-energy-flow.js`: packaged card file used by HACS
 - `dist/backgrounds/`: packaged background assets used by HACS
 - `hacs.json`: HACS metadata
 - `examples/lovelace-card.yaml`: config example
 - `docs/screenshots/`: preview images for README
-
-## Notes
-
-- This repository is ready for manual installation or HACS custom repository usage.
-- If you publish it on GitHub, keep the repository root as-is so `hacs.json` and `tesla-style-energy-flow.js` stay in the expected locations.
 
 ## License
 
