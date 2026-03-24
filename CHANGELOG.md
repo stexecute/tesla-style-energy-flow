@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.7 - 2026-03-24
+
+- Added a `show_header` option to hide the card title
+- Added EV power threshold control in the editor
+- Hide the battery node entirely when no battery entities are configured
+
 ## 0.3.6 - 2026-03-24
 
 - Fixed dual-EV charging scene flow paths to match the packaged dual background assets

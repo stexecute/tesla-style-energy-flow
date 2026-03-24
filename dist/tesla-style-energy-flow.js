@@ -865,6 +865,7 @@
     background: '/local/community/tesla-style-energy-flow/backgrounds/scene_day_clear_idle.png',
     dynamic_background: true,
     background_asset_base: '/local/community/tesla-style-energy-flow/backgrounds',
+    show_header: true,
     show_labels: true,
     ev_hide_when_idle: false,
     scene_scale: 1.06,
@@ -1414,7 +1415,7 @@
       const titleText = cfg.title === DEFAULT_CONFIG.title
         ? this._t('card.default_title', DEFAULT_CONFIG.title)
         : cfg.title;
-      const titleHtml = titleText ? `<div class="card-title">${titleText}</div>` : '';
+      const titleHtml = (cfg.show_header !== false && titleText) ? `<div class="card-title">${titleText}</div>` : '';
       const sceneScale = clamp(safeNum(cfg.scene_scale, 1.06), 0.6, 1.4);
       const pathD = (id, configKey) => p[id] || cfg.paths?.[configKey] || DEFAULT_CONFIG.paths[configKey];
       this._lastAppliedSceneFlowProfile = '';
@@ -1528,6 +1529,9 @@
           .ev-hidden {
             display: none;
           }
+          .battery-hidden {
+            display: none;
+          }
           .flow-line {
             fill: none;
             stroke: rgba(191, 219, 254, 0.22);
@@ -1631,7 +1635,7 @@
                   <text class="flow-status" id="flow-load-status" x="0" y="-62">${this._t('card.status.consuming', 'IN CONSUMO')}</text>
                 </g>
 
-                <g class="flow-node" transform="translate(314, 330)">
+                <g class="flow-node" id="battery-node-group" transform="translate(314, 330)">
                   <circle class="flow-node-bg" id="node-battery-bg" cx="0" cy="0" r="5"></circle>
                   <line class="flow-node-guide" id="flow-battery-guide" x1="0" y1="12" x2="0" y2="42"></line>
                   <text class="flow-label" id="flow-battery-label" x="0" y="67">${this._t('card.node.battery', 'Batteria')}</text>
@@ -1674,6 +1678,7 @@
       const batteryPower = toWatt(this._entityState(cfg.entities.battery_power));
       const loadPower = toWatt(this._entityState(cfg.entities.load_power));
       const batteryLevel = toPct(this._entityState(cfg.entities.battery_level), 0);
+      const batteryConfigured = !!(cfg.entities.battery_power || cfg.entities.battery_level);
       const evData = this._collectEvData();
       const evPower = evData.totalPower;
       const solarMin = this._flowThreshold('solar_min_w', FLOW_MIN_W);
@@ -1685,6 +1690,7 @@
       const evHideIdle = !!cfg.ev_hide_when_idle;
       const evNodeGroup = this.shadowRoot.querySelector('#ev-node-group');
       const ev2NodeGroup = this.shadowRoot.querySelector('#ev2-node-group');
+      const batteryNodeGroup = this.shadowRoot.querySelector('#battery-node-group');
       const ev1 = evData.vehicles.find((vehicle) => vehicle.key === 'ev1') || { power: 0, batteryText: '--%', labelText: this._t('card.node.ev', 'EV'), switchOn: false, configured: false };
       const ev2 = evData.vehicles.find((vehicle) => vehicle.key === 'ev2') || { power: 0, batteryText: '--%', labelText: 'EV 2', switchOn: false, configured: false };
       if (evNodeGroup) {
@@ -1692,6 +1698,9 @@
       }
       if (ev2NodeGroup) {
         ev2NodeGroup.classList.toggle('ev-hidden', !ev2.configured || (evHideIdle && !(ev2.power > 0 || ev2.switchOn)));
+      }
+      if (batteryNodeGroup) {
+        batteryNodeGroup.classList.toggle('battery-hidden', !batteryConfigured);
       }
       const sceneHref = this._resolveBackground(evCharging, evData.hasSecondaryEv);
       this._setBackground(sceneHref);
@@ -1701,8 +1710,8 @@
       this._setText('#flow-solar-power', this._formatKW(solarPower));
       this._setText('#flow-grid-power', this._formatKW(gridPower));
       this._setText('#flow-load-power', this._formatKW(loadPower));
-      this._setText('#flow-battery-power', this._formatKW(batteryPower));
-      this._setText('#flow-battery-pct', `${Math.round(batteryLevel)}%`);
+      this._setText('#flow-battery-power', batteryConfigured ? this._formatKW(batteryPower) : '');
+      this._setText('#flow-battery-pct', batteryConfigured ? `${Math.round(batteryLevel)}%` : '');
       this._setText('#flow-ev-label', ev1.labelText || this._t('card.node.ev', 'EV'));
       this._setText('#flow-ev-power', this._formatKW(ev1.power || 0));
       this._setText('#flow-ev-pct', ev1.batteryText || '--%');
@@ -1712,7 +1721,10 @@
 
       const batteryStatusEl = this.shadowRoot.querySelector('#flow-battery-status');
       if (batteryStatusEl) {
-        if (batteryPower > batteryMin) {
+        if (!batteryConfigured) {
+          this._setText('#flow-battery-status', '');
+          batteryStatusEl.style.display = 'none';
+        } else if (batteryPower > batteryMin) {
           this._setText('#flow-battery-status', this._t('card.status.charging', 'IN CARICA'));
           batteryStatusEl.style.display = 'inline';
         } else if (batteryPower < -batteryMin) {
@@ -1727,7 +1739,7 @@
       this._toggleNode('#node-solar-bg', solarPower > solarMin);
       this._toggleNode('#node-grid-bg', Math.abs(gridPower) > gridMin);
       this._toggleNode('#node-load-bg', loadPower > homeMin);
-      this._toggleNode('#node-battery-bg', Math.abs(batteryPower) > batteryMin);
+      this._toggleNode('#node-battery-bg', batteryConfigured && Math.abs(batteryPower) > batteryMin);
       this._toggleNode('#node-ev-bg', (ev1.power || 0) > 0 || ev1.switchOn);
       this._toggleNode('#node-ev2-bg', (ev2.power || 0) > 0 || ev2.switchOn);
 
@@ -2065,6 +2077,10 @@
                 <input type="checkbox" data-path="grid_invert" ${cfg.grid_invert ? 'checked' : ''}>
               </div>
               <div class="row">
+                <label>Show header</label>
+                <input type="checkbox" data-path="show_header" ${cfg.show_header !== false ? 'checked' : ''}>
+              </div>
+              <div class="row">
                 <label>${this._t('editor.field_show_labels', 'Show labels')}</label>
                 <input type="checkbox" data-path="show_labels" ${cfg.show_labels ? 'checked' : ''}>
               </div>
@@ -2080,6 +2096,8 @@
               <input type="number" data-path="thresholds.grid_min_w" value="${safeNum(cfg.thresholds?.grid_min_w, 50)}">
               <label>${this._t('editor.field_battery_threshold', 'Battery threshold (W)')}</label>
               <input type="number" data-path="thresholds.battery_min_w" value="${safeNum(cfg.thresholds?.battery_min_w, 50)}">
+              <label>EV threshold (W)</label>
+              <input type="number" data-path="ev_min_w" value="${safeNum(cfg.ev_min_w, 150)}">
             </div>
           </div>
 
