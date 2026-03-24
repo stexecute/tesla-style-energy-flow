@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.6 - 2026-03-24
+
+- Fixed dual-EV charging scene flow paths to match the packaged dual background assets
+- Fixed dual-EV charging label and value positions for day/night and clear/rain variants
+
 ## 0.3.5 - 2026-03-24
 
 - Added packaged dual-EV charging background assets

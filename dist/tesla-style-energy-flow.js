@@ -415,9 +415,22 @@
       'line-wallbox-ev2': 'M 148 312 Q 126 310 112 316'
   });
 
+  const DAY_CLEAR_DUAL_CHARGING_PATHS = Object.freeze({
+      'line-solar-load': 'M 394 287 L 401 302 401 337',
+      'line-solar-grid': 'M 401 341 L 400 378 476 402',
+      'line-solar-battery': 'M 400 337 L 389 341 354 348',
+      'line-grid-load': 'M 490 407 Q 441 391 399 376 400 358 400 337',
+      'line-grid-battery': 'M 352 340 L 312 348',
+      'line-battery-load': 'M 355 347 Q 383 342 398 338',
+      'line-junction-home-load': 'M 401 338 Q 428 332 456 325',
+      'line-wallbox-ev': 'M 203 323 Q 200 381 220 340',
+      'line-wallbox-ev2': 'M 174 310 Q 161 384 126 315'
+  });
+
   const SCENE_FLOW_PATH_MAP = Object.freeze({
     'scene_day_clear_idle.png': DAY_CLEAR_IDLE_PATHS,
     'scene_day_clear_charging.png': DAY_CLEAR_CHARGING_PATHS,
+    'scene_day_clear_dual_charging.png': DAY_CLEAR_DUAL_CHARGING_PATHS,
     'image2.png': DAY_CLEAR_IDLE_PATHS,
     'image.png': DAY_CLEAR_CHARGING_PATHS,
     'scene_day_rain_idle.png': Object.freeze({
@@ -442,6 +455,17 @@
       'line-wallbox-ev': 'M 174 296 Q 164 342 188 314',
       'line-wallbox-ev2': 'M 164 286 Q 134 280 106 292'
     }),
+    'scene_day_rain_dual_charging.png': Object.freeze({
+      'line-solar-load': 'M 398 291 L 400 305 400 337',
+      'line-solar-grid': 'M 400 336 L 399 378 497 411',
+      'line-solar-battery': 'M 401 337 L 385 341 356 347',
+      'line-grid-load': 'M 532 420 Q 471 402 398 377 399 354 400 334',
+      'line-grid-battery': 'M 457 396 L 401 377',
+      'line-battery-load': 'M 354 348 Q 380 342 401 338',
+      'line-junction-home-load': 'M 400 337 Q 427 331 458 324',
+      'line-wallbox-ev': 'M 204 322 Q 202 376 216 345',
+      'line-wallbox-ev2': 'M 171 310 Q 170 378 128 322'
+    }),
     'scene_night_clear_idle.png': Object.freeze({
       'line-solar-load': 'M 351 292 L 352 338 L 352 338',
       'line-solar-grid': 'M 352 296 L 352 376 L 440 406',
@@ -464,6 +488,17 @@
       'line-wallbox-ev': 'M 192 304 Q 184 352 206 326',
       'line-wallbox-ev2': 'M 180 294 Q 148 286 118 300'
     }),
+    'scene_night_clear_dual_charging.png': Object.freeze({
+      'line-solar-load': 'M 397 289 L 401 305 401 336',
+      'line-solar-grid': 'M 400 337 L 400 378 480 401',
+      'line-solar-battery': 'M 402 336 L 380 341 355 347',
+      'line-grid-load': 'M 511 413 Q 454 397 401 378 400 356 399 337',
+      'line-grid-battery': 'M 501 409 L 402 378',
+      'line-battery-load': 'M 353 346 Q 383 340 400 336',
+      'line-junction-home-load': 'M 402 336 Q 435 329 458 323',
+      'line-wallbox-ev': 'M 204 321 Q 199 376 221 341',
+      'line-wallbox-ev2': 'M 174 310 Q 154 390 127 317'
+    }),
     'scene_night_rain_idle.png': Object.freeze({
       'line-solar-load': 'M 351 292 L 352 338 L 352 338',
       'line-solar-grid': 'M 350 284 L 354 366 L 432 392',
@@ -485,6 +520,17 @@
       'line-junction-home-load': 'M 352 334 Q 386 326 410 320',
       'line-wallbox-ev': 'M 164 314 Q 160 356 182 332',
       'line-wallbox-ev2': 'M 150 304 Q 128 300 112 308'
+    }),
+    'scene_night_rain_dual_charging.png': Object.freeze({
+      'line-solar-load': 'M 396 287 L 398 300 398 338',
+      'line-solar-grid': 'M 399 340 L 398 376 470 400',
+      'line-solar-battery': 'M 399 336 L 400 338 357 347',
+      'line-grid-load': 'M 504 409 Q 452 391 398 376 399 357 400 338',
+      'line-grid-battery': 'M 436 402 L 352 376',
+      'line-battery-load': 'M 355 347 Q 382 342 401 337',
+      'line-junction-home-load': 'M 401 336 Q 431 329 458 323',
+      'line-wallbox-ev': 'M 204 322 Q 199 380 223 338',
+      'line-wallbox-ev2': 'M 173 310 Q 156 388 129 317'
     })
   });
 
@@ -538,9 +584,35 @@
     'ev2-guide': Object.freeze({ x1: -16, y1: -70, x2: -16, y2: -12 })
   });
 
+  const DAY_CLEAR_DUAL_CHARGING_COMPONENTS = Object.freeze({
+    'solar-label': Object.freeze({ x: 9, y: -77 }),
+    'solar-power': Object.freeze({ x: 10, y: -59 }),
+    'solar-guide': Object.freeze({ x1: 0, y1: -50, x2: 0, y2: 30 }),
+    'grid-label': Object.freeze({ x: 25, y: 100 }),
+    'grid-power': Object.freeze({ x: 28, y: 116 }),
+    'grid-guide': Object.freeze({ x1: 22, y1: 44, x2: 22, y2: 88 }),
+    'load-label': Object.freeze({ x: 24, y: -14 }),
+    'load-power': Object.freeze({ x: 28, y: 3 }),
+    'load-guide': Object.freeze({ x1: 17, y1: 8, x2: 17, y2: 72 }),
+    'battery-label': Object.freeze({ x: 15, y: 102 }),
+    'battery-power': Object.freeze({ x: 14, y: 117 }),
+    'battery-pct': Object.freeze({ x: 28, y: 83 }),
+    'battery-status': Object.freeze({ x: 12, y: 100 }),
+    'battery-guide': Object.freeze({ x1: 10, y1: 60, x2: 10, y2: 88 }),
+    'ev-label': Object.freeze({ x: 14, y: -102 }),
+    'ev-power': Object.freeze({ x: 22, y: -84 }),
+    'ev-pct': Object.freeze({ x: 41, y: -5 }),
+    'ev-guide': Object.freeze({ x1: 0, y1: -98, x2: 0, y2: 4 }),
+    'ev2-label': Object.freeze({ x: -46, y: -101 }),
+    'ev2-power': Object.freeze({ x: -41, y: -85 }),
+    'ev2-pct': Object.freeze({ x: -30, y: -42 }),
+    'ev2-guide': Object.freeze({ x1: -47, y1: -75, x2: -47, y2: -17 })
+  });
+
   const SCENE_FLOW_COMPONENT_MAP = Object.freeze({
     'scene_day_clear_idle.png': DAY_CLEAR_IDLE_COMPONENTS,
     'scene_day_clear_charging.png': DAY_CLEAR_CHARGING_COMPONENTS,
+    'scene_day_clear_dual_charging.png': DAY_CLEAR_DUAL_CHARGING_COMPONENTS,
     'image2.png': DAY_CLEAR_IDLE_COMPONENTS,
     'image.png': DAY_CLEAR_CHARGING_COMPONENTS,
     'scene_day_rain_idle.png': Object.freeze({
@@ -591,6 +663,30 @@
       'ev2-pct': Object.freeze({ x: 0, y: -48 }),
       'ev2-guide': Object.freeze({ x1: -20, y1: -78, x2: -22, y2: -24 })
     }),
+    'scene_day_rain_dual_charging.png': Object.freeze({
+      'solar-label': Object.freeze({ x: 14, y: -106 }),
+      'solar-power': Object.freeze({ x: 20, y: -86 }),
+      'solar-guide': Object.freeze({ x1: 0, y1: -84, x2: 0, y2: -4 }),
+      'grid-label': Object.freeze({ x: 6, y: 78 }),
+      'grid-power': Object.freeze({ x: 24, y: 98 }),
+      'grid-guide': Object.freeze({ x1: 6, y1: 32, x2: 6, y2: 62 }),
+      'load-label': Object.freeze({ x: 0, y: -58 }),
+      'load-power': Object.freeze({ x: 18, y: -34 }),
+      'load-guide': Object.freeze({ x1: 0, y1: -26, x2: 0, y2: 46 }),
+      'battery-label': Object.freeze({ x: -14, y: 93 }),
+      'battery-power': Object.freeze({ x: -12, y: 113 }),
+      'battery-pct': Object.freeze({ x: 13, y: 64 }),
+      'battery-status': Object.freeze({ x: 40, y: 82 }),
+      'battery-guide': Object.freeze({ x1: -12, y1: 37, x2: -12, y2: 79 }),
+      'ev-label': Object.freeze({ x: -7, y: -132 }),
+      'ev-power': Object.freeze({ x: 0, y: -118 }),
+      'ev-pct': Object.freeze({ x: 14, y: -46 }),
+      'ev-guide': Object.freeze({ x1: -18, y1: -114, x2: -20, y2: -24 }),
+      'ev2-label': Object.freeze({ x: -22, y: -92 }),
+      'ev2-power': Object.freeze({ x: -4, y: -68 }),
+      'ev2-pct': Object.freeze({ x: 0, y: -48 }),
+      'ev2-guide': Object.freeze({ x1: -20, y1: -78, x2: -22, y2: -24 })
+    }),
     'scene_night_clear_idle.png': Object.freeze({
       'solar-label': Object.freeze({ x: 4, y: -110 }),
       'solar-power': Object.freeze({ x: 20, y: -86 }),
@@ -622,6 +718,30 @@
       'grid-label': Object.freeze({ x: 36, y: 74 }),
       'grid-power': Object.freeze({ x: 54, y: 100 }),
       'grid-guide': Object.freeze({ x1: 34, y1: 30, x2: 34, y2: 60 }),
+      'load-label': Object.freeze({ x: -10, y: -40 }),
+      'load-power': Object.freeze({ x: 10, y: -16 }),
+      'load-guide': Object.freeze({ x1: -8, y1: -8, x2: -8, y2: 64 }),
+      'battery-label': Object.freeze({ x: -6, y: 96 }),
+      'battery-power': Object.freeze({ x: 8, y: 118 }),
+      'battery-pct': Object.freeze({ x: 18, y: 70 }),
+      'battery-status': Object.freeze({ x: 54, y: 96 }),
+      'battery-guide': Object.freeze({ x1: -8, y1: 44, x2: -8, y2: 74 }),
+      'ev-label': Object.freeze({ x: 10, y: -110 }),
+      'ev-power': Object.freeze({ x: 26, y: -86 }),
+      'ev-pct': Object.freeze({ x: 32, y: -34 }),
+      'ev-guide': Object.freeze({ x1: 8, y1: -78, x2: 10, y2: -30 }),
+      'ev2-label': Object.freeze({ x: -10, y: -78 }),
+      'ev2-power': Object.freeze({ x: 6, y: -56 }),
+      'ev2-pct': Object.freeze({ x: 8, y: -36 }),
+      'ev2-guide': Object.freeze({ x1: -8, y1: -64, x2: -10, y2: -22 })
+    }),
+    'scene_night_clear_dual_charging.png': Object.freeze({
+      'solar-label': Object.freeze({ x: 4, y: -114 }),
+      'solar-power': Object.freeze({ x: 18, y: -88 }),
+      'solar-guide': Object.freeze({ x1: 0, y1: -92, x2: 0, y2: -12 }),
+      'grid-label': Object.freeze({ x: 23, y: 98 }),
+      'grid-power': Object.freeze({ x: 29, y: 115 }),
+      'grid-guide': Object.freeze({ x1: 24, y1: 60, x2: 24, y2: 90 }),
       'load-label': Object.freeze({ x: -10, y: -40 }),
       'load-power': Object.freeze({ x: 10, y: -16 }),
       'load-guide': Object.freeze({ x1: -8, y1: -8, x2: -8, y2: 64 }),
@@ -685,6 +805,30 @@
       'ev2-label': Object.freeze({ x: -16, y: -80 }),
       'ev2-power': Object.freeze({ x: 2, y: -58 }),
       'ev2-pct': Object.freeze({ x: 4, y: -38 }),
+      'ev2-guide': Object.freeze({ x1: -18, y1: -68, x2: -18, y2: -28 })
+    }),
+    'scene_night_rain_dual_charging.png': Object.freeze({
+      'solar-label': Object.freeze({ x: -16, y: -99 }),
+      'solar-power': Object.freeze({ x: -14, y: -82 }),
+      'solar-guide': Object.freeze({ x1: -22, y1: -78, x2: -22, y2: 2 }),
+      'grid-label': Object.freeze({ x: 0, y: 98 }),
+      'grid-power': Object.freeze({ x: 6, y: 114 }),
+      'grid-guide': Object.freeze({ x1: -15, y1: 58, x2: -15, y2: 88 }),
+      'load-label': Object.freeze({ x: 22, y: -19 }),
+      'load-power': Object.freeze({ x: 29, y: -4 }),
+      'load-guide': Object.freeze({ x1: 18, y1: 1, x2: 18, y2: 73 }),
+      'battery-label': Object.freeze({ x: 2, y: 106 }),
+      'battery-power': Object.freeze({ x: -1, y: 121 }),
+      'battery-pct': Object.freeze({ x: 46, y: 77 }),
+      'battery-status': Object.freeze({ x: 42, y: 92 }),
+      'battery-guide': Object.freeze({ x1: 2, y1: 62, x2: 2, y2: 92 }),
+      'ev-label': Object.freeze({ x: 17, y: -93 }),
+      'ev-power': Object.freeze({ x: 22, y: -75 }),
+      'ev-pct': Object.freeze({ x: 44, y: -15 }),
+      'ev-guide': Object.freeze({ x1: 13, y1: -68, x2: 13, y2: -26 }),
+      'ev2-label': Object.freeze({ x: -13, y: -90 }),
+      'ev2-power': Object.freeze({ x: -8, y: -72 }),
+      'ev2-pct': Object.freeze({ x: 21, y: -28 }),
       'ev2-guide': Object.freeze({ x1: -18, y1: -68, x2: -18, y2: -28 })
     })
   });
