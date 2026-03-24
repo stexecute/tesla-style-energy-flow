@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.5 - 2026-03-24
+
+- Added packaged dual-EV charging background assets
+- Dynamic background selection now automatically uses dual-EV charging scenes when EV2 is configured and charging
+
 ## 0.3.4 - 2026-03-24
 
 - Improved the Lovelace entity picker UX with searchable inputs backed by suggestions

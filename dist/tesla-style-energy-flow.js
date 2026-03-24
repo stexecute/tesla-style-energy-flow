@@ -366,6 +366,19 @@
     night_storm_idle: 'scene_night_clear_idle.png'
   });
 
+  const DUAL_CHARGING_SCENE_IMAGE_MAP = Object.freeze({
+    day_clear_dual_charging: 'scene_day_clear_dual_charging.png',
+    day_cloudy_dual_charging: 'scene_day_clear_dual_charging.png',
+    day_rain_dual_charging: 'scene_day_rain_dual_charging.png',
+    day_snow_dual_charging: 'scene_day_clear_dual_charging.png',
+    day_storm_dual_charging: 'scene_day_clear_dual_charging.png',
+    night_clear_dual_charging: 'scene_night_clear_dual_charging.png',
+    night_cloudy_dual_charging: 'scene_night_clear_dual_charging.png',
+    night_rain_dual_charging: 'scene_night_rain_dual_charging.png',
+    night_snow_dual_charging: 'scene_night_clear_dual_charging.png',
+    night_storm_dual_charging: 'scene_night_clear_dual_charging.png'
+  });
+
   const FLOW_PATH_KEYS = Object.freeze({
     'line-solar-load': 'line_solar_load',
     'line-grid-load': 'line_grid_load',
@@ -1088,6 +1101,9 @@
       Object.entries(SCENE_IMAGE_MAP).forEach(([k, v]) => {
         out[k] = joinAsset(base, v);
       });
+      Object.entries(DUAL_CHARGING_SCENE_IMAGE_MAP).forEach(([k, v]) => {
+        out[k] = joinAsset(base, v);
+      });
 
       out.day_default = out.day_clear_idle || joinAsset(base, 'scene_day_clear_idle.png');
       out.night_default = out.night_clear_idle || joinAsset(base, 'scene_night_clear_idle.png');
@@ -1115,7 +1131,7 @@
       return deepMerge(SCENE_FLOW_COMPONENT_MAP, this._config.scene_component_map || {});
     }
 
-    _resolveBackground(evCharging) {
+    _resolveBackground(evCharging, hasSecondaryEv = false) {
       const cfg = this._config;
       if (!cfg.dynamic_background) return cfg.background;
 
@@ -1127,6 +1143,16 @@
         ...this._defaultBackgroundMap(),
         ...compactStringMap(cfg.background_map || {})
       };
+
+      if (hasSecondaryEv && evCharging) {
+        const dualExactKey = `${period}_${weatherGroup}_dual_charging`;
+        const dualExactUrl = String(map[dualExactKey] || '').trim();
+        if (dualExactUrl) return dualExactUrl;
+
+        const dualClearKey = `${period}_clear_dual_charging`;
+        const dualClearUrl = String(map[dualClearKey] || '').trim();
+        if (dualClearUrl) return dualClearUrl;
+      }
 
       const exactKey = `${period}_${weatherGroup}_${chargeState}`;
       const exactUrl = String(map[exactKey] || '').trim();
@@ -1145,7 +1171,7 @@
       if (defaultUrl) return defaultUrl;
 
       const fallbackFile = chargeState === 'charging'
-        ? SCENE_IMAGE_MAP.day_clear_charging
+        ? (hasSecondaryEv ? DUAL_CHARGING_SCENE_IMAGE_MAP.day_clear_dual_charging : SCENE_IMAGE_MAP.day_clear_charging)
         : SCENE_IMAGE_MAP.day_clear_idle;
       const legacyFallback = joinAsset(
         cfg.background_asset_base || '/local/community/tesla-style-energy-flow/backgrounds',
@@ -1523,7 +1549,7 @@
       if (ev2NodeGroup) {
         ev2NodeGroup.classList.toggle('ev-hidden', !ev2.configured || (evHideIdle && !(ev2.power > 0 || ev2.switchOn)));
       }
-      const sceneHref = this._resolveBackground(evCharging);
+      const sceneHref = this._resolveBackground(evCharging, evData.hasSecondaryEv);
       this._setBackground(sceneHref);
       this._applySceneFlowPaths(sceneHref);
       this._applySceneFlowComponents(sceneHref);
