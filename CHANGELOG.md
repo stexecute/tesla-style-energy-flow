@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.16 - 2026-03-26
+
+- Added optional `battery_invert` to flip the battery power sign without creating a template sensor
+- Added optional `font_scale` to make labels and values easier to read on smaller cards or tablet layouts
+- Added default section grid row hints to reduce overlap in Home Assistant sections layout
+
 ## 0.3.15 - 2026-03-25
 
 - Added optional roof array overlays for two arrays with power, voltage and current values

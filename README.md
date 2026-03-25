@@ -29,6 +29,8 @@ Custom Home Assistant Lovelace card for energy flows on a house scene, with dyna
   - `ev_min_w`
 - Optional `ev_hide_when_idle` to hide EV labels/guide when not charging
 - Optional `show_header` to show or hide the card title
+- Optional `font_scale` to improve readability on compact cards or tablet layouts
+- Optional `battery_invert` if your battery sensor uses the opposite sign convention
 - Battery node hidden automatically when no battery entities are configured
 - Battery percentage remains readable even when battery power is idle
 - Simplified node status text with battery-focused charging/discharging state
@@ -38,7 +40,7 @@ Custom Home Assistant Lovelace card for energy flows on a house scene, with dyna
 ### HACS (Custom Repository)
 
 1. HACS -> Frontend -> Custom repositories
-2. Add this GitHub repo URL
+2. Add this GitHub repo URL: `https://github.com/stexecute/tesla-style-energy-flow`
 3. Category: `Dashboard`
 4. Install `Tesla Style Energy Flow`
 5. Refresh browser cache
@@ -69,7 +71,9 @@ language: auto
 background: /local/community/tesla-style-energy-flow/backgrounds/scene_day_clear_idle.png
 dynamic_background: true
 background_asset_base: /local/community/tesla-style-energy-flow/backgrounds
-grid_invert: true
+battery_invert: false
+grid_invert: false
+font_scale: 1.0
 ev_hide_when_idle: false
 ev_min_w: 150
 thresholds:

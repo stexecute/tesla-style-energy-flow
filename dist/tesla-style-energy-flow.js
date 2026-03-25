@@ -876,9 +876,11 @@
     show_header: true,
     show_labels: true,
     power_unit_mode: 'auto',
+    font_scale: 1,
     ev_hide_when_idle: false,
     scene_scale: 1.06,
     grid_invert: false,
+    battery_invert: false,
     ev_min_w: 150,
     thresholds: {
       solar_min_w: 50,
@@ -1125,6 +1127,13 @@
 
     getCardSize() {
       return 7;
+    }
+
+    getGridOptions() {
+      return {
+        rows: 10,
+        min_rows: 8
+      };
     }
 
     _entityState(entityId) {
@@ -1439,6 +1448,7 @@
       const titleText = String(cfg.title || '');
       const titleHtml = (cfg.show_header !== false && titleText) ? `<div class="card-title">${titleText}</div>` : '';
       const sceneScale = clamp(safeNum(cfg.scene_scale, 1.06), 0.6, 1.4);
+      const fontScale = clamp(safeNum(cfg.font_scale, 1), 0.75, 1.35);
       const pathD = (id, configKey) => p[id] || cfg.paths?.[configKey] || DEFAULT_CONFIG.paths[configKey];
       this._lastAppliedSceneFlowProfile = '';
       this._lastAppliedSceneFlowComponentProfile = '';
@@ -1453,9 +1463,10 @@
           }
           .wrap {
             padding: 0;
+            --flow-font-scale: ${fontScale};
           }
           .card-title {
-            font-size: 14px;
+            font-size: calc(14px * var(--flow-font-scale));
             font-weight: 600;
             letter-spacing: 0.04em;
             padding: 14px 14px 8px;
@@ -1504,21 +1515,21 @@
                     drop-shadow(0 0 16px rgba(0, 0, 0, 0.52));
           }
           .flow-label {
-            font-size: 11px;
+            font-size: calc(11px * var(--flow-font-scale));
             font-weight: 600;
             letter-spacing: 0.05em;
             text-transform: uppercase;
           }
           .flow-power {
-            font-size: 12px;
+            font-size: calc(12px * var(--flow-font-scale));
             font-weight: 700;
           }
           .flow-pct {
-            font-size: 11px;
+            font-size: calc(11px * var(--flow-font-scale));
             font-weight: 700;
           }
           .flow-status {
-            font-size: 8.5px;
+            font-size: calc(8.5px * var(--flow-font-scale));
             font-weight: 600;
             opacity: 0.9;
             display: none;
@@ -1533,18 +1544,18 @@
                     drop-shadow(0 0 16px rgba(0, 0, 0, 0.52));
           }
           .roof-meta-label {
-            font-size: 9px;
+            font-size: calc(9px * var(--flow-font-scale));
             font-weight: 700;
             letter-spacing: 0.05em;
             text-transform: uppercase;
           }
           .roof-meta-value {
-            font-size: 8px;
+            font-size: calc(8px * var(--flow-font-scale));
             font-weight: 600;
           }
           #flow-battery-status {
             display: inline;
-            font-size: 9px;
+            font-size: calc(9px * var(--flow-font-scale));
             letter-spacing: 0.05em;
           }
           .flow-node.inactive .flow-label,
@@ -1739,7 +1750,8 @@
       const roofBPower = toWatt(this._entityState(cfg.entities.roof_b_power));
       const roofBVoltage = safeNum(this._entityState(cfg.entities.roof_b_voltage)?.state, 0);
       const roofBCurrent = safeNum(this._entityState(cfg.entities.roof_b_current)?.state, 0);
-      const batteryPower = toWatt(this._entityState(cfg.entities.battery_power));
+      let batteryPower = toWatt(this._entityState(cfg.entities.battery_power));
+      if (cfg.battery_invert) batteryPower *= -1;
       const loadPower = toWatt(this._entityState(cfg.entities.load_power));
       const batteryLevel = toPct(this._entityState(cfg.entities.battery_level), 0);
       const batteryConfigured = !!(cfg.entities.battery_power || cfg.entities.battery_level);
@@ -2191,6 +2203,10 @@
                 <input type="checkbox" data-path="grid_invert" ${cfg.grid_invert ? 'checked' : ''}>
               </div>
               <div class="row">
+                <label>Invert battery sign</label>
+                <input type="checkbox" data-path="battery_invert" ${cfg.battery_invert ? 'checked' : ''}>
+              </div>
+              <div class="row">
                 <label>Show header</label>
                 <input type="checkbox" data-path="show_header" ${cfg.show_header !== false ? 'checked' : ''}>
               </div>
@@ -2204,6 +2220,8 @@
               </div>
               <label>${this._t('editor.field_scene_scale', 'Scene Scale')}</label>
               <input type="number" step="0.01" data-path="scene_scale" value="${safeNum(cfg.scene_scale, 1.06)}">
+              <label>Font scale</label>
+              <input type="number" step="0.05" min="0.75" max="1.35" data-path="font_scale" value="${safeNum(cfg.font_scale, 1)}">
               <label>${this._t('editor.field_solar_threshold', 'Solar threshold (W)')}</label>
               <input type="number" data-path="thresholds.solar_min_w" value="${safeNum(cfg.thresholds?.solar_min_w, 50)}">
               <label>${this._t('editor.field_grid_threshold', 'Grid threshold (W)')}</label>
