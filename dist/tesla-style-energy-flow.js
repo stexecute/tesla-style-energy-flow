@@ -1190,6 +1190,7 @@
     }
 
     _activatePath(id, cls, watt, minW = FLOW_MIN_W, reverse = false) {
+      if (watt <= 0) return;
       if (watt < minW) return;
       const el = this.shadowRoot.querySelector(`#${id}`);
       if (!el) return;
@@ -1920,6 +1921,8 @@
       const batteryToGrid = Math.min(remainingGridExport, battDischargeRemaining);
 
       let gridToLoadVisual = gridToLoad;
+      const gridImportVisual = gridImport;
+      const gridExportVisual = gridExport;
       // Fallback visuale: se il carico e sostenuto di fatto dalla rete ma il calcolo cade sotto soglia.
       if (
         !evCharging &&
@@ -1933,7 +1936,7 @@
       }
 
       this._activatePath('line-solar-load', 'flow-solar', solarToLoad, solarMin);
-      this._activatePath('line-grid-load', 'flow-broken', gridToLoadVisual, gridMin);
+      this._activatePath('line-grid-load', 'flow-broken', gridImportVisual, gridMin);
       this._activatePath('line-grid-load', 'flow-green', batteryToGrid, Math.max(1, Math.min(gridMin, batteryMin)), true);
       this._activatePath('line-battery-load', 'flow-green', Math.max(battToLoad, batteryToGrid), Math.max(1, Math.min(gridMin, batteryMin)));
 
@@ -1943,7 +1946,7 @@
 
       this._activatePath('line-solar-battery', 'flow-solar', solarToBattery, batteryMin);
       this._activatePath('line-grid-battery', 'flow-broken', gridToBattery, batteryMin);
-      this._activatePath('line-solar-grid', 'flow-green', solarExport, Math.max(1, gridMin));
+      this._activatePath('line-solar-grid', 'flow-green', gridExportVisual, Math.max(1, gridMin));
 
       const evTotal = solarToEv + battToEv + gridToEv;
       const evCls = this._dominantFlowClass(solarToEv, battToEv, gridToEv, 'flow-green');
