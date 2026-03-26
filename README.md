@@ -19,6 +19,8 @@ Custom Home Assistant Lovelace card for energy flows on a house scene, with dyna
 - Dynamic background (weather + day/night + EV charging)
 - Scene-specific label/guide positioning for each background
 - Optional dual-EV support with separate EV1 / EV2 power, battery and charging switch entities
+- Optional `ev_label` / `ev2_label` for custom vehicle names
+- Optional `ev_presence` / `ev2_presence` to show the EV scene when a vehicle is at home, even if it is not charging
 - Optional `scene_path_map` and `scene_component_map` overrides for custom dual-EV backgrounds
 - Config editor with entity dropdowns
 - Multilanguage UI (`auto`, `it`, `en`, `es`, `fr`, `de`)
@@ -74,6 +76,8 @@ background_asset_base: /local/community/tesla-style-energy-flow/backgrounds
 battery_invert: false
 grid_invert: false
 font_scale: 1.0
+ev_label: Model Y
+ev2_label: Model 3
 ev_hide_when_idle: false
 ev_min_w: 150
 thresholds:
@@ -95,9 +99,11 @@ entities:
   ev_power: sensor.ev_charging_power
   ev_battery: sensor.ev_battery_level
   ev_charge_switch: switch.ev_charge
+  ev_presence: binary_sensor.ev_presence
   ev2_power: sensor.ev2_charging_power
   ev2_battery: sensor.ev2_battery_level
   ev2_charge_switch: switch.ev2_charge
+  ev2_presence: binary_sensor.ev2_presence
   weather: weather.home
   sun: sun.sun
 ```
@@ -105,6 +111,12 @@ entities:
 The card ships with built-in SVG flow paths and scene presets, so no extra `paths:` block is required for a normal install.
 
 The second EV is optional. If `ev2_*` entities are not configured, the card behaves exactly like the single-EV version.
+
+If presence entities are configured:
+
+- the card can keep the EV scene visible when a car is at home even if charging power is `0`
+- if only one EV is present/active, the single-car scene is reused and mapped to that vehicle
+- if both EVs are present/active, the dual-EV scene logic is used
 
 Optional roof array sensors can also be added for two array overlays:
 

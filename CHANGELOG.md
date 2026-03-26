@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.17 - 2026-03-26
+
+- Added optional `ev_label` and `ev2_label` for custom vehicle names
+- Added optional `ev_presence` and `ev2_presence` entities to show EV scenes based on vehicle presence, not only charging
+- When only one EV is present/active, the card reuses the single-car scene and maps the visible label/data to that vehicle
+
 ## 0.3.16 - 2026-03-26
 
 - Added optional `battery_invert` to flip the battery power sign without creating a template sensor

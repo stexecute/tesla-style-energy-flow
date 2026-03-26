@@ -881,6 +881,8 @@
     scene_scale: 1.06,
     grid_invert: false,
     battery_invert: false,
+    ev_label: '',
+    ev2_label: '',
     ev_min_w: 150,
     thresholds: {
       solar_min_w: 50,
@@ -902,9 +904,11 @@
       ev_power: '',
       ev_battery: '',
       ev_charge_switch: '',
+      ev_presence: '',
       ev2_power: '',
       ev2_battery: '',
       ev2_charge_switch: '',
+      ev2_presence: '',
       weather: '',
       sun: 'sun.sun'
     },
@@ -1070,6 +1074,17 @@
     return fallback || key;
   }
 
+  function isTruthyPresenceState(entityState) {
+    if (!entityState) return false;
+    const state = String(entityState.state || '').trim().toLowerCase();
+    if (!state || ['unknown', 'unavailable', 'none', 'null'].includes(state)) return false;
+    if (['on', 'home', 'present', 'true', 'occupied', 'detected'].includes(state)) return true;
+    if (['off', 'not_home', 'away', 'false', 'clear', 'idle'].includes(state)) return false;
+    const numeric = Number(state);
+    if (Number.isFinite(numeric)) return numeric > 0;
+    return true;
+  }
+
   class EnergyFlowProCard extends HTMLElement {
     static getConfigElement() {
       return document.createElement('tesla-style-energy-flow-editor');
@@ -1092,9 +1107,11 @@
           ev_power: 'sensor.ev_charging_power',
           ev_battery: 'sensor.ev_battery_level',
           ev_charge_switch: 'switch.ev_charge',
+          ev_presence: 'binary_sensor.ev_presence',
           ev2_power: 'sensor.ev2_charging_power',
           ev2_battery: 'sensor.ev2_battery_level',
           ev2_charge_switch: 'switch.ev2_charge',
+          ev2_presence: 'binary_sensor.ev2_presence',
           weather: 'weather.home',
           sun: 'sun.sun'
         }
@@ -1207,22 +1224,27 @@
           key: 'ev1',
           powerEntity: this._config.entities.ev_power,
           batteryEntity: this._config.entities.ev_battery,
-          chargeSwitchEntity: this._config.entities.ev_charge_switch
+          chargeSwitchEntity: this._config.entities.ev_charge_switch,
+          presenceEntity: this._config.entities.ev_presence,
+          customLabel: this._config.ev_label
         },
         {
           key: 'ev2',
           powerEntity: this._config.entities.ev2_power,
           batteryEntity: this._config.entities.ev2_battery,
-          chargeSwitchEntity: this._config.entities.ev2_charge_switch
+          chargeSwitchEntity: this._config.entities.ev2_charge_switch,
+          presenceEntity: this._config.entities.ev2_presence,
+          customLabel: this._config.ev2_label
         }
       ];
 
       const vehicles = evSlots
         .map((slot) => {
-          const configured = !!(slot.powerEntity || slot.batteryEntity || slot.chargeSwitchEntity);
+          const configured = !!(slot.powerEntity || slot.batteryEntity || slot.chargeSwitchEntity || slot.presenceEntity);
           const powerState = this._entityState(slot.powerEntity);
           const batteryState = this._entityState(slot.batteryEntity);
           const switchState = this._entityState(slot.chargeSwitchEntity);
+          const presenceState = this._entityState(slot.presenceEntity);
           return {
             key: slot.key,
             configured,
@@ -1230,24 +1252,28 @@
             hasBatteryEntity: !!batteryState,
             power: Math.max(0, toWatt(powerState)),
             battery: toPct(batteryState, 0),
-            switchOn: switchState?.state === 'on'
+            switchOn: switchState?.state === 'on',
+            present: isTruthyPresenceState(presenceState),
+            customLabel: String(slot.customLabel || '').trim()
           };
         })
         .filter((vehicle) => vehicle.configured);
 
-      const hasSecondaryEv = vehicles.some((vehicle) => vehicle.key === 'ev2');
+      const activeVehicles = vehicles.filter((vehicle) => vehicle.present || vehicle.power > 0 || vehicle.switchOn);
+      const hasSecondaryEv = activeVehicles.length > 1;
       const normalized = vehicles.map((vehicle) => ({
         ...vehicle,
-        labelText: vehicle.key === 'ev2'
+        labelText: vehicle.customLabel || (vehicle.key === 'ev2'
           ? 'EV 2'
-          : (hasSecondaryEv ? 'EV 1' : this._t('card.node.ev', 'EV')),
+          : (hasSecondaryEv ? 'EV 1' : this._t('card.node.ev', 'EV'))),
         batteryText: vehicle.hasBatteryEntity ? `${Math.round(vehicle.battery)}%` : '--%'
       }));
 
       return {
         vehicles: normalized,
         totalPower: normalized.reduce((sum, vehicle) => sum + vehicle.power, 0),
-        hasSecondaryEv
+        hasSecondaryEv,
+        activeVehicles
       };
     }
 
@@ -1763,19 +1789,23 @@
       const homeMin = Math.min(solarMin, gridMin, batteryMin);
 
       const evCharging = this._isEvCharging(evData);
+      const visibleVehicles = evData.activeVehicles.length ? evData.activeVehicles : evData.vehicles;
+      const primaryVisibleVehicle = visibleVehicles[0] || null;
+      const secondaryVisibleVehicle = visibleVehicles[1] || null;
+      const evSceneActive = evCharging || evData.activeVehicles.length > 0;
       const evHideIdle = !!cfg.ev_hide_when_idle;
       const evNodeGroup = this.shadowRoot.querySelector('#ev-node-group');
       const ev2NodeGroup = this.shadowRoot.querySelector('#ev2-node-group');
       const batteryNodeGroup = this.shadowRoot.querySelector('#battery-node-group');
       const roofAGroup = this.shadowRoot.querySelector('#roof-array-a-group');
       const roofBGroup = this.shadowRoot.querySelector('#roof-array-b-group');
-      const ev1 = evData.vehicles.find((vehicle) => vehicle.key === 'ev1') || { power: 0, batteryText: '--%', labelText: this._t('card.node.ev', 'EV'), switchOn: false, configured: false };
-      const ev2 = evData.vehicles.find((vehicle) => vehicle.key === 'ev2') || { power: 0, batteryText: '--%', labelText: 'EV 2', switchOn: false, configured: false };
+      const ev1 = primaryVisibleVehicle || { power: 0, batteryText: '--%', labelText: this._t('card.node.ev', 'EV'), switchOn: false, configured: false, present: false };
+      const ev2 = secondaryVisibleVehicle || { power: 0, batteryText: '--%', labelText: 'EV 2', switchOn: false, configured: false, present: false };
       if (evNodeGroup) {
-        evNodeGroup.classList.toggle('ev-hidden', !ev1.configured || (evHideIdle && !(ev1.power > 0 || ev1.switchOn)));
+        evNodeGroup.classList.toggle('ev-hidden', !ev1.configured || (evHideIdle && !(ev1.power > 0 || ev1.switchOn || ev1.present)));
       }
       if (ev2NodeGroup) {
-        ev2NodeGroup.classList.toggle('ev-hidden', !ev2.configured || (evHideIdle && !(ev2.power > 0 || ev2.switchOn)));
+        ev2NodeGroup.classList.toggle('ev-hidden', !ev2.configured || (evHideIdle && !(ev2.power > 0 || ev2.switchOn || ev2.present)));
       }
       if (batteryNodeGroup) {
         batteryNodeGroup.classList.toggle('battery-hidden', !batteryConfigured);
@@ -1786,7 +1816,7 @@
       if (roofBGroup) {
         roofBGroup.classList.toggle('roof-hidden', !(roofBPower > 0 || roofBVoltage > 0 || roofBCurrent > 0));
       }
-      const sceneHref = this._resolveBackground(evCharging, evData.hasSecondaryEv);
+      const sceneHref = this._resolveBackground(evSceneActive, !!secondaryVisibleVehicle);
       this._setBackground(sceneHref);
       this._applySceneFlowPaths(sceneHref);
       this._applySceneFlowComponents(sceneHref);
@@ -1830,8 +1860,8 @@
       this._toggleNode('#node-grid-bg', Math.abs(gridPower) > gridMin);
       this._toggleNode('#node-load-bg', loadPower > homeMin);
       this._toggleNode('#node-battery-bg', batteryConfigured && Math.abs(batteryPower) > batteryMin);
-      this._toggleNode('#node-ev-bg', (ev1.power || 0) > 0 || ev1.switchOn);
-      this._toggleNode('#node-ev2-bg', (ev2.power || 0) > 0 || ev2.switchOn);
+      this._toggleNode('#node-ev-bg', (ev1.power || 0) > 0 || ev1.switchOn || ev1.present);
+      this._toggleNode('#node-ev2-bg', (ev2.power || 0) > 0 || ev2.switchOn || ev2.present);
 
       this.shadowRoot.querySelectorAll('.flow-line').forEach((line) => {
         line.classList.remove('active', 'flow-solar', 'flow-green', 'flow-broken', 'flow-reverse');
@@ -1843,7 +1873,7 @@
       const gridExport = Math.max(0, -gridPower);
       const batteryCharge = Math.max(0, batteryPower);
       const batteryDischarge = Math.max(0, -batteryPower);
-      const evDraw = evCharging ? Math.max(0, evPower) : 0;
+      const evDraw = evSceneActive ? Math.max(0, evPower) : 0;
       const ev1Draw = Math.max(0, ev1.power || 0);
       const ev2Draw = Math.max(0, ev2.power || 0);
 
@@ -2017,6 +2047,14 @@
         .sort((a, b) => a.localeCompare(b));
     }
 
+    _entityIdsByDomains(domains) {
+      if (!this._hass) return [];
+      const domainSet = new Set(Array.isArray(domains) ? domains : []);
+      return Object.keys(this._hass.states)
+        .filter((id) => domainSet.has(id.split('.')[0]))
+        .sort((a, b) => a.localeCompare(b));
+    }
+
     _getByPath(path) {
       const keys = path.split('.');
       let value = this._config;
@@ -2101,6 +2139,7 @@
     _render() {
       const sensorIds = this._entityIdsByDomain('sensor');
       const switchIds = this._entityIdsByDomain('switch');
+      const presenceIds = this._entityIdsByDomains(['binary_sensor', 'device_tracker', 'person', 'input_boolean']);
       const weatherIds = this._entityIdsByDomain('weather');
       const sunIds = this._entityIdsByDomain('sun');
 
@@ -2222,6 +2261,10 @@
               <input type="number" step="0.01" data-path="scene_scale" value="${safeNum(cfg.scene_scale, 1.06)}">
               <label>Font scale</label>
               <input type="number" step="0.05" min="0.75" max="1.35" data-path="font_scale" value="${safeNum(cfg.font_scale, 1)}">
+              <label>EV 1 label</label>
+              <input data-path="ev_label" value="${this._escapeHtml(cfg.ev_label || '')}">
+              <label>EV 2 label</label>
+              <input data-path="ev2_label" value="${this._escapeHtml(cfg.ev2_label || '')}">
               <label>${this._t('editor.field_solar_threshold', 'Solar threshold (W)')}</label>
               <input type="number" data-path="thresholds.solar_min_w" value="${safeNum(cfg.thresholds?.solar_min_w, 50)}">
               <label>${this._t('editor.field_grid_threshold', 'Grid threshold (W)')}</label>
@@ -2250,9 +2293,11 @@
               ${this._entitySelectRow(this._t('editor.sensor_ev_power', 'EV Power'), 'entities.ev_power', sensorIds, this._t('editor.placeholder_sensor', '-- select sensor --'))}
               ${this._entitySelectRow(this._t('editor.sensor_ev_battery', 'EV Battery %'), 'entities.ev_battery', sensorIds, this._t('editor.placeholder_sensor', '-- select sensor --'))}
               ${this._entitySelectRow(this._t('editor.sensor_ev_switch', 'EV Charge Switch'), 'entities.ev_charge_switch', switchIds, this._t('editor.placeholder_switch', '-- select switch --'))}
+              ${this._entitySelectRow('EV 1 Presence', 'entities.ev_presence', presenceIds, '-- select presence entity --')}
               ${this._entitySelectRow(this._t('editor.sensor_ev2_power', 'EV 2 Power'), 'entities.ev2_power', sensorIds, this._t('editor.placeholder_sensor', '-- select sensor --'))}
               ${this._entitySelectRow(this._t('editor.sensor_ev2_battery', 'EV 2 Battery %'), 'entities.ev2_battery', sensorIds, this._t('editor.placeholder_sensor', '-- select sensor --'))}
               ${this._entitySelectRow(this._t('editor.sensor_ev2_switch', 'EV 2 Charge Switch'), 'entities.ev2_charge_switch', switchIds, this._t('editor.placeholder_switch', '-- select switch --'))}
+              ${this._entitySelectRow('EV 2 Presence', 'entities.ev2_presence', presenceIds, '-- select presence entity --')}
               ${this._entitySelectRow(this._t('editor.sensor_weather', 'Weather Entity'), 'entities.weather', weatherIds, this._t('editor.placeholder_weather', '-- select weather --'))}
               ${this._entitySelectRow(this._t('editor.sensor_sun', 'Sun Entity'), 'entities.sun', sunIds, this._t('editor.placeholder_sun', '-- select sun --'))}
             </div>
