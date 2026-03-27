@@ -1289,6 +1289,8 @@
       const activeVehicles = vehicles.filter((vehicle) => vehicle.present || vehicle.power > 0 || vehicle.switchOn);
       const presenceVehicles = vehicles.filter((vehicle) => vehicle.present);
       const chargingVehicles = vehicles.filter((vehicle) => vehicle.power > 0 || vehicle.switchOn);
+      const hasConfiguredSecondaryEv = vehicles.some((vehicle) => vehicle.key === 'ev2');
+      const hasPresenceEntities = evSlots.some((slot) => !!slot.presenceEntity);
       const hasSecondaryEv = activeVehicles.length > 1;
       const normalized = vehicles.map((vehicle) => ({
         ...vehicle,
@@ -1302,6 +1304,8 @@
         vehicles: normalized,
         totalPower: normalized.reduce((sum, vehicle) => sum + vehicle.power, 0),
         hasSecondaryEv,
+        hasConfiguredSecondaryEv,
+        hasPresenceEntities,
         activeVehicles,
         presenceVehicles,
         chargingVehicles
@@ -1824,8 +1828,12 @@
       const visibleVehicles = evData.activeVehicles.length ? evData.activeVehicles : evData.vehicles;
       const primaryVisibleVehicle = visibleVehicles[0] || null;
       const secondaryVisibleVehicle = visibleVehicles[1] || null;
-      const evSceneActive = evCharging || evData.presenceVehicles.length > 0;
-      const useDualScene = sceneVehicles.length > 1;
+      const evSceneActive = evData.hasPresenceEntities
+        ? (evCharging || evData.presenceVehicles.length > 0)
+        : evCharging;
+      const useDualScene = evData.hasPresenceEntities
+        ? (sceneVehicles.length > 1)
+        : evData.hasConfiguredSecondaryEv;
       const evHideIdle = !!cfg.ev_hide_when_idle;
       const evNodeGroup = this.shadowRoot.querySelector('#ev-node-group');
       const ev2NodeGroup = this.shadowRoot.querySelector('#ev2-node-group');
