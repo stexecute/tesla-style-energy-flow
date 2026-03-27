@@ -984,7 +984,21 @@
 
   function toPct(entityState, fallback = 0) {
     if (!entityState) return fallback;
-    return clamp(safeNum(entityState.state, fallback), 0, 100);
+    const candidates = [
+      entityState.state,
+      entityState.attributes?.battery_level,
+      entityState.attributes?.battery,
+      entityState.attributes?.battery_percent,
+      entityState.attributes?.battery_percentage,
+      entityState.attributes?.percentage,
+      entityState.attributes?.level,
+      entityState.attributes?.usable_battery_level
+    ];
+    for (const candidate of candidates) {
+      const parsed = safeNum(candidate, Number.NaN);
+      if (Number.isFinite(parsed)) return clamp(parsed, 0, 100);
+    }
+    return clamp(fallback, 0, 100);
   }
 
   function joinAsset(base, file) {
