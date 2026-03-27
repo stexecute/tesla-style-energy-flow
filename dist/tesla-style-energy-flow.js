@@ -1293,24 +1293,22 @@
         })
         .filter((vehicle) => vehicle.configured);
 
-      const activeVehicles = vehicles.filter((vehicle) => vehicle.present || vehicle.power > 0 || vehicle.switchOn);
-      const presenceVehicles = vehicles.filter((vehicle) => vehicle.present);
-      const chargingVehicles = vehicles.filter((vehicle) => vehicle.power > 0 || vehicle.switchOn);
       const hasConfiguredSecondaryEv = vehicles.some((vehicle) => vehicle.key === 'ev2');
       const hasPresenceEntities = evSlots.some((slot) => !!slot.presenceEntity);
-      const hasSecondaryEv = activeVehicles.length > 1;
       const normalized = vehicles.map((vehicle) => ({
         ...vehicle,
         labelText: vehicle.customLabel || vehicle.derivedLabel || (vehicle.key === 'ev2'
           ? 'EV 2'
-          : (hasSecondaryEv ? 'EV 1' : this._t('card.node.ev', 'EV'))),
+          : (hasConfiguredSecondaryEv ? 'EV 1' : this._t('card.node.ev', 'EV'))),
         batteryText: vehicle.hasBatteryEntity ? `${Math.round(vehicle.battery)}%` : '--%'
       }));
+      const activeVehicles = normalized.filter((vehicle) => vehicle.present || vehicle.power > 0 || vehicle.switchOn);
+      const presenceVehicles = normalized.filter((vehicle) => vehicle.present);
+      const chargingVehicles = normalized.filter((vehicle) => vehicle.power > 0 || vehicle.switchOn);
 
       return {
         vehicles: normalized,
         totalPower: normalized.reduce((sum, vehicle) => sum + vehicle.power, 0),
-        hasSecondaryEv,
         hasConfiguredSecondaryEv,
         hasPresenceEntities,
         activeVehicles,
