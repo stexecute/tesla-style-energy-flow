@@ -1085,6 +1085,11 @@
     return true;
   }
 
+  function friendlyEntityName(entityState) {
+    const name = String(entityState?.attributes?.friendly_name || '').trim();
+    return name || '';
+  }
+
   class EnergyFlowProCard extends HTMLElement {
     static getConfigElement() {
       return document.createElement('tesla-style-energy-flow-editor');
@@ -1246,6 +1251,12 @@
           const batteryState = this._entityState(slot.batteryEntity);
           const switchState = this._entityState(slot.chargeSwitchEntity);
           const presenceState = this._entityState(slot.presenceEntity);
+          const derivedLabel = (
+            friendlyEntityName(powerState) ||
+            friendlyEntityName(batteryState) ||
+            friendlyEntityName(presenceState) ||
+            friendlyEntityName(switchState)
+          );
           return {
             key: slot.key,
             configured,
@@ -1255,16 +1266,19 @@
             battery: toPct(batteryState, 0),
             switchOn: switchState?.state === 'on',
             present: isTruthyPresenceState(presenceState),
-            customLabel: String(slot.customLabel || '').trim()
+            customLabel: String(slot.customLabel || '').trim(),
+            derivedLabel
           };
         })
         .filter((vehicle) => vehicle.configured);
 
       const activeVehicles = vehicles.filter((vehicle) => vehicle.present || vehicle.power > 0 || vehicle.switchOn);
+      const presenceVehicles = vehicles.filter((vehicle) => vehicle.present);
+      const chargingVehicles = vehicles.filter((vehicle) => vehicle.power > 0 || vehicle.switchOn);
       const hasSecondaryEv = activeVehicles.length > 1;
       const normalized = vehicles.map((vehicle) => ({
         ...vehicle,
-        labelText: vehicle.customLabel || (vehicle.key === 'ev2'
+        labelText: vehicle.customLabel || vehicle.derivedLabel || (vehicle.key === 'ev2'
           ? 'EV 2'
           : (hasSecondaryEv ? 'EV 1' : this._t('card.node.ev', 'EV'))),
         batteryText: vehicle.hasBatteryEntity ? `${Math.round(vehicle.battery)}%` : '--%'
@@ -1274,7 +1288,9 @@
         vehicles: normalized,
         totalPower: normalized.reduce((sum, vehicle) => sum + vehicle.power, 0),
         hasSecondaryEv,
-        activeVehicles
+        activeVehicles,
+        presenceVehicles,
+        chargingVehicles
       };
     }
 
@@ -1790,10 +1806,12 @@
       const homeMin = Math.min(solarMin, gridMin, batteryMin);
 
       const evCharging = this._isEvCharging(evData);
+      const sceneVehicles = evData.presenceVehicles.length ? evData.presenceVehicles : evData.chargingVehicles;
       const visibleVehicles = evData.activeVehicles.length ? evData.activeVehicles : evData.vehicles;
       const primaryVisibleVehicle = visibleVehicles[0] || null;
       const secondaryVisibleVehicle = visibleVehicles[1] || null;
-      const evSceneActive = evCharging || evData.activeVehicles.length > 0;
+      const evSceneActive = evCharging || evData.presenceVehicles.length > 0;
+      const useDualScene = sceneVehicles.length > 1;
       const evHideIdle = !!cfg.ev_hide_when_idle;
       const evNodeGroup = this.shadowRoot.querySelector('#ev-node-group');
       const ev2NodeGroup = this.shadowRoot.querySelector('#ev2-node-group');
@@ -1817,7 +1835,7 @@
       if (roofBGroup) {
         roofBGroup.classList.toggle('roof-hidden', !(roofBPower > 0 || roofBVoltage > 0 || roofBCurrent > 0));
       }
-      const sceneHref = this._resolveBackground(evSceneActive, !!secondaryVisibleVehicle);
+      const sceneHref = this._resolveBackground(evSceneActive, useDualScene);
       this._setBackground(sceneHref);
       this._applySceneFlowPaths(sceneHref);
       this._applySceneFlowComponents(sceneHref);

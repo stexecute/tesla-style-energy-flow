@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.19 - 2026-03-27
+
+- Fixed EV scene selection so presence-aware backgrounds do not override the classic scene logic when no presence entities are configured
+- Added EV label fallback from the configured entity friendly name when no custom `ev_label` / `ev2_label` is set
+
 ## 0.3.17 - 2026-03-26
 
 - Added optional `ev_label` and `ev2_label` for custom vehicle names
