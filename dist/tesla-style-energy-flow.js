@@ -990,6 +990,7 @@
       entityState.attributes?.battery,
       entityState.attributes?.battery_percent,
       entityState.attributes?.battery_percentage,
+      entityState.attributes?.raw_soc,
       entityState.attributes?.percentage,
       entityState.attributes?.level,
       entityState.attributes?.usable_battery_level
