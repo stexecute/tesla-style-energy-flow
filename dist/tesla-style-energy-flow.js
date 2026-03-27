@@ -1266,6 +1266,12 @@
           const batteryState = this._entityState(slot.batteryEntity);
           const switchState = this._entityState(slot.chargeSwitchEntity);
           const presenceState = this._entityState(slot.presenceEntity);
+          const batteryPct = [
+            toPct(batteryState, Number.NaN),
+            toPct(powerState, Number.NaN),
+            toPct(presenceState, Number.NaN),
+            toPct(switchState, Number.NaN)
+          ].find((value) => Number.isFinite(value));
           const derivedLabel = (
             friendlyEntityName(powerState) ||
             friendlyEntityName(batteryState) ||
@@ -1276,9 +1282,9 @@
             key: slot.key,
             configured,
             hasPowerEntity: !!powerState,
-            hasBatteryEntity: !!batteryState,
+            hasBatteryEntity: Number.isFinite(batteryPct) || !!batteryState,
             power: Math.max(0, toWatt(powerState)),
-            battery: toPct(batteryState, 0),
+            battery: Number.isFinite(batteryPct) ? batteryPct : 0,
             switchOn: switchState?.state === 'on',
             present: isTruthyPresenceState(presenceState),
             customLabel: String(slot.customLabel || '').trim(),
