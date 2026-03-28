@@ -883,6 +883,8 @@
     battery_invert: false,
     ev_label: '',
     ev2_label: '',
+    roof_a_label: 'ARRAY A',
+    roof_b_label: 'ARRAY B',
     ev_min_w: 150,
     thresholds: {
       solar_min_w: 50,
@@ -1869,9 +1871,11 @@
 
       this._setText('#flow-solar-power', this._formatKW(solarPower));
       this._setText('#flow-grid-power', this._formatKW(gridPower));
+      this._setText('#flow-roof-a-label', String(cfg.roof_a_label || 'ARRAY A'));
       this._setText('#flow-roof-a-power', this._formatKW(roofAPower));
       this._setText('#flow-roof-a-voltage', `${Math.round(roofAVoltage)} V`);
       this._setText('#flow-roof-a-current', `${roofACurrent.toFixed(1)} A`);
+      this._setText('#flow-roof-b-label', String(cfg.roof_b_label || 'ARRAY B'));
       this._setText('#flow-roof-b-power', this._formatKW(roofBPower));
       this._setText('#flow-roof-b-voltage', `${Math.round(roofBVoltage)} V`);
       this._setText('#flow-roof-b-current', `${roofBCurrent.toFixed(1)} A`);
@@ -2313,6 +2317,10 @@
               <input data-path="ev_label" value="${this._escapeHtml(cfg.ev_label || '')}">
               <label>EV 2 label</label>
               <input data-path="ev2_label" value="${this._escapeHtml(cfg.ev2_label || '')}">
+              <label>Roof Array A label</label>
+              <input data-path="roof_a_label" value="${this._escapeHtml(cfg.roof_a_label || 'ARRAY A')}">
+              <label>Roof Array B label</label>
+              <input data-path="roof_b_label" value="${this._escapeHtml(cfg.roof_b_label || 'ARRAY B')}">
               <label>${this._t('editor.field_solar_threshold', 'Solar threshold (W)')}</label>
               <input type="number" data-path="thresholds.solar_min_w" value="${safeNum(cfg.thresholds?.solar_min_w, 50)}">
               <label>${this._t('editor.field_grid_threshold', 'Grid threshold (W)')}</label>

@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.25 - 2026-03-28
+
+- Added optional `roof_a_label` and `roof_b_label` so PV array names can be customized
+
 ## 0.3.19 - 2026-03-27
 
 - Fixed EV scene selection so presence-aware backgrounds do not override the classic scene logic when no presence entities are configured

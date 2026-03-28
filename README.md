@@ -20,6 +20,7 @@ Custom Home Assistant Lovelace card for energy flows on a house scene, with dyna
 - Scene-specific label/guide positioning for each background
 - Optional dual-EV support with separate EV1 / EV2 power, battery and charging switch entities
 - Optional `ev_label` / `ev2_label` for custom vehicle names
+- Optional `roof_a_label` / `roof_b_label` for custom PV array names
 - Optional `ev_presence` / `ev2_presence` to show the EV scene when a vehicle is at home, even if it is not charging
 - Optional `scene_path_map` and `scene_component_map` overrides for custom dual-EV backgrounds
 - Config editor with entity dropdowns
@@ -78,6 +79,8 @@ grid_invert: false
 font_scale: 1.0
 ev_label: Model Y
 ev2_label: Model 3
+roof_a_label: South
+roof_b_label: West
 ev_hide_when_idle: false
 ev_min_w: 150
 thresholds:
