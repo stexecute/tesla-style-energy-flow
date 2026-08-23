@@ -5,15 +5,19 @@
   const CARD_TYPE = 'tesla-style-energy-flow';
   const FLOW_MIN_W = 50;
   const EDITOR_UPDATE_DEBOUNCE_MS = 500;
-  const SUPPORTED_LANGS = ['it', 'en', 'es', 'fr', 'de'];
+  const SUPPORTED_LANGS = ['it', 'en', 'es', 'fr', 'de', 'pt-br', 'pt-pt'];
   const DEFAULT_LANG = 'it';
+  // Region-less tags that must resolve to a specific regional bundle.
+  const LANGUAGE_ALIASES = new Map([['pt', 'pt-pt']]);
   const LANGUAGE_OPTIONS = Object.freeze([
     { value: 'auto', labelKey: 'editor.lang_auto' },
     { value: 'it', labelKey: 'editor.lang_it' },
     { value: 'en', labelKey: 'editor.lang_en' },
     { value: 'es', labelKey: 'editor.lang_es' },
     { value: 'fr', labelKey: 'editor.lang_fr' },
-    { value: 'de', labelKey: 'editor.lang_de' }
+    { value: 'de', labelKey: 'editor.lang_de' },
+    { value: 'pt-br', labelKey: 'editor.lang_pt_br' },
+    { value: 'pt-pt', labelKey: 'editor.lang_pt_pt' }
   ]);
   const COMPACT_VALUE_ROW = Object.freeze({
     arrowOffsetX: 8,
@@ -109,6 +113,8 @@
         lang_es: 'Spagnolo',
         lang_fr: 'Francese',
         lang_de: 'Tedesco',
+        lang_pt_br: 'Portoghese (Brasile)',
+        lang_pt_pt: 'Portoghese (Portogallo)',
         position_open_button: 'Modifica visiva',
         position_modal_title: 'Modifica visiva',
         position_modal_kicker: 'Posizioni scena',
@@ -197,6 +203,8 @@
         lang_es: 'Spanish',
         lang_fr: 'French',
         lang_de: 'German',
+        lang_pt_br: 'Portuguese (Brazil)',
+        lang_pt_pt: 'Portuguese (Portugal)',
         position_open_button: 'Edit visually',
         position_modal_title: 'Edit visually',
         position_modal_kicker: 'Scene positions',
@@ -285,6 +293,8 @@
         lang_es: 'Espanol',
         lang_fr: 'Frances',
         lang_de: 'Aleman',
+        lang_pt_br: 'Portugues (Brasil)',
+        lang_pt_pt: 'Portugues (Portugal)',
         position_open_button: 'Edicion visual',
         position_modal_title: 'Edicion visual',
         position_modal_kicker: 'Posiciones de escena',
@@ -373,6 +383,8 @@
         lang_es: 'Espagnol',
         lang_fr: 'Francais',
         lang_de: 'Allemand',
+        lang_pt_br: 'Portugais (Bresil)',
+        lang_pt_pt: 'Portugais (Portugal)',
         position_open_button: 'Edition visuelle',
         position_modal_title: 'Edition visuelle',
         position_modal_kicker: 'Positions de scene',
@@ -461,6 +473,8 @@
         lang_es: 'Spanisch',
         lang_fr: 'Franzosisch',
         lang_de: 'Deutsch',
+        lang_pt_br: 'Portugiesisch (Brasilien)',
+        lang_pt_pt: 'Portugiesisch (Portugal)',
         position_open_button: 'Visuell bearbeiten',
         position_modal_title: 'Visuell bearbeiten',
         position_modal_kicker: 'Szenenpositionen',
@@ -477,6 +491,186 @@
         position_field_guide_b: 'Linie B',
         section_scene_positions: 'Szenenpositionen',
         position_hint: 'Batterie-Prozent folgt automatisch dem Batterie-kW-Wert. Pfad-Geometrie bleibt in YAML/JSON.'
+      }
+    },
+    'pt-br': {
+      card: {
+        default_title: 'Fluxo de Energia',
+        node: {
+          solar: 'Solar',
+          grid: 'Rede',
+          home: 'Casa',
+          battery: 'Bateria',
+          ev: 'EV'
+        },
+        status: {
+          inactive: 'INATIVO',
+          connected: 'CONECTADA',
+          consuming: 'CONSUMINDO',
+          waiting: 'EM ESPERA',
+          off: 'OFF',
+          producing: 'PRODUZINDO',
+          charging: 'CARREGANDO',
+          discharging: 'DESCARREGANDO'
+        }
+      },
+      editor: {
+        section_general: 'Geral',
+        field_title: 'Título',
+        field_language: 'Idioma',
+        field_background: 'URL do fundo',
+        field_background_base: 'Base dos arquivos de fundo (auto)',
+        field_grid_invert: 'Inverter sinal da rede',
+        field_ev_in_load: 'Potência do EV já incluída no consumo da casa',
+        field_ev2_in_load: 'Potência do EV 2 já incluída no consumo da casa',
+        field_smoothing: 'Suavização (seg, 0 = off)',
+        field_show_labels: 'Mostrar rótulos',
+        field_hide_ev_idle: 'Ocultar EV quando ocioso',
+        field_scene_scale: 'Escala da cena',
+        field_solar_threshold: 'Limite Solar (W)',
+        field_grid_threshold: 'Limite Rede (W)',
+        field_battery_threshold: 'Limite Bateria (W)',
+        section_sensors: 'Sensores',
+        sensor_solar: 'Potência Solar',
+        sensor_grid: 'Potência da Rede',
+        sensor_grid_import: 'Potência de Importação da Rede',
+        sensor_grid_export: 'Potência de Exportação da Rede',
+        sensor_battery: 'Potência da Bateria',
+        sensor_battery_charge: 'Potência de Carga da Bateria',
+        sensor_battery_discharge: 'Potência de Descarga da Bateria',
+        sensor_load: 'Potência da Casa',
+        sensor_battery_level: 'Nível da Bateria %',
+        sensor_ev_power: 'Potência do EV',
+        sensor_ev_battery: 'Bateria do EV %',
+        sensor_ev_switch: 'Interruptor de carga do EV',
+        sensor_ev2_power: 'Potência do EV 2',
+        sensor_ev2_battery: 'Bateria do EV 2 %',
+        sensor_ev2_switch: 'Interruptor de carga do EV 2',
+        sensor_weather: 'Entidade de clima',
+        sensor_sun: 'Entidade do sol',
+        hint_entities: 'Menu limpo com entidades filtradas por domínio.',
+        section_dynamic_bg: 'Fundo Dinâmico',
+        field_dynamic_bg: 'Ativar dinâmico',
+        hint_bg_lookup: 'Prioridade de busca: período+clima+carregando -> período+clima -> period_default -> default -> background.',
+        placeholder_select: '-- selecionar --',
+        placeholder_sensor: '-- selecionar sensor --',
+        placeholder_switch: '-- selecionar switch --',
+        placeholder_weather: '-- selecionar weather --',
+        placeholder_sun: '-- selecionar sun --',
+        lang_auto: 'Automático (Home Assistant)',
+        lang_it: 'Italiano',
+        lang_en: 'Inglês',
+        lang_es: 'Espanhol',
+        lang_fr: 'Francês',
+        lang_de: 'Alemão',
+        lang_pt_br: 'Português (Brasil)',
+        lang_pt_pt: 'Português (Portugal)',
+        position_open_button: 'Editar visualmente',
+        position_modal_title: 'Editar visualmente',
+        position_modal_kicker: 'Posições da cena',
+        position_close_button: 'Fechar',
+        position_field_scene: 'Cena',
+        position_copy_from: 'Copiar posições de',
+        position_copy_button: 'Aplicar',
+        position_show_paths: 'Mostrar todas as linhas de fluxo',
+        position_hide_paths: 'Ocultar linhas de fluxo',
+        position_paths_hint: 'Sobreposição estática de todas as linhas de fluxo desta cena — verifique se cada linha alcança seus nós.',
+        position_field_label: 'Rótulo',
+        position_field_value: 'Valor',
+        position_field_guide_a: 'Guia A',
+        position_field_guide_b: 'Guia B',
+        section_scene_positions: 'Posições da cena',
+        position_hint: 'A porcentagem da bateria acompanha automaticamente o valor em kW. A geometria dos caminhos permanece no YAML/JSON.'
+      }
+    },
+    'pt-pt': {
+      card: {
+        default_title: 'Fluxo de Energia',
+        node: {
+          solar: 'Solar',
+          grid: 'Rede',
+          home: 'Casa',
+          battery: 'Bateria',
+          ev: 'EV'
+        },
+        status: {
+          inactive: 'INATIVO',
+          connected: 'LIGADA',
+          consuming: 'A CONSUMIR',
+          waiting: 'EM ESPERA',
+          off: 'OFF',
+          producing: 'A PRODUZIR',
+          charging: 'A CARREGAR',
+          discharging: 'A DESCARREGAR'
+        }
+      },
+      editor: {
+        section_general: 'Geral',
+        field_title: 'Título',
+        field_language: 'Idioma',
+        field_background: 'URL do fundo',
+        field_background_base: 'Base dos ficheiros de fundo (auto)',
+        field_grid_invert: 'Inverter sinal da rede',
+        field_ev_in_load: 'Potência do EV já incluída no consumo da casa',
+        field_ev2_in_load: 'Potência do EV 2 já incluída no consumo da casa',
+        field_smoothing: 'Suavização (seg, 0 = off)',
+        field_show_labels: 'Mostrar etiquetas',
+        field_hide_ev_idle: 'Ocultar EV quando inativo',
+        field_scene_scale: 'Escala da cena',
+        field_solar_threshold: 'Limite Solar (W)',
+        field_grid_threshold: 'Limite Rede (W)',
+        field_battery_threshold: 'Limite Bateria (W)',
+        section_sensors: 'Sensores',
+        sensor_solar: 'Potência Solar',
+        sensor_grid: 'Potência da Rede',
+        sensor_grid_import: 'Potência de Importação da Rede',
+        sensor_grid_export: 'Potência de Exportação da Rede',
+        sensor_battery: 'Potência da Bateria',
+        sensor_battery_charge: 'Potência de Carga da Bateria',
+        sensor_battery_discharge: 'Potência de Descarga da Bateria',
+        sensor_load: 'Potência da Casa',
+        sensor_battery_level: 'Nível da Bateria %',
+        sensor_ev_power: 'Potência do EV',
+        sensor_ev_battery: 'Bateria do EV %',
+        sensor_ev_switch: 'Interruptor de carregamento do EV',
+        sensor_ev2_power: 'Potência do EV 2',
+        sensor_ev2_battery: 'Bateria do EV 2 %',
+        sensor_ev2_switch: 'Interruptor de carregamento do EV 2',
+        sensor_weather: 'Entidade de meteorologia',
+        sensor_sun: 'Entidade do sol',
+        hint_entities: 'Menu limpo com entidades filtradas por domínio.',
+        section_dynamic_bg: 'Fundo Dinâmico',
+        field_dynamic_bg: 'Ativar dinâmico',
+        hint_bg_lookup: 'Prioridade de procura: período+meteorologia+a carregar -> período+meteorologia -> period_default -> default -> background.',
+        placeholder_select: '-- selecionar --',
+        placeholder_sensor: '-- selecionar sensor --',
+        placeholder_switch: '-- selecionar switch --',
+        placeholder_weather: '-- selecionar weather --',
+        placeholder_sun: '-- selecionar sun --',
+        lang_auto: 'Automático (Home Assistant)',
+        lang_it: 'Italiano',
+        lang_en: 'Inglês',
+        lang_es: 'Espanhol',
+        lang_fr: 'Francês',
+        lang_de: 'Alemão',
+        lang_pt_br: 'Português (Brasil)',
+        lang_pt_pt: 'Português (Portugal)',
+        position_open_button: 'Editar visualmente',
+        position_modal_title: 'Editar visualmente',
+        position_modal_kicker: 'Posições da cena',
+        position_close_button: 'Fechar',
+        position_field_scene: 'Cena',
+        position_copy_from: 'Copiar posições de',
+        position_copy_button: 'Aplicar',
+        position_show_paths: 'Mostrar todas as linhas de fluxo',
+        position_hide_paths: 'Ocultar linhas de fluxo',
+        position_paths_hint: 'Sobreposição estática de todas as linhas de fluxo desta cena — verifique se cada linha chega aos seus nós.',
+        position_field_label: 'Etiqueta',
+        position_field_value: 'Valor',
+        position_field_guide_a: 'Guia A',
+        position_field_guide_b: 'Guia B',
+        section_scene_positions: 'Posições da cena',
+        position_hint: 'A percentagem da bateria acompanha automaticamente o valor em kW. A geometria dos caminhos permanece no YAML/JSON.'
       }
     }
   });
@@ -1299,11 +1493,18 @@
   }
 
   function normalizeLanguageCode(value) {
-    return String(value || '')
+    const tag = String(value || '')
       .trim()
       .toLowerCase()
-      .replace(/_/g, '-')
-      .split('-')[0];
+      .replace(/_/g, '-');
+    if (!tag || tag === 'auto') return tag;
+    // Regional bundles (pt-br, pt-pt) must survive normalization, so the
+    // full tag is tried before falling back to the bare base tag.
+    if (SUPPORTED_LANGS.includes(tag)) return tag;
+    if (LANGUAGE_ALIASES.has(tag)) return LANGUAGE_ALIASES.get(tag);
+    const base = tag.split('-')[0];
+    if (SUPPORTED_LANGS.includes(base)) return base;
+    return LANGUAGE_ALIASES.get(base) || base;
   }
 
   function resolveLanguage(preferred, hass) {

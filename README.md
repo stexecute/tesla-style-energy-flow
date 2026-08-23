@@ -41,7 +41,9 @@ Custom Home Assistant Lovelace card for energy flows on a house scene, with dyna
 - Optional `ev_presence` / `ev2_presence` to show the EV scene when a vehicle is at home, even if it is not charging
 - Optional `scene_path_map` and `scene_component_map` overrides for custom dual-EV backgrounds
 - Config editor with entity dropdowns
-- Multilanguage UI (`auto`, `it`, `en`, `es`, `fr`, `de`)
+- Multilanguage UI (`auto`, `it`, `en`, `es`, `fr`, `de`, `pt-BR`, `pt-PT`)
+  - `pt-BR` (Brazilian Portuguese) and `pt-PT` (European Portuguese) are separate bundles;
+    `auto` picks `pt-BR` for a `pt-BR` Home Assistant profile and `pt-PT` for a bare `pt` one
 - Configurable thresholds for flow visibility:
   - `thresholds.solar_min_w`
   - `thresholds.grid_min_w`

@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Added Brazilian Portuguese (`pt-BR`) and European Portuguese (`pt-PT`) translations for the card and the config editor
+- Added region-aware language resolution so `pt-BR` and `pt-PT` are kept apart, with a bare `pt` profile mapping to `pt-PT`
+- Added `tests/i18n.test.mjs` to keep every translation bundle in key parity with `en`
+
 ## 0.3.30 - 2026-06-28
 
 - Fixed battery node visibility when only separate `battery_charge_power` and `battery_discharge_power` sensors are configured
