@@ -2260,10 +2260,10 @@
           }
           .wrap[data-scene-tone="afternoon"] .flow-scene-dim {
             fill: #06111f;
-            opacity: 0.4;
+            opacity: 0.28;
           }
           .wrap[data-scene-tone="afternoon"] .flow-sky-dim {
-            opacity: 0.66;
+            opacity: 0.4;
           }
           .wrap[data-scene-tone="evening"] .flow-scene-dim {
             fill: #080f1c;
