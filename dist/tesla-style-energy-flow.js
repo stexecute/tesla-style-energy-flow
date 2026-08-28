@@ -2850,15 +2850,13 @@
       this._activatePath('line-solar-battery', 'flow-solar', solarToBattery, batteryMin);
       this._activatePath('line-grid-battery', 'flow-broken', gridToBattery, batteryMin);
       // line-solar-grid: only solar export; battery→grid is shown via line-battery-load + line-grid-load (reverse)
-      this._activatePath('line-solar-grid', 'flow-green', solarExport, Math.max(1, gridMin));
+      this._activatePath('line-solar-grid', 'flow-solar', solarExport, Math.max(1, gridMin));
 
       const evTotal = solarToEv + battToEv + gridToEv;
-      // Mirror the line-solar-grid convention (always green when solar
-      // exports to grid because it's semantically positive) for EV charging:
-      // when >= 80 % of the wallbox draw comes from renewable sources
-      // (solar direct + battery), paint the line green regardless of which
-      // single source happens to be largest. Below that threshold fall back
-      // to the source-dominant color (yellow / green / red).
+      // For EV charging: when >= 80 % of the wallbox draw comes from
+      // renewable sources (solar direct + battery), paint the line green
+      // regardless of which single source happens to be largest. Below that
+      // threshold fall back to the source-dominant color (yellow / green / red).
       const evRenewableShare = evTotal > 0
         ? (solarToEv + battToEv) / evTotal
         : 0;
