@@ -49,6 +49,8 @@ Custom Home Assistant Lovelace card for energy flows on a house scene, with dyna
   - `ev_min_w`
 - Optional `ev_hide_when_idle` to hide EV labels/guide when not charging
 - Optional `ev_in_load` / `ev2_in_load` for whole-home meters that already include the wallbox draw in `load_power` (SMA SHM 2.0, SolarEdge total_consumption, …) — the card subtracts EV power from load before flow allocation so the battery is not double-counted
+- Optional `heat_pump_power` entity adds a dedicated Heat Pump flow node, sharing solar/battery/grid priority with EV charging (`thresholds.heat_pump_min_w`, `heat_pump_label`)
+- Optional `heat_pump_in_load` for whole-home meters that already include the heat pump's draw in `load_power` — same double-counting fix as `ev_in_load`, applied to the heat pump
 - Optional `smoothing_seconds` (Tesla-style EWMA, default `0`) — set to e.g. `10` to dampen the cloud-induced jumpiness on Solar, Grid, Battery, Load. EV power stays unsmoothed so start/stop transitions remain instant.
 - Optional `show_header` to show or hide the card title
 - Optional `font_scale` to improve readability on compact cards or tablet layouts
@@ -98,14 +100,18 @@ grid_invert: false
 font_scale: 1.0
 ev_label: Model Y
 ev2_label: Model 3
+heat_pump_label: Heat Pump
 roof_a_label: South
 roof_b_label: West
 ev_hide_when_idle: false
 ev_min_w: 150
+# Set true only if load_power already includes the heat pump's draw
+heat_pump_in_load: false
 thresholds:
   solar_min_w: 50
   grid_min_w: 50
   battery_min_w: 50
+  heat_pump_min_w: 50
 entities:
   solar_power: sensor.solar_power
   roof_a_power: sensor.roof_array_a_power
@@ -118,6 +124,8 @@ entities:
   battery_power: sensor.battery_power
   load_power: sensor.home_load_power
   battery_level: sensor.battery_level
+  # Optional heat pump — omit entirely to hide the Heat Pump node
+  heat_pump_power: sensor.heat_pump_power
   ev_power: sensor.ev_charging_power
   ev_battery: sensor.ev_battery_level
   ev_charge_switch: switch.ev_charge
@@ -182,6 +190,23 @@ grid → battery line stays visible while the car charges. Only set this if your
 meter actually includes the wallbox — if you have a *dedicated* EV circuit that is **not**
 part of `load_power`, leave it `false`.
 
+### The heat pump line looks wrong, or the home load seems inflated
+
+**Cause:** the same double-counting issue as above, but for `heat_pump_power`. If your
+`load_power` sensor already includes the heat pump's draw (common when the heat pump is
+on the main consumer unit rather than a dedicated sub-meter), leaving `heat_pump_in_load`
+at its default (`false`) counts that power twice — once inside `load_power` and once as
+the separate Heat Pump node.
+
+**Fix:**
+
+```yaml
+heat_pump_in_load: true
+```
+
+Only set this if your load meter actually includes the heat pump — if it's on a
+*dedicated* circuit/sub-meter that is **not** part of `load_power`, leave it `false`.
+
 ### Grid / battery flow direction looks inverted
 
 Some inverters (e.g. SolarEdge) report the opposite sign from what the card expects.
@@ -215,10 +240,41 @@ Night rain (grid + home + EV)
 ## Files
 
 - `dist/tesla-style-energy-flow.js`: packaged card file used by HACS
-- `dist/backgrounds/`: packaged background assets used by HACS
+- `dist/backgrounds/`: packaged background assets used by HACS (12 scenes + 3 heat pump sprites)
 - `hacs.json`: HACS metadata
 - `examples/lovelace-card.yaml`: config example
 - `docs/screenshots/`: preview images for README
+- `dev/`: local preview harness (not shipped by HACS) — see below
+- `tests/visual-polish.test.mjs`: regex regression checks over the packaged bundle
+
+## Local preview
+
+A standalone harness for working on the card without a running Home Assistant:
+
+```bash
+node dev/serve.js
+```
+
+Then open <http://localhost:8080/dev/preview.html>. It needs no dependencies —
+just Node. (A plain `python -m http.server` will *not* work: it serves `.js` as
+`text/plain`, which browsers refuse to load as an ES module.)
+
+It provides:
+
+- all 12 scenes, weather/sun state, and the dynamic-background toggle
+- sliders for solar, grid, battery, home load, heat pump, EV1/EV2 and SoC
+- toggles for which entities are "configured", plus `heat_pump_in_load` / `ev_in_load`
+- presets for common states (sunny export, night import, rain, EV charging, dual EV)
+- geometry debug: freeze the dash animation to see each path's full extent,
+  reveal inactive paths, a 25-unit viewBox grid, and artwork dimming
+- **hover the scene for live viewBox coordinates, click to copy** — useful when
+  re-tuning `scene_path_map` / `scene_component_map` against new artwork
+
+Run the tests with:
+
+```bash
+node tests/visual-polish.test.mjs
+```
 
 ## License
 

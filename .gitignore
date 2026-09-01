@@ -2,3 +2,9 @@
 
 # Pre-compressed dist files — HACS and HA web servers handle gzip on the fly
 dist/*.gz
+
+# Local scratch: original background renders, source art, zips
+backup/
+
+# Editor/agent workspace settings
+.claude/
