@@ -36,3 +36,14 @@ function activePaths(batteryPower, batteryInvert = false) {
 assert.ok(activePaths(-900).includes('line-battery-load'), 'negative battery power discharges to home');
 assert.ok(activePaths(900, true).includes('line-battery-load'), 'battery_invert supports positive discharge sensors');
 assert.deepEqual(activePaths(900), [], 'positive battery power is charging and cannot supply home');
+
+const heatPumpCard = new Card();
+heatPumpCard.setConfig({ language: 'en', entities: { heat_pump_power: 'sensor.heat_pump' } });
+let renders = 0;
+heatPumpCard._renderDynamic = () => { renders++; };
+const heatPumpHass = (watts) => ({ language: 'en', states: {
+  'sensor.heat_pump': { state: String(watts), attributes: { unit_of_measurement: 'W' } }
+} });
+heatPumpCard.hass = heatPumpHass(1000);
+heatPumpCard.hass = heatPumpHass(2000);
+assert.equal(renders, 2, 'heat pump sensor updates must redraw the card');

@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tesla Style Energy Flow — local preview</title>
+<style>
+  :root {
+    --bg: #0e1116;
+    --panel: #171b22;
+    --panel-2: #1e232c;
+    --line: #2a313d;
+    --text: #e6e9ef;
+    --muted: #98a1b0;
+    --accent: #4da3ff;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    display: flex;
+    min-height: 100vh;
+  }
+  /* ---- stage ---- */
+  #stage {
+    flex: 1 1 auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 0;
+  }
+  #cardWrap {
+    align-self: flex-start;
+    position: relative;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 12px 40px rgba(0,0,0,.55);
+  }
+  tesla-style-energy-flow { display: block; }
+  #statusbar {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+    align-items: center;
+    font: 12px/1 ui-monospace, "SFMono-Regular", Consolas, monospace;
+    color: var(--muted);
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 9px 12px;
+    align-self: flex-start;
+    max-width: 100%;
+  }
+  #statusbar b { color: var(--text); font-weight: 600; }
+  #coord { color: var(--accent); cursor: pointer; }
+  #coord:hover { text-decoration: underline; }
+  #copied { color: #4ade80; opacity: 0; transition: opacity .2s; }
+  #copied.show { opacity: 1; }
+
+  /* ---- controls ---- */
+  #controls {
+    flex: 0 0 320px;
+    background: var(--panel);
+    border-left: 1px solid var(--line);
+    padding: 16px;
+    overflow-y: auto;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+  }
+  h1 { font-size: 15px; margin: 0 0 4px; }
+  .sub { color: var(--muted); font-size: 12px; margin: 0 0 16px; }
+  fieldset {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 12px;
+    margin: 0 0 14px;
+    background: var(--panel-2);
+  }
+  legend { padding: 0 6px; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .07em; }
+  label.row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 7px 0; }
+  label.row > span:first-child { color: var(--muted); }
+  select, input[type=text], input[type=number] {
+    background: #0f131a; color: var(--text);
+    border: 1px solid var(--line); border-radius: 6px;
+    padding: 5px 7px; font: inherit; font-size: 13px; min-width: 0;
+  }
+  select { width: 100%; }
+  .slider { margin: 10px 0; }
+  .slider .head { display: flex; justify-content: space-between; font-size: 12px; }
+  .slider .head b { font: 12px ui-monospace, Consolas, monospace; }
+  input[type=range] { width: 100%; accent-color: var(--accent); }
+  .checks { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 10px; }
+  .checks label { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--muted); }
+  .checks input { accent-color: var(--accent); }
+  .presets { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  button {
+    background: #232a35; color: var(--text);
+    border: 1px solid var(--line); border-radius: 6px;
+    padding: 7px 8px; font: inherit; font-size: 12.5px; cursor: pointer;
+  }
+  button:hover { background: #2b3340; border-color: #3a4351; }
+  .hint { color: var(--muted); font-size: 11.5px; margin-top: 8px; line-height: 1.4; }
+</style>
+</head>
+<body>
+
+<div id="stage">
+  <div id="cardWrap"></div>
+  <div id="statusbar">
+    <span>cursor <span id="coord">–</span> <span id="copied">copied!</span></span>
+    <span>scene <b id="sScene">–</b></span>
+    <span>hp icon <b id="sIcon">–</b></span>
+    <span>active lines <b id="sLines">–</b></span>
+  </div>
+</div>
+
+<div id="controls">
+  <h1>Energy Flow — preview</h1>
+  <p class="sub">Local test harness. Hover the scene for viewBox coordinates; click to copy.</p>
+
+  <fieldset>
+    <legend>Scene</legend>
+    <label class="row"><span>Background</span></label>
+    <select id="scene"></select>
+    <div class="checks" style="margin-top:10px">
+      <label><input type="checkbox" id="dynamicBg"> dynamic bg</label>
+      <label><input type="checkbox" id="showLabels" checked> labels</label>
+    </div>
+    <label class="row" style="margin-top:10px"><span>Weather</span></label>
+    <select id="weather"></select>
+    <label class="row" style="margin-top:8px"><span>Sun</span></label>
+    <select id="sun">
+      <option value="above_horizon">above_horizon (day)</option>
+      <option value="below_horizon">below_horizon (night)</option>
+    </select>
+    <div class="slider" style="margin-top:12px">
+      <div class="head"><span>Card width</span><b id="wOut">1100px</b></div>
+      <input type="range" id="cardW" min="360" max="2000" step="20" value="1100">
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Power</legend>
+    <div class="slider"><div class="head"><span>Solar</span><b id="oSolar"></b></div>
+      <input type="range" id="solar" min="0" max="10000" step="50" value="4000"></div>
+    <div class="slider"><div class="head"><span>Grid <small>(− export)</small></span><b id="oGrid"></b></div>
+      <input type="range" id="grid" min="-8000" max="8000" step="50" value="1000"></div>
+    <div class="slider"><div class="head"><span>Battery <small>(+ charge)</small></span><b id="oBatt"></b></div>
+      <input type="range" id="batt" min="-6000" max="6000" step="50" value="-500"></div>
+    <div class="slider"><div class="head"><span>Home load</span><b id="oLoad"></b></div>
+      <input type="range" id="load" min="0" max="10000" step="50" value="1500"></div>
+    <div class="slider"><div class="head"><span>Heat pump</span><b id="oHp"></b></div>
+      <input type="range" id="hp" min="0" max="6000" step="50" value="1200"></div>
+    <div class="slider"><div class="head"><span>EV 1</span><b id="oEv"></b></div>
+      <input type="range" id="ev" min="0" max="11000" step="100" value="0"></div>
+    <div class="slider"><div class="head"><span>EV 2</span><b id="oEv2"></b></div>
+      <input type="range" id="ev2" min="0" max="11000" step="100" value="0"></div>
+    <div class="slider"><div class="head"><span>Battery SoC</span><b id="oSoc"></b></div>
+      <input type="range" id="soc" min="0" max="100" step="1" value="62"></div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Entities configured</legend>
+    <div class="checks">
+      <label><input type="checkbox" id="hpOn" checked> heat pump</label>
+      <label><input type="checkbox" id="evOn"> EV 1</label>
+      <label><input type="checkbox" id="ev2On"> EV 2</label>
+      <label><input type="checkbox" id="battOn" checked> battery</label>
+      <label><input type="checkbox" id="hpInLoad"> hp_in_load</label>
+      <label><input type="checkbox" id="evInLoad"> ev_in_load</label>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Geometry debug</legend>
+    <div class="checks">
+      <label><input type="checkbox" id="solidLines"> solid lines</label>
+      <label><input type="checkbox" id="allPaths"> show all paths</label>
+      <label><input type="checkbox" id="gridOverlay"> grid overlay</label>
+      <label><input type="checkbox" id="hideArt"> hide artwork</label>
+    </div>
+    <div class="hint">“Solid lines” freezes the dash animation so you can see each path’s full extent. “Show all paths” also reveals inactive ones.</div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Presets</legend>
+    <div class="presets">
+      <button data-preset="sunny">Sunny + export</button>
+      <button data-preset="night">Night import</button>
+      <button data-preset="rain">Rainy day</button>
+      <button data-preset="hp">Heat pump only</button>
+      <button data-preset="ev">EV charging</button>
+      <button data-preset="dual">Dual EV</button>
+    </div>
+  </fieldset>
+</div>
+
+<script type="module">
+import '../dist/tesla-style-energy-flow.js';
+
+const SCENES = [
+  'scene_day_clear_idle.png','scene_day_clear_charging.png','scene_day_clear_dual_charging.png',
+  'scene_day_rain_idle.png','scene_day_rain_charging.png','scene_day_rain_dual_charging.png',
+  'scene_night_clear_idle.png','scene_night_clear_charging.png','scene_night_clear_dual_charging.png',
+  'scene_night_rain_idle.png','scene_night_rain_charging.png','scene_night_rain_dual_charging.png'
+];
+const WEATHER = ['sunny','partlycloudy','cloudy','fog','windy','rainy','pouring','lightning','lightning-rainy','snowy','hail','clear-night'];
+
+const $ = id => document.getElementById(id);
+SCENES.forEach(s => $('scene').add(new Option(s.replace(/^scene_|\.png$/g,''), s)));
+WEATHER.forEach(w => $('weather').add(new Option(w, w)));
+$('weather').value = 'sunny';
+
+const ASSET_BASE = '../dist/backgrounds';
+
+await customElements.whenDefined('tesla-style-energy-flow');
+const card = document.createElement('tesla-style-energy-flow');
+$('cardWrap').appendChild(card);
+
+const num = id => Number($(id).value);
+const on  = id => $(id).checked;
+
+function buildConfig() {
+  const e = {
+    solar_power: 'sensor.solar_power',
+    grid_power: 'sensor.grid_power',
+    load_power: 'sensor.load_power',
+    weather: 'weather.home',
+    sun: 'sun.sun'
+  };
+  if (on('battOn')) { e.battery_power = 'sensor.battery_power'; e.battery_level = 'sensor.battery_level'; }
+  if (on('hpOn'))   { e.heat_pump_power = 'sensor.heat_pump_power'; }
+  if (on('evOn'))   { e.ev_power = 'sensor.ev_power'; e.ev_battery = 'sensor.ev_battery'; e.ev_charge_switch = 'switch.ev_charge'; }
+  if (on('ev2On'))  { e.ev2_power = 'sensor.ev2_power'; e.ev2_battery = 'sensor.ev2_battery'; e.ev2_charge_switch = 'switch.ev2_charge'; }
+  return {
+    type: 'custom:tesla-style-energy-flow',
+    title: 'Energy Flow Preview',
+    language: 'en',
+    show_header: true,
+    show_labels: on('showLabels'),
+    background: `${ASSET_BASE}/${$('scene').value}`,
+    background_asset_base: ASSET_BASE,
+    dynamic_background: on('dynamicBg'),
+    heat_pump_in_load: on('hpInLoad'),
+    ev_in_load: on('evInLoad'),
+    entities: e
+  };
+}
+
+const W  = (v) => ({ state: String(v), attributes: { unit_of_measurement: 'W' } });
+const PC = (v) => ({ state: String(v), attributes: { unit_of_measurement: '%' } });
+
+function buildHass() {
+  return {
+    language: 'en',
+    states: {
+      'sensor.solar_power': W(num('solar')),
+      'sensor.grid_power': W(num('grid')),
+      'sensor.battery_power': W(num('batt')),
+      'sensor.battery_level': PC(num('soc')),
+      'sensor.load_power': W(num('load')),
+      'sensor.heat_pump_power': W(num('hp')),
+      'sensor.ev_power': W(num('ev')),
+      'sensor.ev_battery': PC(55),
+      'switch.ev_charge': { state: num('ev') > 0 ? 'on' : 'off', attributes: {} },
+      'sensor.ev2_power': W(num('ev2')),
+      'sensor.ev2_battery': PC(41),
+      'switch.ev2_charge': { state: num('ev2') > 0 ? 'on' : 'off', attributes: {} },
+      'weather.home': { state: $('weather').value, attributes: {} },
+      'sun.sun': { state: $('sun').value, attributes: {} }
+    }
+  };
+}
+
+const fmt = w => (Math.abs(w) >= 1000 ? (w/1000).toFixed(2)+' kW' : w+' W');
+function syncOutputs() {
+  $('oSolar').textContent = fmt(num('solar'));
+  $('oGrid').textContent  = fmt(num('grid'));
+  $('oBatt').textContent  = fmt(num('batt'));
+  $('oLoad').textContent  = fmt(num('load'));
+  $('oHp').textContent    = fmt(num('hp'));
+  $('oEv').textContent    = fmt(num('ev'));
+  $('oEv2').textContent   = fmt(num('ev2'));
+  $('oSoc').textContent   = num('soc') + '%';
+  $('wOut').textContent   = num('cardW') + 'px';
+}
+
+let coordBound = false;
+function applyDebug() {
+  const root = card.shadowRoot;
+  if (!root) return;
+  const svg = root.querySelector('svg');
+  if (!svg) return;
+
+  // artwork visibility
+  const art = root.querySelector('#flow-scene-image');
+  if (art) art.style.opacity = on('hideArt') ? '0.12' : '';
+
+  // flow-line debug styling
+  root.querySelectorAll('.flow-line').forEach(l => {
+    const active = l.classList.contains('active');
+    if (on('solidLines')) { l.style.strokeDasharray = 'none'; l.style.animation = 'none'; }
+    else { l.style.strokeDasharray = ''; l.style.animation = ''; }
+    if (on('allPaths') && !active) {
+      l.style.opacity = '0.9';
+      l.style.stroke = 'rgba(120,190,255,.55)';
+    } else {
+      l.style.opacity = ''; l.style.stroke = '';
+    }
+  });
+
+  // grid overlay
+  let g = svg.querySelector('#dbg-grid');
+  if (on('gridOverlay')) {
+    if (!g) {
+      g = document.createElementNS('http://www.w3.org/2000/svg','g');
+      g.id = 'dbg-grid';
+      g.setAttribute('pointer-events','none');
+      for (let x = 0; x <= 600; x += 25) {
+        const l = document.createElementNS('http://www.w3.org/2000/svg','line');
+        l.setAttribute('x1',x); l.setAttribute('y1',0); l.setAttribute('x2',x); l.setAttribute('y2',460);
+        l.setAttribute('stroke', x % 100 === 0 ? 'rgba(0,255,120,.5)' : 'rgba(0,255,120,.18)');
+        l.setAttribute('stroke-width','0.5'); g.appendChild(l);
+        if (x % 100 === 0) {
+          const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+          t.setAttribute('x',x+2); t.setAttribute('y',10);
+          t.setAttribute('fill','rgba(0,255,120,.85)'); t.setAttribute('font-size','8');
+          t.textContent = x; g.appendChild(t);
+        }
+      }
+      for (let y = 0; y <= 460; y += 25) {
+        const l = document.createElementNS('http://www.w3.org/2000/svg','line');
+        l.setAttribute('x1',0); l.setAttribute('y1',y); l.setAttribute('x2',600); l.setAttribute('y2',y);
+        l.setAttribute('stroke', y % 100 === 0 ? 'rgba(0,255,120,.5)' : 'rgba(0,255,120,.18)');
+        l.setAttribute('stroke-width','0.5'); g.appendChild(l);
+        if (y % 100 === 0) {
+          const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+          t.setAttribute('x',2); t.setAttribute('y',y-2);
+          t.setAttribute('fill','rgba(0,255,120,.85)'); t.setAttribute('font-size','8');
+          t.textContent = y; g.appendChild(t);
+        }
+      }
+      svg.appendChild(g);
+    }
+    g.style.display = '';
+  } else if (g) {
+    g.style.display = 'none';
+  }
+
+  // hover coordinate readout (bind once)
+  if (!coordBound) {
+    coordBound = true;
+    svg.addEventListener('mousemove', ev => {
+      const pt = svg.createSVGPoint();
+      pt.x = ev.clientX; pt.y = ev.clientY;
+      const m = svg.getScreenCTM();
+      if (!m) return;
+      const p = pt.matrixTransform(m.inverse());
+      $('coord').textContent = `${p.x.toFixed(1)}, ${p.y.toFixed(1)}`;
+    });
+    svg.addEventListener('click', async () => {
+      const txt = $('coord').textContent;
+      try { await navigator.clipboard.writeText(txt); } catch {}
+      $('copied').classList.add('show');
+      setTimeout(() => $('copied').classList.remove('show'), 800);
+    });
+    svg.style.cursor = 'crosshair';
+  }
+
+  // status readout
+  const icon = root.querySelector('#heat-pump-icon');
+  const href = icon ? (icon.getAttribute('href') || '') : '';
+  const hpHidden = root.querySelector('#heat-pump-node-group')?.classList.contains('heat-pump-hidden');
+  $('sIcon').textContent = hpHidden ? '(hidden)' : (href.split('/').pop() || '–');
+  $('sScene').textContent = (root.querySelector('#flow-scene-image')?.getAttribute('href') || '').split('/').pop();
+  $('sLines').textContent = [...root.querySelectorAll('.flow-line.active')].map(l => l.id.replace('line-','')).join(' · ') || 'none';
+}
+
+let lastConfig = '';
+function update() {
+  syncOutputs();
+  const w = num('cardW');
+  card.style.width = w + 'px';
+  card.style.height = Math.round(w * 460/600) + 'px';
+
+  const cfg = buildConfig();
+  const sig = JSON.stringify(cfg);
+  if (sig !== lastConfig) { card.setConfig(cfg); lastConfig = sig; }
+  card.hass = buildHass();
+  applyDebug();
+}
+
+document.querySelectorAll('input, select').forEach(el => {
+  el.addEventListener('input', update);
+  el.addEventListener('change', update);
+});
+
+const PRESETS = {
+  sunny:  { scene:'scene_day_clear_idle.png', weather:'sunny', sun:'above_horizon', solar:6500, grid:-2500, batt:1500, load:1400, hp:900, ev:0, ev2:0, hpOn:1, evOn:0, ev2On:0 },
+  night:  { scene:'scene_night_clear_idle.png', weather:'clear-night', sun:'below_horizon', solar:0, grid:2600, batt:-800, load:1500, hp:1400, ev:0, ev2:0, hpOn:1, evOn:0, ev2On:0 },
+  rain:   { scene:'scene_day_rain_idle.png', weather:'rainy', sun:'above_horizon', solar:900, grid:1800, batt:-300, load:1600, hp:1900, ev:0, ev2:0, hpOn:1, evOn:0, ev2On:0 },
+  hp:     { scene:'scene_day_clear_idle.png', weather:'sunny', sun:'above_horizon', solar:2200, grid:0, batt:0, load:400, hp:2000, ev:0, ev2:0, hpOn:1, evOn:0, ev2On:0 },
+  ev:     { scene:'scene_day_clear_charging.png', weather:'sunny', sun:'above_horizon', solar:5200, grid:600, batt:-400, load:1200, hp:800, ev:7000, ev2:0, hpOn:1, evOn:1, ev2On:0 },
+  dual:   { scene:'scene_day_clear_dual_charging.png', weather:'sunny', sun:'above_horizon', solar:6000, grid:3000, batt:-1000, load:1300, hp:900, ev:6500, ev2:4000, hpOn:1, evOn:1, ev2On:1 }
+};
+document.querySelectorAll('[data-preset]').forEach(b => b.addEventListener('click', () => {
+  const p = PRESETS[b.dataset.preset];
+  for (const [k,v] of Object.entries(p)) {
+    const el = $(k);
+    if (!el) continue;
+    if (el.type === 'checkbox') el.checked = !!v; else el.value = v;
+  }
+  update();
+}));
+
+update();
+window.__card = card;
+</script>
+</body>
+</html>
