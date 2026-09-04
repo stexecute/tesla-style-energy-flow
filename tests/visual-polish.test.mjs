@@ -33,14 +33,14 @@ assert.match(
 
 assert.match(
   source,
-  /'grid-label': Object\.freeze\(\{ x: 4, y: -14 \}\),\s*'grid-power': Object\.freeze\(\{ x: 4, y: 8 \}\),\s*'grid-guide': Object\.freeze\(\{ x1: 4, y1: 26, x2: 4, y2: 64 \}\)/,
-  'day clear idle grid label and power should sit above the grid guide line'
+  /'grid-label': Object\.freeze\(\{ x: -14, y: 66 \}\),\s*'grid-power': Object\.freeze\(\{ x: -14, y: 88 \}\),\s*'grid-guide': Object\.freeze\(\{ x1: -14, y1: 106, x2: -14, y2: 144 \}\)/,
+  'day clear idle grid label and power should sit above the grid guide line, near the grid import line origin so it does not overlap the heat pump node'
 );
 
 assert.match(
   source,
-  /'load-label': Object\.freeze\(\{ x: -32, y: -64 \}\),\s*'load-power': Object\.freeze\(\{ x: -32, y: -42 \}\),\s*'load-guide': Object\.freeze\(\{ x1: -32, y1: -6, x2: -32, y2: 68 \}\)/,
-  'day clear idle house label and power should move up while the guide line reaches farther upward'
+  /'load-label': Object\.freeze\(\{ x: -20, y: -125 \}\),\s*'load-power': Object\.freeze\(\{ x: -20, y: -103 \}\),\s*'load-guide': Object\.freeze\(\{ x1: -20, y1: -85, x2: -56, y2: -66 \}\)/,
+  'day clear idle house label should sit up in the open sky, with the guide pointing diagonally down to the roof peak (not the solar panels, to avoid confusion), clear of the heat pump node'
 );
 
 assert.match(
@@ -387,5 +387,90 @@ for (const colour of ['flow-solar', 'flow-green', 'flow-broken']) {
     seg + gap,
     flowStreamCycle,
     `${colour} dash period (--flow-seg ${seg} + --flow-gap ${gap} = ${seg + gap}) must equal the flowStream scroll distance ${flowStreamCycle} so the dashes loop without stuttering`
+  );
+}
+
+// Heat pump node: config, waterfall wiring, and SVG scaffolding should all be present.
+assert.match(
+  source,
+  /heat_pump_power: ''/,
+  'DEFAULT_CONFIG.entities should expose a heat pump power sensor'
+);
+
+assert.match(
+  source,
+  /heat_pump_in_load: false/,
+  'DEFAULT_CONFIG should expose a heat_pump_in_load flag mirroring ev_in_load'
+);
+
+assert.match(
+  source,
+  /'line-heat-pump': 'line_heat_pump'/,
+  'FLOW_PATH_KEYS should register the heat pump flow line'
+);
+
+assert.match(
+  source,
+  /id="heat-pump-node-group"/,
+  'the card template should render a heat pump node group'
+);
+
+assert.match(
+  source,
+  /const flexDraw = evDraw \+ heatPumpDraw;/,
+  'heat pump should share its draw pool with EV in the flow-allocation waterfall'
+);
+
+assert.match(
+  source,
+  /id="heat-pump-icon" href="\$\{joinAsset\(cfg\.background_asset_base, 'heat_pump_icon_day\.png'\)\}"/,
+  'the card template should render a heat pump sprite icon sourced from background_asset_base'
+);
+
+assert.match(
+  source,
+  /_setHeatPumpIcon\(joinAsset\(cfg\.background_asset_base, heatPumpIconFile\)\)/,
+  'the heat pump icon should switch between day/rain/night variants based on scene period and weather'
+);
+
+// The dual-charging renders are 1376x768 with a wider camera (vs 1536x1024 for
+// every other scene), so the heat pump needs a scene-specific origin and feed
+// line there — otherwise the sprite lands mid-driveway and its line starts at
+// the battery instead of the distribution box.
+assert.match(
+  source,
+  /const HEAT_PUMP_SCENE_ORIGINS = Object\.freeze\(\{/,
+  'heat pump should support per-scene origins'
+);
+
+for (const scene of [
+  'scene_day_clear_dual_charging.png',
+  'scene_day_rain_dual_charging.png',
+  'scene_night_clear_dual_charging.png',
+  'scene_night_rain_dual_charging.png'
+]) {
+  assert.match(
+    source,
+    new RegExp(`'${scene.replace(/\./g, '\.')}': HEAT_PUMP_DUAL_ORIGIN`),
+    `${scene} should use the dual-charging heat pump origin`
+  );
+}
+
+assert.match(
+  source,
+  /heatPumpNodeGroup\.setAttribute\('transform', hpTransform\)/,
+  'the card should apply the scene-specific heat pump origin at render time'
+);
+
+{
+  // Every scene whose camera differs from the default framing needs its own
+  // line-heat-pump, or the feed line starts in the wrong place. Only the three
+  // scenes that share the default camera (day_clear_idle, day_clear_charging,
+  // night_clear_idle) fall through to DEFAULT_CONFIG.paths.
+  const sceneBlocks = source.match(/'line-junction-home-load': '[^']*',\s*\n\s*'line-heat-pump': '[^']*'/g) || [];
+  assert.equal(
+    sceneBlocks.length,
+    9,
+    `expected 9 scene-specific heat pump lines (12 scenes minus the 3 sharing the default camera), found ${sceneBlocks.length}`
   );
 }
