@@ -47,3 +47,23 @@ const heatPumpHass = (watts) => ({ language: 'en', states: {
 heatPumpCard.hass = heatPumpHass(1000);
 heatPumpCard.hass = heatPumpHass(2000);
 assert.equal(renders, 2, 'heat pump sensor updates must redraw the card');
+
+const allocationCard = new Card();
+allocationCard.setConfig({
+  language: 'en', heat_pump_in_load: true,
+  entities: { grid_power: 'sensor.grid', load_power: 'sensor.home', heat_pump_power: 'sensor.heat_pump' }
+});
+const labels = new Map();
+const active = [];
+allocationCard._setText = (id, value) => labels.set(id, value);
+allocationCard._activatePath = (id, cls, watts, threshold) => {
+  if (watts >= threshold) active.push(id);
+};
+allocationCard.hass = { language: 'en', states: {
+  'sensor.grid': { state: '2000', attributes: { unit_of_measurement: 'W' } },
+  'sensor.home': { state: '2000', attributes: { unit_of_measurement: 'W' } },
+  'sensor.heat_pump': { state: '1000', attributes: { unit_of_measurement: 'W' } }
+} };
+assert.equal(labels.get('#flow-load-power'), '1.0 kW', 'whole-home load must exclude the separate heat pump draw');
+assert.equal(labels.get('#flow-heat-pump-power'), '1.0 kW');
+assert.ok(active.includes('line-heat-pump'), 'configured heat pump draw should light its own path');

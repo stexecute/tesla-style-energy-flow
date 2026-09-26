@@ -7,6 +7,7 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..');
+const REAL_ROOT = fs.realpathSync(ROOT);
 const PORT = Number(process.env.PORT) || 8080;
 
 const TYPES = {
@@ -31,6 +32,11 @@ http.createServer((req, res) => {
     res.end('bad request');
     return;
   }
+  if (urlPath.includes('\0')) {
+    res.writeHead(400);
+    res.end('bad request');
+    return;
+  }
   if (urlPath === '/') urlPath = '/dev/preview.html';
 
   const filePath = path.resolve(ROOT, `.${urlPath}`);
@@ -44,17 +50,29 @@ http.createServer((req, res) => {
     return;
   }
 
-  fs.readFile(filePath, (err, data) => {
-    if (err) {
+  fs.realpath(filePath, (pathError, realPath) => {
+    if (pathError) {
       res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
       res.end('404 — not found: ' + urlPath);
       return;
     }
-    res.writeHead(200, {
-      'Content-Type': TYPES[path.extname(filePath).toLowerCase()] || 'application/octet-stream',
-      'Cache-Control': 'no-store'
+    if (path.relative(REAL_ROOT, realPath) !== relativePath) {
+      res.writeHead(403);
+      res.end('forbidden');
+      return;
+    }
+    fs.readFile(realPath, (err, data) => {
+      if (err) {
+        res.writeHead(404);
+        res.end('not found');
+        return;
+      }
+      res.writeHead(200, {
+        'Content-Type': TYPES[path.extname(realPath).toLowerCase()] || 'application/octet-stream',
+        'Cache-Control': 'no-store'
+      });
+      res.end(data);
     });
-    res.end(data);
   });
 }).listen(PORT, '127.0.0.1', () => {
   console.log(`Preview server running:  http://localhost:${PORT}/dev/preview.html`);

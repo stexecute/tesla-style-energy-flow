@@ -35,3 +35,37 @@ assert.match(card._computeBackground(false, false, 'sunny', true), /scene_day_cl
 
 card.setConfig({ language: 'en', background_dim: 2 });
 assert.match(card.shadowRoot.innerHTML, /class="flow-background-dim" opacity="1"/);
+
+const sceneCard = new Card();
+let selectedScene = '';
+sceneCard.setConfig({
+  language: 'en',
+  background_map: { day_clear_ev2_only: '/local/my-second-car.png' },
+  entities: { ev_power: 'sensor.ev1', ev2_power: 'sensor.ev2', ev2_presence: 'binary_sensor.ev2' }
+});
+sceneCard._setBackground = (url) => { selectedScene = url; };
+const evState = (ev1Power) => ({ language: 'en', states: {
+  'sun.sun': { state: 'above_horizon' },
+  'sensor.ev1': { state: String(ev1Power), attributes: { unit_of_measurement: 'W' } },
+  'sensor.ev2': { state: '0', attributes: { unit_of_measurement: 'W' } },
+  'binary_sensor.ev2': { state: 'on', attributes: {} }
+} });
+sceneCard.hass = evState(0);
+assert.equal(selectedScene, '/local/my-second-car.png', 'EV 2 presence should select its custom image');
+sceneCard.hass = evState(1500);
+assert.notEqual(selectedScene, '/local/my-second-car.png', 'EV 1 charging means EV 2 is not alone');
+
+const sceneDefaults = sceneCard._sceneFlowComponentMap();
+for (const scene of ['scene_day_clear_idle.png', 'scene_night_rain_dual_charging.png']) {
+  assert.equal(sceneDefaults[scene]['heat-pump-label'].y, -96, 'each scene needs a heat pump label reset position');
+  assert.equal(sceneDefaults[scene]['heat-pump-guide'].y2, -55);
+}
+assert.match(sceneCard.shadowRoot.innerHTML, /id="flow-heat-pump-guide"/);
+
+const Editor = elements.get('tesla-style-energy-flow-editor');
+const editor = new Editor();
+editor.setConfig({ language: 'en' });
+assert.ok(!editor._positionEditorGroups('scene_day_clear_idle.png').some((group) => group.node === 'heat-pump'));
+editor.setConfig({ language: 'en', entities: { heat_pump_power: 'sensor.heat_pump' } });
+assert.ok(editor._positionEditorGroups('scene_day_clear_idle.png').some((group) => group.node === 'heat-pump'));
+assert.equal(editor._positionValue('scene_day_clear_idle.png', 'heat-pump-label', 'y'), -96);

@@ -1235,8 +1235,19 @@
     })
   });
 
+  const HEAT_PUMP_COMPONENTS = Object.freeze({
+    'heat-pump-label': Object.freeze({ x: 0, y: -96 }),
+    'heat-pump-power': Object.freeze({ x: 0, y: -78 }),
+    'heat-pump-guide': Object.freeze({ x1: 0, y1: -65, x2: 0, y2: -55 })
+  });
+  const SCENE_COMPONENTS_WITH_HEAT_PUMP = Object.freeze(Object.fromEntries(
+    Object.entries(SCENE_FLOW_COMPONENT_MAP).map(([scene, components]) => [
+      scene, Object.freeze({ ...components, ...HEAT_PUMP_COMPONENTS })
+    ])
+  ));
+
   const POSITION_EDITOR_SCENES = Object.freeze(
-    Object.keys(SCENE_FLOW_COMPONENT_MAP)
+    Object.keys(SCENE_COMPONENTS_WITH_HEAT_PUMP)
       .filter((key) => key.startsWith('scene_'))
       .map((key) => Object.freeze({
         key,
@@ -2105,7 +2116,7 @@
 
     _sceneFlowComponentMap() {
       if (!this._sceneFlowComponentMapCache) {
-        this._sceneFlowComponentMapCache = deepMerge(SCENE_FLOW_COMPONENT_MAP, this._config.scene_component_map || {});
+        this._sceneFlowComponentMapCache = deepMerge(SCENE_COMPONENTS_WITH_HEAT_PUMP, this._config.scene_component_map || {});
       }
       return this._sceneFlowComponentMapCache;
     }
@@ -2858,6 +2869,7 @@
                 <g class="flow-node heat-pump-hidden" id="heat-pump-node-group" transform="translate(445, 365)">
                   <image id="heat-pump-icon" href="${joinAsset(cfg.background_asset_base, 'heat_pump_icon_day.png')}" x="-35" y="-54" width="70" height="54" preserveAspectRatio="xMidYMax meet"></image>
                   <circle class="flow-node-bg" id="node-heat-pump-bg" cx="0" cy="0" r="5"></circle>
+                  <line class="flow-node-guide" id="flow-heat-pump-guide" x1="0" y1="-65" x2="0" y2="-55"></line>
                   <text class="flow-label" id="flow-heat-pump-label" x="0" y="-96">${this._t('card.node.heat_pump', 'Heat Pump')}</text>
                   <text class="flow-power" id="flow-heat-pump-power" x="0" y="-78">0.0 kW</text>
                   <text class="flow-status" id="flow-heat-pump-status" x="0" y="-62"></text>
@@ -3553,7 +3565,7 @@
     }
 
     _sceneFlowComponentMap() {
-      return deepMerge(SCENE_FLOW_COMPONENT_MAP, this._config.scene_component_map || {});
+      return deepMerge(SCENE_COMPONENTS_WITH_HEAT_PUMP, this._config.scene_component_map || {});
     }
 
     _selectedPositionScene() {
@@ -3574,6 +3586,7 @@
 
     _positionEditorGroups(sceneKey) {
       return POSITION_EDITOR_GROUPS.filter((group) => {
+        if (group.node === 'heat-pump' && !this._config.entities.heat_pump_power) return false;
         if (!group.scene) return true;
         if (group.scene === 'charging') return sceneKey.includes('charging');
         if (group.scene === 'dual_charging') return sceneKey.includes('dual_charging');
@@ -4041,7 +4054,7 @@
       const cfg = this._config;
       const b = cfg.background_map || {};
       // Filtered lists for common field types — reduces long dropdowns to plausible matches.
-      const powerIds = (path) => this._sensorIdsByUnitOrClass(['W', 'kW'], ['power'], String(this._getByPath(path) || ''));
+      const powerIds = (path) => this._sensorIdsByUnitOrClass(['mW', 'W', 'kW', 'MW'], ['power'], String(this._getByPath(path) || ''));
       const pctIds = (path) => this._sensorIdsByUnitOrClass(['%'], ['battery'], String(this._getByPath(path) || ''));
       const voltIds = (path) => this._sensorIdsByUnitOrClass(['V'], ['voltage'], String(this._getByPath(path) || ''));
       const ampIds = (path) => this._sensorIdsByUnitOrClass(['A'], ['current'], String(this._getByPath(path) || ''));
