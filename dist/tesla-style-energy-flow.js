@@ -5,6 +5,7 @@
   const CARD_TYPE = 'tesla-style-energy-flow';
   const FLOW_MIN_W = 50;
   const EDITOR_UPDATE_DEBOUNCE_MS = 500;
+  const EDITOR_ENTITY_DOMAINS = new Set(['sensor', 'switch', 'binary_sensor', 'device_tracker', 'person', 'input_boolean', 'weather', 'sun']);
   const SUPPORTED_LANGS = ['it', 'en', 'es', 'fr', 'de', 'pt-br', 'pt-pt'];
   const DEFAULT_LANG = 'it';
   // Region-less tags that must resolve to a specific regional bundle.
@@ -70,6 +71,7 @@
         field_language: 'Lingua',
         field_background: 'Background URL',
         field_background_base: 'Background Assets Base (auto)',
+        field_background_dim: 'Intensità oscuramento sfondo (0–1)',
         field_grid_invert: 'Inverti segno rete',
         field_ev_in_load: 'Potenza EV gia inclusa nel consumo casa',
         field_ev2_in_load: 'Potenza EV 2 gia inclusa nel consumo casa',
@@ -160,6 +162,7 @@
         field_language: 'Language',
         field_background: 'Background URL',
         field_background_base: 'Background Assets Base (auto)',
+        field_background_dim: 'Background dimming (0–1)',
         field_grid_invert: 'Invert grid sign',
         field_ev_in_load: 'EV power already included in home load',
         field_ev2_in_load: 'EV 2 power already included in home load',
@@ -250,6 +253,7 @@
         field_language: 'Idioma',
         field_background: 'URL de fondo',
         field_background_base: 'Base de assets de fondo (auto)',
+        field_background_dim: 'Oscurecimiento del fondo (0–1)',
         field_grid_invert: 'Invertir signo de red',
         field_ev_in_load: 'Potencia EV ya incluida en consumo casa',
         field_ev2_in_load: 'Potencia EV 2 ya incluida en consumo casa',
@@ -340,6 +344,7 @@
         field_language: 'Langue',
         field_background: 'URL du fond',
         field_background_base: 'Base assets fond (auto)',
+        field_background_dim: 'Assombrissement du fond (0–1)',
         field_grid_invert: 'Inverser signe reseau',
         field_ev_in_load: 'Puissance EV deja incluse dans conso maison',
         field_ev2_in_load: 'Puissance EV 2 deja incluse dans conso maison',
@@ -430,6 +435,7 @@
         field_language: 'Sprache',
         field_background: 'Hintergrund URL',
         field_background_base: 'Hintergrund Asset-Basis (auto)',
+        field_background_dim: 'Hintergrund abdunkeln (0–1)',
         field_grid_invert: 'Netz-Vorzeichen invertieren',
         field_ev_in_load: 'EV-Leistung bereits im Hausverbrauch enthalten',
         field_ev2_in_load: 'EV 2 Leistung bereits im Hausverbrauch enthalten',
@@ -520,6 +526,7 @@
         field_language: 'Idioma',
         field_background: 'URL do fundo',
         field_background_base: 'Base dos arquivos de fundo (auto)',
+        field_background_dim: 'Escurecimento do fundo (0–1)',
         field_grid_invert: 'Inverter sinal da rede',
         field_ev_in_load: 'Potência do EV já incluída no consumo da casa',
         field_ev2_in_load: 'Potência do EV 2 já incluída no consumo da casa',
@@ -610,6 +617,7 @@
         field_language: 'Idioma',
         field_background: 'URL do fundo',
         field_background_base: 'Base dos ficheiros de fundo (auto)',
+        field_background_dim: 'Escurecimento do fundo (0–1)',
         field_grid_invert: 'Inverter sinal da rede',
         field_ev_in_load: 'Potência do EV já incluída no consumo da casa',
         field_ev2_in_load: 'Potência do EV 2 já incluída no consumo da casa',
@@ -1259,6 +1267,7 @@
     language: 'auto',
     background: '/local/community/tesla-style-energy-flow/backgrounds/scene_day_clear_idle.png',
     dynamic_background: true,
+    background_dim: 1,
     background_asset_base: '/local/community/tesla-style-energy-flow/backgrounds',
     show_header: true,
     show_labels: true,
@@ -1366,8 +1375,10 @@
       evening_storm_charging: '',
       day_clear_idle: '',
       day_clear_charging: '',
+      day_clear_ev2_only: '',
       night_clear_idle: '',
-      night_clear_charging: ''
+      night_clear_charging: '',
+      night_clear_ev2_only: ''
     },
     scene_component_map: {},
     scene_path_map: {},
@@ -1414,9 +1425,10 @@
       entityState.attributes?.unit_of_measurement ||
       entityState.attributes?.unit ||
       'W'
-    ).trim().toLowerCase();
-    if (unit === 'kw') return raw * 1000;
-    if (unit === 'mw') return raw * 1000000;
+    ).trim();
+    if (unit.toLowerCase() === 'kw') return raw * 1000;
+    if (unit === 'MW') return raw * 1000000;
+    if (unit === 'mW') return raw / 1000;
     return raw;
   }
 
@@ -1613,6 +1625,7 @@
       this._pathLastActive = {};
       this._lastDominant = {};
       this._elCache = new Map();
+      this._flowLinesCache = null;
       this._trackedIdsCache = null;
       this._sceneFlowPathMapCache = null;
       this._sceneFlowComponentMapCache = null;
@@ -1632,6 +1645,7 @@
       this._lastDominant = {};
       // Config-derived caches — invalidate so the next render rebuilds them.
       this._elCache = new Map();
+      this._flowLinesCache = null;
       this._trackedIdsCache = null;
       this._sceneFlowPathMapCache = null;
       this._sceneFlowComponentMapCache = null;
@@ -2008,7 +2022,7 @@
       return this._sceneFlowComponentMapCache;
     }
 
-    _resolveBackground(evCharging, hasSecondaryEv = false) {
+    _resolveBackground(evCharging, hasSecondaryEv = false, ev2Only = false) {
       const cfg = this._config;
       if (!cfg.dynamic_background) return cfg.background;
 
@@ -2024,16 +2038,16 @@
       // or EV state happens to change.
       const period = this._scenePeriod(weatherState);
       const timeSlot = this._sceneTimeSlot(period);
-      const cacheKey = `${weatherState}|${sunState}|${period}|${timeSlot}|${evCharging ? 1 : 0}|${hasSecondaryEv ? 1 : 0}`;
+      const cacheKey = `${weatherState}|${sunState}|${period}|${timeSlot}|${evCharging ? 1 : 0}|${hasSecondaryEv ? 1 : 0}|${ev2Only ? 1 : 0}`;
       if (this._bgCacheKey === cacheKey) return this._bgCacheValue;
 
-      const result = this._computeBackground(evCharging, hasSecondaryEv, weatherState);
+      const result = this._computeBackground(evCharging, hasSecondaryEv, weatherState, ev2Only);
       this._bgCacheKey = cacheKey;
       this._bgCacheValue = result;
       return result;
     }
 
-    _computeBackground(evCharging, hasSecondaryEv, weatherState) {
+    _computeBackground(evCharging, hasSecondaryEv, weatherState, ev2Only = false) {
       const cfg = this._config;
       const period = this._scenePeriod(weatherState);
       const timeSlot = this._sceneTimeSlot(period);
@@ -2043,6 +2057,17 @@
         ...this._defaultBackgroundMap(),
         ...compactStringMap(cfg.background_map || {})
       };
+
+      if (ev2Only && evCharging) {
+        for (const key of [
+          `${timeSlot}_${weatherGroup}_ev2_only`,
+          `${period}_${weatherGroup}_ev2_only`,
+          `${period}_clear_ev2_only`
+        ]) {
+          const url = String(map[key] || '').trim();
+          if (url) return url;
+        }
+      }
 
       if (hasSecondaryEv && evCharging) {
         const dualExactKey = `${period}_${weatherGroup}_dual_charging`;
@@ -2400,11 +2425,13 @@
       const titleHtml = (cfg.show_header !== false && titleText) ? `<div class="card-title">${titleText}</div>` : '';
       const sceneScale = clamp(safeNum(cfg.scene_scale, 1), 0.6, 1.4);
       const fontScale = clamp(safeNum(cfg.font_scale, 1), 0.75, 1.35);
+      const backgroundDim = clamp(safeNum(cfg.background_dim, 1), 0, 1);
       const pathD = (id, configKey) => p[id] || cfg.paths?.[configKey] || DEFAULT_CONFIG.paths[configKey];
       this._lastAppliedSceneFlowProfile = '';
       this._lastAppliedSceneFlowComponentProfile = '';
       // The previous element tree is about to be replaced — drop cached refs.
       this._elCache = new Map();
+      this._flowLinesCache = null;
 
       this.shadowRoot.innerHTML = `
         <style>
@@ -2702,10 +2729,12 @@
                   </radialGradient>
                 </defs>
                 <image id="flow-scene-image" href="${cfg.background}" x="0" y="0" width="600" height="460" preserveAspectRatio="xMidYMid slice"></image>
-                <rect class="flow-scene-dim" x="0" y="0" width="600" height="460"></rect>
-                <rect class="flow-sky-dim" x="0" y="0" width="600" height="260"></rect>
-                <rect class="flow-bottom-dim" x="0" y="230" width="600" height="230"></rect>
-                <rect class="flow-vignette" x="0" y="0" width="600" height="460"></rect>
+                <g class="flow-background-dim" opacity="${backgroundDim}">
+                  <rect class="flow-scene-dim" x="0" y="0" width="600" height="460"></rect>
+                  <rect class="flow-sky-dim" x="0" y="0" width="600" height="260"></rect>
+                  <rect class="flow-bottom-dim" x="0" y="230" width="600" height="230"></rect>
+                  <rect class="flow-vignette" x="0" y="0" width="600" height="460"></rect>
+                </g>
 
                 <path id="line-solar-load" class="flow-line" d="${pathD('line-solar-load', 'line_solar_load')}"></path>
                 <path id="line-grid-load" class="flow-line" d="${pathD('line-grid-load', 'line_grid_load')}"></path>
@@ -2889,12 +2918,13 @@
       const useDualScene = evData.hasPresenceEntities
         ? (sceneVehicles.length > 1)
         : evData.hasConfiguredSecondaryEv;
+      const ev2OnlyScene = evData.activeVehicles.length === 1 && evData.activeVehicles[0].key === 'ev2';
       const evHideIdle = !!cfg.ev_hide_when_idle;
-      const evNodeGroup = this.shadowRoot.querySelector('#ev-node-group');
-      const ev2NodeGroup = this.shadowRoot.querySelector('#ev2-node-group');
-      const batteryNodeGroup = this.shadowRoot.querySelector('#battery-node-group');
-      const roofAGroup = this.shadowRoot.querySelector('#roof-array-a-group');
-      const roofBGroup = this.shadowRoot.querySelector('#roof-array-b-group');
+      const evNodeGroup = this._query('#ev-node-group');
+      const ev2NodeGroup = this._query('#ev2-node-group');
+      const batteryNodeGroup = this._query('#battery-node-group');
+      const roofAGroup = this._query('#roof-array-a-group');
+      const roofBGroup = this._query('#roof-array-b-group');
       const ev1 = primaryVisibleVehicle || { power: 0, batteryText: '--%', labelText: this._t('card.node.ev', 'EV'), switchOn: false, configured: false, present: false };
       const ev2 = secondaryVisibleVehicle || { power: 0, batteryText: '--%', labelText: 'EV 2', switchOn: false, configured: false, present: false };
       if (evNodeGroup) {
@@ -2916,7 +2946,7 @@
       const period = this._scenePeriod(weatherState);
       const weatherGroup = this._weatherGroup(weatherState);
       this._setSceneTone(this._sceneTimeSlot(period), weatherGroup);
-      const sceneHref = this._resolveBackground(evSceneActive, useDualScene);
+      const sceneHref = this._resolveBackground(evSceneActive, useDualScene, ev2OnlyScene);
       this._setBackground(sceneHref);
       this._applySceneFlowPaths(sceneHref);
       this._applySceneFlowComponents(sceneHref);
@@ -2947,7 +2977,7 @@
       this._setText('#flow-ev2-arrow', ev2Arrow);
       this._setText('#flow-ev2-pct', ev2.batteryText || '--%');
 
-      const batteryStatusEl = this.shadowRoot.querySelector('#flow-battery-status');
+      const batteryStatusEl = this._query('#flow-battery-status');
       if (batteryStatusEl) {
         // Charge/discharge direction is shown via the separate green arrow.
         // the textual status word is intentionally suppressed (Tesla-style).
@@ -2962,7 +2992,10 @@
       this._toggleNode('#node-ev-bg', (ev1.power || 0) > 0 || ev1.switchOn || ev1.present);
       this._toggleNode('#node-ev2-bg', (ev2.power || 0) > 0 || ev2.switchOn || ev2.present);
 
-      this.shadowRoot.querySelectorAll('.flow-line').forEach((line) => {
+      if (!this._flowLinesCache) {
+        this._flowLinesCache = Array.from(this.shadowRoot.querySelectorAll('.flow-line'));
+      }
+      this._flowLinesCache.forEach((line) => {
         line.classList.remove('active', 'flow-solar', 'flow-green', 'flow-broken', 'flow-reverse');
       });
 
@@ -3087,6 +3120,8 @@
       this.attachShadow({ mode: 'open' });
       this._config = deepMerge(DEFAULT_CONFIG, {});
       this._hass = null;
+      this._lastRenderedHass = null;
+      this._pendingEditorRender = false;
       this._configSignature = JSON.stringify(this._config);
       this._pendingEditorUpdate = null;
       this._editingPath = '';
@@ -3114,14 +3149,40 @@
       if (nextSignature === this._configSignature) return;
       this._config = nextConfig;
       this._configSignature = nextSignature;
-      if (this._isEditorBusy()) return;
+      if (this._isEditorBusy()) {
+        this._pendingEditorRender = true;
+        return;
+      }
       this._render();
     }
 
     set hass(hass) {
       this._hass = hass;
       if (this._isEditorBusy()) return;
-      this._render();
+      if (this._pendingEditorRender || !this._lastRenderedHass || this._hasEntityOptionsChange(this._lastRenderedHass, hass)) {
+        this._render();
+      }
+    }
+
+    _hasEntityOptionsChange(prev, next) {
+      if (!prev || !next) return true;
+      if (prev.language !== next.language || prev.locale?.language !== next.locale?.language) return true;
+      if (prev.states === next.states) return false;
+
+      const isEditorEntity = (id) => EDITOR_ENTITY_DOMAINS.has(id.split('.')[0]);
+      const previousIds = Object.keys(prev.states || {}).filter(isEditorEntity);
+      const nextIds = Object.keys(next.states || {}).filter(isEditorEntity);
+      if (previousIds.length !== nextIds.length) return true;
+      const previousSet = new Set(previousIds);
+      for (const id of nextIds) {
+        if (!previousSet.has(id)) return true;
+        const oldAttrs = prev.states[id]?.attributes || {};
+        const newAttrs = next.states[id]?.attributes || {};
+        if (oldAttrs.friendly_name !== newAttrs.friendly_name ||
+            oldAttrs.unit_of_measurement !== newAttrs.unit_of_measurement ||
+            oldAttrs.device_class !== newAttrs.device_class) return true;
+      }
+      return false;
     }
 
     _isEditorBusy() {
@@ -3787,8 +3848,7 @@
 
     _render() {
       // Preserve open state of <details> elements across re-renders.
-      // HA calls set hass() on every entity update which triggers _render(),
-      // replacing innerHTML and collapsing all <details> nodes.
+      // Config, locale and entity option changes can still rebuild the editor.
       const openDetailKeys = new Set();
       this.shadowRoot.querySelectorAll('details[data-key]').forEach((d) => {
         if (d.open) openDetailKeys.add(d.dataset.key);
@@ -4442,6 +4502,8 @@
               <input data-path="background" value="${cfg.background || ''}">
               <label>${this._t('editor.field_background_base', 'Background Assets Base (auto)')}</label>
               <input data-path="background_asset_base" value="${cfg.background_asset_base || '/local/community/tesla-style-energy-flow/backgrounds'}">
+              <label>${this._t('editor.field_background_dim', 'Background dimming (0–1)')}</label>
+              <input type="number" min="0" max="1" step="0.1" data-path="background_dim" value="${clamp(safeNum(cfg.background_dim, 1), 0, 1)}">
               <div class="row">
                 <label>${this._t('editor.field_dynamic_bg', 'Enable dynamic background')}</label>
                 <input type="checkbox" data-path="dynamic_background" ${cfg.dynamic_background ? 'checked' : ''}>
@@ -4477,6 +4539,8 @@
                   <input data-path="background_map.day_clear_idle" value="${b.day_clear_idle || ''}">
                   <label>background_map.day_clear_charging</label>
                   <input data-path="background_map.day_clear_charging" value="${b.day_clear_charging || ''}">
+                  <label>background_map.day_clear_ev2_only</label>
+                  <input data-path="background_map.day_clear_ev2_only" value="${b.day_clear_ev2_only || ''}">
                   <label>background_map.morning_clear_idle</label>
                   <input data-path="background_map.morning_clear_idle" value="${b.morning_clear_idle || ''}">
                   <label>background_map.morning_clear_charging</label>
@@ -4493,6 +4557,8 @@
                   <input data-path="background_map.night_clear_idle" value="${b.night_clear_idle || ''}">
                   <label>background_map.night_clear_charging</label>
                   <input data-path="background_map.night_clear_charging" value="${b.night_clear_charging || ''}">
+                  <label>background_map.night_clear_ev2_only</label>
+                  <input data-path="background_map.night_clear_ev2_only" value="${b.night_clear_ev2_only || ''}">
                 </div>
               </details>
             </div>
@@ -4637,6 +4703,8 @@
           }
         });
       });
+      this._lastRenderedHass = this._hass;
+      this._pendingEditorRender = false;
     }
   }
 

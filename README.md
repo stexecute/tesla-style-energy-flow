@@ -34,6 +34,7 @@ Custom Home Assistant Lovelace card for energy flows on a house scene, with dyna
 - Smooth animated SVG flow lines
 - Flow colors by source: solar = yellow, battery = green, grid = red
 - Dynamic background (weather + day/night + EV charging)
+- Adjustable background dimming for custom images (`background_dim`, from `0` to `1`)
 - Scene-specific label/guide positioning for each background
 - Optional dual-EV support with separate EV1 / EV2 power, battery and charging switch entities
 - Optional `ev_label` / `ev2_label` for custom vehicle names
@@ -95,6 +96,7 @@ language: auto
 background: /local/community/tesla-style-energy-flow/backgrounds/scene_day_clear_idle.png
 dynamic_background: true
 background_asset_base: /local/community/tesla-style-energy-flow/backgrounds
+background_dim: 1.0 # set 0 to disable the dark overlays
 battery_invert: false
 grid_invert: false
 font_scale: 1.0
@@ -143,6 +145,15 @@ If presence entities are configured:
 - if only one EV is present/active, the single-car scene is reused and mapped to that vehicle
 - if both EVs are present/active, the dual-EV scene logic is used
 
+If you use different car artwork, set `background_map.day_clear_ev2_only` and
+`background_map.night_clear_ev2_only` to your own images. These are used only
+when EV 2 is the sole present or charging vehicle. Weather-specific keys such
+as `day_rain_ev2_only` can be added in YAML; otherwise the clear variant is
+used. Without these overrides, existing scene selection is unchanged.
+
+`background_dim` scales the card's dark overlays. The default `1` preserves
+the normal scene tone; `0` removes the overlays for already-dark custom images.
+
 Optional roof array sensors can also be added for two array overlays:
 
 - `roof_a_power`
@@ -158,6 +169,17 @@ For custom dual-EV scenes you can also override per-scene geometry through:
 - `scene_component_map`
 
 ## Troubleshooting
+
+### Nodes are active but no flow lines appear
+
+Check the raw sensor values and `unit_of_measurement` attributes in Home
+Assistant. Power values must be in W, kW or MW; a bare value such as `0.9`
+without a unit is read as `0.9 W`, below the default `50 W` flow threshold.
+The card expects positive battery power to mean charging and negative power
+to mean discharging. If your battery sensor uses the opposite sign, set
+`battery_invert: true`. If the values and signs are correct and the lines
+remain invisible, include the sensor states, units and card configuration in
+the issue report so the missing allocation can be reproduced.
 
 ### The grid → battery line disappears while the car is charging
 
