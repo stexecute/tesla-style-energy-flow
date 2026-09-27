@@ -104,6 +104,18 @@
   }
   button:hover { background: #2b3340; border-color: #3a4351; }
   .hint { color: var(--muted); font-size: 11.5px; margin-top: 8px; line-height: 1.4; }
+  @media (max-width: 960px) {
+    body { flex-direction: column; }
+    #controls {
+      flex: none;
+      width: 100%;
+      height: auto;
+      position: static;
+      overflow: visible;
+      border-left: 0;
+      border-top: 1px solid var(--line);
+    }
+  }
 </style>
 </head>
 <body>
@@ -138,7 +150,7 @@
       <option value="below_horizon">below_horizon (night)</option>
     </select>
     <div class="slider" style="margin-top:12px">
-      <div class="head"><span>Card width</span><b id="wOut">1100px</b></div>
+      <div class="head"><span>Card width limit</span><b id="wOut">1100px</b></div>
       <input type="range" id="cardW" min="360" max="2000" step="20" value="1100">
     </div>
   </fieldset>
@@ -286,7 +298,18 @@ function syncOutputs() {
   $('oEv').textContent    = fmt(num('ev'));
   $('oEv2').textContent   = fmt(num('ev2'));
   $('oSoc').textContent   = num('soc') + '%';
-  $('wOut').textContent   = num('cardW') + 'px';
+}
+
+function fitCard() {
+  const stage = $('stage');
+  const padding = getComputedStyle(stage);
+  const available = stage.clientWidth - parseFloat(padding.paddingLeft) - parseFloat(padding.paddingRight);
+  const requested = num('cardW');
+  const width = Math.max(1, Math.floor(Math.min(requested, available)));
+  card.style.width = width + 'px';
+  // The card's SVG scales with width; its optional title adds natural height.
+  card.style.height = '';
+  $('wOut').textContent = width < requested ? `${width}px shown (max ${requested}px)` : `${width}px`;
 }
 
 let coordBound = false;
@@ -401,9 +424,7 @@ function applyDebug() {
 let lastConfig = '';
 function update() {
   syncOutputs();
-  const w = num('cardW');
-  card.style.width = w + 'px';
-  card.style.height = Math.round(w * 460/600) + 'px';
+  fitCard();
 
   const cfg = buildConfig();
   const sig = JSON.stringify(cfg);
@@ -416,6 +437,7 @@ document.querySelectorAll('input, select').forEach(el => {
   el.addEventListener('input', update);
   el.addEventListener('change', update);
 });
+window.addEventListener('resize', fitCard);
 
 const PRESETS = {
   sunny:  { scene:'scene_day_clear_idle.png', weather:'sunny', sun:'above_horizon', solar:6500, grid:-2500, batt:1500, load:1400, hp:900, ev:0, ev2:0, hpOn:1, evOn:0, ev2On:0 },

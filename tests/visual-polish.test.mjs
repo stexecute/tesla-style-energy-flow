@@ -367,16 +367,7 @@ assert.match(
   'the SVG should include a sky dimming layer so text remains readable on bright backgrounds'
 );
 
-// Regression for #27: the moving highlight must advance by exactly one dash period
-// per loop, including when flow direction is reversed.
-const flowStreamCycle = 144;
-const trailDash = source.match(/\.flow-trail \{[\s\S]*?stroke-dasharray: (\d+) (\d+);/);
-assert.ok(trailDash, 'moving highlight needs a dash pattern');
-assert.equal(Number(trailDash[1]) + Number(trailDash[2]), flowStreamCycle);
-assert.match(source, /--trail-end: \$\{start - 144\}px; --trail-reverse-end: \$\{start \+ 144\}px/);
-assert.match(source, /@keyframes flowStream \{\s*from \{ stroke-dashoffset: var\(--trail-start\); \}\s*to \{ stroke-dashoffset: var\(--trail-end\); \}/);
-assert.match(source, /@keyframes flowStreamReverse \{\s*from \{ stroke-dashoffset: var\(--trail-start\); \}\s*to \{ stroke-dashoffset: var\(--trail-reverse-end\); \}/);
-assert.match(source, /FLOW_TRAIL_OPACITIES = Object\.freeze\(\[0\.12, 0\.32, 0\.62, 1, 0\.78, 0\.42, 0\.16\]\)/);
+// Moving pulse geometry and phase regressions are exercised in flow-animation.test.mjs.
 
 // Heat pump node: config, waterfall wiring, and SVG scaffolding should all be present.
 assert.match(

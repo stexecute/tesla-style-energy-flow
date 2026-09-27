@@ -764,12 +764,16 @@
     return file.replace(/\.png$/, '_heat_pump.png');
   }
 
-  // Seven short strokes form one moving highlight with soft leading and trailing edges.
-  const FLOW_TRAIL_OPACITIES = Object.freeze([0.12, 0.32, 0.62, 1, 0.78, 0.42, 0.16]);
+  // Approximate the reference pulse with a bright head and a long fading tail.
+  const FLOW_TRAIL_OPACITIES = Object.freeze([
+    0.005, 0.01, 0.028, 0.04, 0.059, 0.085, 0.12, 0.165, 0.222,
+    0.285, 0.357, 0.445, 0.534, 0.63, 0.725, 0.81, 0.9, 1
+  ]);
   function flowPathMarkup(id, d) {
     const trail = FLOW_TRAIL_OPACITIES.map((opacity, index) => {
-      const start = -index * 8;
-      return `<path class="flow-trail" d="${d}" style="--trail-start: ${start}px; --trail-end: ${start - 144}px; --trail-reverse-end: ${start + 144}px; --trail-opacity: ${opacity}"></path>`;
+      const start = -index * 5;
+      const reverseOpacity = FLOW_TRAIL_OPACITIES[FLOW_TRAIL_OPACITIES.length - 1 - index];
+      return `<path class="flow-trail" d="${d}" style="--trail-start: ${start}px; --trail-end: ${start - 200}px; --trail-reverse-end: ${start + 200}px; --trail-opacity: ${opacity}; --trail-opacity-reverse: ${reverseOpacity}"></path>`;
     }).join('');
     return `<path id="${id}" class="flow-line" d="${d}"></path>` +
       `<g class="flow-trail-group" data-flow-path="${id}" aria-hidden="true">${trail}</g>`;
@@ -1925,6 +1929,7 @@
       this._lastDominant = {};
       this._elCache = new Map();
       this._flowLinesCache = null;
+      this._syncedFlowAnimations = new WeakSet();
       this._trackedIdsCache = null;
       this._sceneFlowPathMapCache = null;
       this._sceneFlowComponentMapCache = null;
@@ -1945,6 +1950,7 @@
       // Config-derived caches — invalidate so the next render rebuilds them.
       this._elCache = new Map();
       this._flowLinesCache = null;
+      this._syncedFlowAnimations = new WeakSet();
       this._trackedIdsCache = null;
       this._sceneFlowPathMapCache = null;
       this._sceneFlowComponentMapCache = null;
@@ -2101,6 +2107,23 @@
         trail.classList.toggle('flow-reverse', !!reverse);
       }
       this._pathLastActive[key] = true;
+    }
+
+    _syncFlowTrailAnimations() {
+      // Newly activated routes join the current pulse; existing routes keep their
+      // clock, including while offscreen. No per-frame JavaScript is needed.
+      const animations = Array.from(this.shadowRoot.querySelectorAll('.flow-trail-group.active'))
+        .flatMap((group) => typeof group.getAnimations === 'function'
+          ? group.getAnimations({ subtree: true }) : []);
+      const reference = animations.find((animation) =>
+        this._syncedFlowAnimations.has(animation) && animation.currentTime != null) || animations[0];
+      const phase = reference?.currentTime ?? 0;
+      animations.forEach((animation) => {
+        if (!this._syncedFlowAnimations.has(animation)) {
+          animation.currentTime = phase;
+          this._syncedFlowAnimations.add(animation);
+        }
+      });
     }
 
     _dominantFlowClass(id, solarW, batteryW, gridW, fallback) {
@@ -2759,6 +2782,7 @@
       // The previous element tree is about to be replaced — drop cached refs.
       this._elCache = new Map();
       this._flowLinesCache = null;
+      this._syncedFlowAnimations = new WeakSet();
 
       this.shadowRoot.innerHTML = `
         <style>
@@ -2966,7 +2990,7 @@
           }
           .flow-line {
             fill: none;
-            stroke: rgba(191, 219, 254, 0.22);
+            stroke: rgba(190, 190, 190, 0.22);
             stroke-width: 1.95;
             opacity: 0;
             stroke-linecap: round;
@@ -2983,19 +3007,16 @@
           .flow-trail-group.active {
             display: block;
             color: #ffe066;
-            --flow-speed: 1.75s;
-            --flow-glow: rgba(255, 224, 102, 0.65);
-            filter: drop-shadow(0 0 0.6px rgba(2, 8, 23, 0.95))
-                    drop-shadow(0 0 3px var(--flow-glow, rgba(125, 249, 255, 0.4)))
-                    drop-shadow(0 0 8px var(--flow-glow, rgba(125, 249, 255, 0.4)));
+            --flow-speed: 2s;
+            filter: blur(0.25px);
           }
           .flow-trail {
             fill: none;
             stroke: currentColor;
             stroke-width: 3;
-            stroke-linecap: round;
+            stroke-linecap: butt;
             stroke-linejoin: round;
-            stroke-dasharray: 8 136;
+            stroke-dasharray: 5 195;
             stroke-dashoffset: var(--trail-start);
             opacity: var(--trail-opacity);
           }
@@ -3004,27 +3025,12 @@
           }
           .flow-trail-group.active.flow-reverse .flow-trail {
             animation-name: flowStreamReverse;
+            opacity: var(--trail-opacity-reverse);
           }
-          .flow-trail-group.active.flow-solar {
-            color: #ffe066;
-            --flow-glow: rgba(255, 224, 102, 0.72);
-            --flow-speed: 1.75s;
-          }
-          .flow-trail-group.active.flow-green {
-            color: #4ade80;
-            --flow-glow: rgba(74, 222, 128, 0.7);
-            --flow-speed: 1.9s;
-          }
-          .flow-trail-group.active.flow-broken {
-            color: #ff5d73;
-            --flow-glow: rgba(255, 93, 115, 0.7);
-            --flow-speed: 1.35s;
-          }
-          .flow-trail-group.active.flow-amber {
-            color: #fb923c;
-            --flow-glow: rgba(251, 146, 60, 0.72);
-            --flow-speed: 1.85s;
-          }
+          .flow-trail-group.active.flow-solar { color: #ffe066; }
+          .flow-trail-group.active.flow-green { color: #4ade80; }
+          .flow-trail-group.active.flow-broken { color: #ff5d73; }
+          .flow-trail-group.active.flow-amber { color: #fb923c; }
           .hide-labels .flow-label,
           .hide-labels .flow-power,
           .hide-labels .flow-pct,
@@ -3516,6 +3522,7 @@
       // Heat pump line is always amber/orange regardless of source mix
       // (distinct from EV's renewable-share-based coloring, per design).
       this._activatePath('line-heat-pump', 'flow-amber', hpTotal, heatPumpMin);
+      this._syncFlowTrailAnimations();
     }
 
     _render() {
