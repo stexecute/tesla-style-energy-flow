@@ -183,7 +183,7 @@
       <label><input type="checkbox" id="gridOverlay"> grid overlay</label>
       <label><input type="checkbox" id="hideArt"> hide artwork</label>
     </div>
-    <div class="hint">“Solid lines” freezes the dash animation so you can see each path’s full extent. “Show all paths” also reveals inactive ones.</div>
+    <div class="hint">“Solid lines” hides the moving light and highlights each active guide along its full length. “Show all paths” also reveals inactive guides.</div>
   </fieldset>
 
   <fieldset>
@@ -300,16 +300,34 @@ function applyDebug() {
   const art = root.querySelector('#flow-scene-image');
   if (art) art.style.opacity = on('hideArt') ? '0.12' : '';
 
-  // flow-line debug styling
-  root.querySelectorAll('.flow-line').forEach(l => {
-    const active = l.classList.contains('active');
-    if (on('solidLines')) { l.style.strokeDasharray = 'none'; l.style.animation = 'none'; }
-    else { l.style.strokeDasharray = ''; l.style.animation = ''; }
-    if (on('allPaths') && !active) {
-      l.style.opacity = '0.9';
-      l.style.stroke = 'rgba(120,190,255,.55)';
-    } else {
-      l.style.opacity = ''; l.style.stroke = '';
+  // Each guide is followed by its moving light group. Keep debug styles local
+  // to the preview so switching both controls off restores the card's CSS.
+  root.querySelectorAll('.flow-line').forEach(guide => {
+    const active = guide.classList.contains('active');
+    const trail = guide.nextElementSibling?.classList.contains('flow-trail-group')
+      ? guide.nextElementSibling : null;
+    const solid = on('solidLines');
+    const reveal = on('allPaths') && !active;
+    const hasTone = name => guide.classList.contains(name) ||
+      trail?.classList.contains(name) || !!trail?.querySelector(`.${name}`);
+    const color = hasTone('flow-solar') ? '#ffe066'
+      : hasTone('flow-green') ? '#4ade80'
+      : hasTone('flow-broken') ? '#ff5d73'
+      : hasTone('flow-amber') ? '#fb923c' : '#bfe5ff';
+
+    guide.style.strokeDasharray = solid && active ? 'none' : '';
+    guide.style.animation = solid && active ? 'none' : '';
+    guide.style.opacity = solid && active ? '1' : reveal ? '0.9' : '';
+    guide.style.stroke = solid && active ? color
+      : reveal ? 'rgba(120,190,255,.55)' : '';
+    guide.style.strokeWidth = solid && active ? '2.8px' : '';
+    guide.style.filter = solid && active ? `drop-shadow(0 0 4px ${color})` : '';
+
+    if (trail) {
+      trail.style.display = solid ? 'none' : '';
+      trail.querySelectorAll('*').forEach(part => {
+        part.style.animationPlayState = solid ? 'paused' : '';
+      });
     }
   });
 

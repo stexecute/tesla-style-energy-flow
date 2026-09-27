@@ -764,6 +764,17 @@
     return file.replace(/\.png$/, '_heat_pump.png');
   }
 
+  // Seven short strokes form one moving highlight with soft leading and trailing edges.
+  const FLOW_TRAIL_OPACITIES = Object.freeze([0.12, 0.32, 0.62, 1, 0.78, 0.42, 0.16]);
+  function flowPathMarkup(id, d) {
+    const trail = FLOW_TRAIL_OPACITIES.map((opacity, index) => {
+      const start = -index * 8;
+      return `<path class="flow-trail" d="${d}" style="--trail-start: ${start}px; --trail-end: ${start - 144}px; --trail-reverse-end: ${start + 144}px; --trail-opacity: ${opacity}"></path>`;
+    }).join('');
+    return `<path id="${id}" class="flow-line" d="${d}"></path>` +
+      `<g class="flow-trail-group" data-flow-path="${id}" aria-hidden="true">${trail}</g>`;
+  }
+
   const FLOW_PATH_KEYS = Object.freeze({
     'line-solar-load': 'line_solar_load',
     'line-grid-load': 'line_grid_load',
@@ -2084,6 +2095,11 @@
       if (!el) return;
       el.classList.add('active', cls);
       el.classList.toggle('flow-reverse', !!reverse);
+      const trail = this._query(`[data-flow-path="${id}"]`);
+      if (trail) {
+        trail.classList.add('active', cls);
+        trail.classList.toggle('flow-reverse', !!reverse);
+      }
       this._pathLastActive[key] = true;
     }
 
@@ -2459,6 +2475,9 @@
         if (!path) return;
         if (path.getAttribute('d') !== d) {
           path.setAttribute('d', d);
+          this._query(`[data-flow-path="${pathId}"]`)?.querySelectorAll('.flow-trail').forEach((trail) => {
+            trail.setAttribute('d', d);
+          });
         }
         applied = true;
       });
@@ -2952,57 +2971,59 @@
             opacity: 0;
             stroke-linecap: round;
             stroke-linejoin: round;
-            transition: opacity 0.18s ease, stroke-width 0.18s ease;
+            transition: opacity 0.18s ease;
           }
           .flow-line.active {
-            opacity: 1;
-            stroke-dasharray: var(--flow-seg, 62) var(--flow-gap, 82);
-            animation: flowStream var(--flow-speed, 1.9s) linear infinite, flowPulse var(--flow-fade, 1.45s) ease-in-out infinite;
-            /* Dark contrast outline first (helps on light/busy backgrounds), then the
-               bright glow stack (helps on dark backgrounds). The outline is tight
-               (sub-pixel blur) so the colored stroke stays sharp. */
-            filter: drop-shadow(0 0 0.6px rgba(2, 8, 23, 0.95))
-                    drop-shadow(0 0 0.6px rgba(2, 8, 23, 0.85))
-                    drop-shadow(0 0 3px var(--flow-glow, rgba(125, 249, 255, 0.4)))
-                    drop-shadow(0 0 12px var(--flow-glow, rgba(125, 249, 255, 0.4)));
+            opacity: 0.7;
           }
-          .flow-line.active.flow-reverse {
-            animation: flowStreamReverse var(--flow-speed, 1.9s) linear infinite, flowPulse var(--flow-fade, 1.45s) ease-in-out infinite;
+          .flow-trail-group {
+            display: none;
+            pointer-events: none;
           }
-          .flow-line.active.flow-solar {
-            stroke: #ffe066;
-            --flow-glow: rgba(255, 224, 102, 0.72);
-            --flow-seg: 64;
-            --flow-gap: 80;
+          .flow-trail-group.active {
+            display: block;
+            color: #ffe066;
             --flow-speed: 1.75s;
-            --flow-fade: 1.35s;
+            --flow-glow: rgba(255, 224, 102, 0.65);
+            filter: drop-shadow(0 0 0.6px rgba(2, 8, 23, 0.95))
+                    drop-shadow(0 0 3px var(--flow-glow, rgba(125, 249, 255, 0.4)))
+                    drop-shadow(0 0 8px var(--flow-glow, rgba(125, 249, 255, 0.4)));
           }
-          .flow-line.active.flow-green {
-            stroke: #4ade80;
+          .flow-trail {
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 3;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            stroke-dasharray: 8 136;
+            stroke-dashoffset: var(--trail-start);
+            opacity: var(--trail-opacity);
+          }
+          .flow-trail-group.active .flow-trail {
+            animation: flowStream var(--flow-speed) linear infinite;
+          }
+          .flow-trail-group.active.flow-reverse .flow-trail {
+            animation-name: flowStreamReverse;
+          }
+          .flow-trail-group.active.flow-solar {
+            color: #ffe066;
+            --flow-glow: rgba(255, 224, 102, 0.72);
+            --flow-speed: 1.75s;
+          }
+          .flow-trail-group.active.flow-green {
+            color: #4ade80;
             --flow-glow: rgba(74, 222, 128, 0.7);
-            --flow-seg: 62;
-            --flow-gap: 82;
             --flow-speed: 1.9s;
-            --flow-fade: 1.45s;
           }
-          .flow-line.active.flow-broken {
-            stroke: #ff5d73;
+          .flow-trail-group.active.flow-broken {
+            color: #ff5d73;
             --flow-glow: rgba(255, 93, 115, 0.7);
-            --flow-seg: 40;
-            /* 40 + 104 = 144, matching the flowStream stroke-dashoffset cycle so the
-               grid/import dashes loop seamlessly instead of jumping every cycle (#27). */
-            --flow-gap: 104;
             --flow-speed: 1.35s;
-            --flow-fade: 1.15s;
           }
-          .flow-line.active.flow-amber {
-            stroke: #fb923c;
+          .flow-trail-group.active.flow-amber {
+            color: #fb923c;
             --flow-glow: rgba(251, 146, 60, 0.72);
-            --flow-seg: 60;
-            /* 60 + 84 = 144, matching the flowStream stroke-dashoffset cycle. */
-            --flow-gap: 84;
             --flow-speed: 1.85s;
-            --flow-fade: 1.4s;
           }
           .hide-labels .flow-label,
           .hide-labels .flow-power,
@@ -3012,19 +3033,24 @@
           }
           /* Pause CSS animations when the card is scrolled out of view.
              Toggled by an IntersectionObserver on the host element. */
-          :host(.flow-offscreen) .flow-line.active {
+          :host(.flow-offscreen) .flow-trail-group.active .flow-trail {
             animation-play-state: paused;
           }
           @keyframes flowStream {
-            to { stroke-dashoffset: -144; }
+            from { stroke-dashoffset: var(--trail-start); }
+            to { stroke-dashoffset: var(--trail-end); }
           }
           @keyframes flowStreamReverse {
-            to { stroke-dashoffset: 144; }
+            from { stroke-dashoffset: var(--trail-start); }
+            to { stroke-dashoffset: var(--trail-reverse-end); }
           }
-          @keyframes flowPulse {
-            0%, 100% { opacity: 0.85; stroke-width: 2.4; }
-            45% { opacity: 1; stroke-width: 3.3; }
-            82% { opacity: 0.92; stroke-width: 2.8; }
+          @media (prefers-reduced-motion: reduce) {
+            .flow-trail-group.active { display: none; }
+            .flow-line.active { opacity: 0.85; }
+            .flow-line.active.flow-solar { stroke: #ffe066; }
+            .flow-line.active.flow-green { stroke: #4ade80; }
+            .flow-line.active.flow-broken { stroke: #ff5d73; }
+            .flow-line.active.flow-amber { stroke: #fb923c; }
           }
         </style>
         <ha-card>
@@ -3056,16 +3082,16 @@
                   <rect class="flow-vignette" x="0" y="0" width="600" height="460"></rect>
                 </g>
 
-                <path id="line-solar-load" class="flow-line" d="${pathD('line-solar-load', 'line_solar_load')}"></path>
-                <path id="line-grid-load" class="flow-line" d="${pathD('line-grid-load', 'line_grid_load')}"></path>
-                <path id="line-battery-load" class="flow-line" d="${pathD('line-battery-load', 'line_battery_load')}"></path>
-                <path id="line-junction-home-load" class="flow-line" d="${pathD('line-junction-home-load', 'line_junction_home_load')}"></path>
-                <path id="line-wallbox-ev" class="flow-line" d="${pathD('line-wallbox-ev', 'line_wallbox_ev')}"></path>
-                <path id="line-wallbox-ev2" class="flow-line" d="${pathD('line-wallbox-ev2', 'line_wallbox_ev2')}"></path>
-                <path id="line-heat-pump" class="flow-line" d="${pathD('line-heat-pump', 'line_heat_pump')}"></path>
-                <path id="line-solar-grid" class="flow-line" d="${pathD('line-solar-grid', 'line_solar_grid')}"></path>
-                <path id="line-solar-battery" class="flow-line" d="${pathD('line-solar-battery', 'line_solar_battery')}"></path>
-                <path id="line-grid-battery" class="flow-line" d="${pathD('line-grid-battery', 'line_grid_battery')}"></path>
+                ${flowPathMarkup('line-solar-load', pathD('line-solar-load', 'line_solar_load'))}
+                ${flowPathMarkup('line-grid-load', pathD('line-grid-load', 'line_grid_load'))}
+                ${flowPathMarkup('line-battery-load', pathD('line-battery-load', 'line_battery_load'))}
+                ${flowPathMarkup('line-junction-home-load', pathD('line-junction-home-load', 'line_junction_home_load'))}
+                ${flowPathMarkup('line-wallbox-ev', pathD('line-wallbox-ev', 'line_wallbox_ev'))}
+                ${flowPathMarkup('line-wallbox-ev2', pathD('line-wallbox-ev2', 'line_wallbox_ev2'))}
+                ${flowPathMarkup('line-heat-pump', pathD('line-heat-pump', 'line_heat_pump'))}
+                ${flowPathMarkup('line-solar-grid', pathD('line-solar-grid', 'line_solar_grid'))}
+                ${flowPathMarkup('line-solar-battery', pathD('line-solar-battery', 'line_solar_battery'))}
+                ${flowPathMarkup('line-grid-battery', pathD('line-grid-battery', 'line_grid_battery'))}
 
                 <g class="flow-node heat-pump-hidden" id="heat-pump-node-group" transform="translate(445, 365)">
                   <image id="heat-pump-icon" href="${joinAsset(cfg.background_asset_base, 'heat_pump_icon_day.png')}" x="-35" y="-54" width="70" height="54" preserveAspectRatio="xMidYMax meet"></image>
@@ -3361,7 +3387,7 @@
       this._toggleNode('#node-ev2-bg', (ev2.power || 0) > 0 || ev2.switchOn || ev2.present);
 
       if (!this._flowLinesCache) {
-        this._flowLinesCache = Array.from(this.shadowRoot.querySelectorAll('.flow-line'));
+        this._flowLinesCache = Array.from(this.shadowRoot.querySelectorAll('.flow-line, .flow-trail-group'));
       }
       this._flowLinesCache.forEach((line) => {
         line.classList.remove('active', 'flow-solar', 'flow-green', 'flow-broken', 'flow-amber', 'flow-reverse');

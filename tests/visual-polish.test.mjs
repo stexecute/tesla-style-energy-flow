@@ -367,28 +367,16 @@ assert.match(
   'the SVG should include a sky dimming layer so text remains readable on bright backgrounds'
 );
 
-// Regression for #27 "Stutter from grid to home": the flowStream keyframe scrolls
-// stroke-dashoffset by a fixed distance every cycle, so a seamless loop requires the
-// dash period (--flow-seg + --flow-gap) of every flow colour to equal that distance.
-// flow-broken (the grid/import colour) used 40 + 96 = 136 while the offset is 144,
-// producing an 8-unit phase jump once per cycle — a visible stutter on the grid->home line.
-const flowStreamCycle = (() => {
-  const m = source.match(/@keyframes flowStream \{\s*to \{ stroke-dashoffset: -(\d+(?:\.\d+)?)/);
-  assert.ok(m, 'flowStream keyframe should define a stroke-dashoffset scroll distance');
-  return Number(m[1]);
-})();
-
-for (const colour of ['flow-solar', 'flow-green', 'flow-broken']) {
-  const block = source.match(new RegExp(`\\.flow-line\\.active\\.${colour} \\{([\\s\\S]*?)\\}`));
-  assert.ok(block, `${colour} flow-line rule should exist`);
-  const seg = Number(block[1].match(/--flow-seg:\s*(\d+(?:\.\d+)?)/)?.[1]);
-  const gap = Number(block[1].match(/--flow-gap:\s*(\d+(?:\.\d+)?)/)?.[1]);
-  assert.equal(
-    seg + gap,
-    flowStreamCycle,
-    `${colour} dash period (--flow-seg ${seg} + --flow-gap ${gap} = ${seg + gap}) must equal the flowStream scroll distance ${flowStreamCycle} so the dashes loop without stuttering`
-  );
-}
+// Regression for #27: the moving highlight must advance by exactly one dash period
+// per loop, including when flow direction is reversed.
+const flowStreamCycle = 144;
+const trailDash = source.match(/\.flow-trail \{[\s\S]*?stroke-dasharray: (\d+) (\d+);/);
+assert.ok(trailDash, 'moving highlight needs a dash pattern');
+assert.equal(Number(trailDash[1]) + Number(trailDash[2]), flowStreamCycle);
+assert.match(source, /--trail-end: \$\{start - 144\}px; --trail-reverse-end: \$\{start \+ 144\}px/);
+assert.match(source, /@keyframes flowStream \{\s*from \{ stroke-dashoffset: var\(--trail-start\); \}\s*to \{ stroke-dashoffset: var\(--trail-end\); \}/);
+assert.match(source, /@keyframes flowStreamReverse \{\s*from \{ stroke-dashoffset: var\(--trail-start\); \}\s*to \{ stroke-dashoffset: var\(--trail-reverse-end\); \}/);
+assert.match(source, /FLOW_TRAIL_OPACITIES = Object\.freeze\(\[0\.12, 0\.32, 0\.62, 1, 0\.78, 0\.42, 0\.16\]\)/);
 
 // Heat pump node: config, waterfall wiring, and SVG scaffolding should all be present.
 assert.match(
