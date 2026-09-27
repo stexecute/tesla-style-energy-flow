@@ -3857,6 +3857,16 @@
       return joinAsset(base, file);
     }
 
+    _positionPreviewHeatPumpIcon(sceneKey) {
+      if (!this._config.entities.heat_pump_power) return '';
+      const base = this._config.background_asset_base || '/local/community/tesla-style-energy-flow/backgrounds';
+      const file = sceneKey.startsWith('scene_night_') || sceneKey.includes('_rain_')
+        ? 'heat_pump_icon_rain.png'
+        : 'heat_pump_icon_day.png';
+      const origin = heatPumpOrigin(sceneKey);
+      return `<image class="position-preview-heat-pump-icon" href="${this._escapeHtml(joinAsset(base, file))}" x="${origin.x - 35}" y="${origin.y - 54}" width="70" height="54" preserveAspectRatio="xMidYMax meet"></image>`;
+    }
+
     _positionPreviewTextCenter(sceneKey, group) {
       const x = this._positionScenePoint(sceneKey, group, group.guide, 'x1', 'y1').x;
       const label = this._positionScenePoint(sceneKey, group, group.label);
@@ -3927,6 +3937,7 @@
           <svg class="position-preview-svg" data-position-preview-svg data-position-scene-key="${this._escapeHtml(sceneKey)}" viewBox="0 0 600 460" preserveAspectRatio="xMidYMid meet">
             <image class="position-preview-image" href="${background}" x="0" y="0" width="600" height="460" preserveAspectRatio="xMidYMid slice"></image>
             <rect class="position-preview-dim" x="0" y="0" width="600" height="460"></rect>
+            ${this._positionPreviewHeatPumpIcon(sceneKey)}
             ${this._showAllPaths ? this._positionPreviewFlowPaths(sceneKey) : ''}
             ${this._positionEditorGroups(sceneKey).map((group) => this._positionPreviewGroup(sceneKey, group)).join('')}
           </svg>
