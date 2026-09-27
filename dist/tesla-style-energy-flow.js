@@ -755,6 +755,15 @@
     night_storm_dual_charging: 'scene_night_clear_dual_charging.png'
   });
 
+  const BUILT_IN_SCENE_FILES = new Set([
+    ...Object.values(SCENE_IMAGE_MAP),
+    ...Object.values(DUAL_CHARGING_SCENE_IMAGE_MAP)
+  ]);
+
+  function heatPumpSceneFile(file) {
+    return file.replace(/\.png$/, '_heat_pump.png');
+  }
+
   const FLOW_PATH_KEYS = Object.freeze({
     'line-solar-load': 'line_solar_load',
     'line-grid-load': 'line_grid_load',
@@ -935,6 +944,85 @@
     })
   });
 
+  // Keep the original scene geometry for cards without a configured heat pump.
+  const ORIGINAL_SCENE_PATH_OVERRIDES = Object.freeze({
+    "scene_day_clear_idle.png": Object.freeze({
+      "line-solar-load": "M 351 292 L 352 338 L 352 338",
+      "line-solar-grid": "M 350 292 L 352 378 L 436 404",
+      "line-solar-battery": "M 350 292 L 352 338 L 310 348"
+    }),
+    "scene_day_clear_charging.png": Object.freeze({
+      "line-solar-load": "M 351 292 L 352 338 L 352 338",
+      "line-solar-grid": "M 350 292 L 352 374 L 434 402",
+      "line-solar-battery": "M 350 292 L 352 340 L 312 348"
+    }),
+    "scene_day_clear_dual_charging.png": Object.freeze({
+      "line-solar-load": "M 394 287 L 401 302 401 337",
+      "line-solar-grid": "M 401 341 L 400 378 476 402",
+      "line-solar-battery": "M 400 337 L 398 338 L 355 347"
+    }),
+    "image2.png": Object.freeze({
+      "line-solar-load": "M 351 292 L 352 338 L 352 338",
+      "line-solar-grid": "M 350 292 L 352 378 L 436 404",
+      "line-solar-battery": "M 350 292 L 352 338 L 310 348"
+    }),
+    "image.png": Object.freeze({
+      "line-solar-load": "M 351 292 L 352 338 L 352 338",
+      "line-solar-grid": "M 350 292 L 352 374 L 434 402",
+      "line-solar-battery": "M 350 292 L 352 340 L 312 348"
+    }),
+    "scene_day_rain_idle.png": Object.freeze({
+      "line-solar-load": "M 351 292 L 352 338 L 352 338",
+      "line-solar-grid": "M 350 288 L 352 376 L 436 402",
+      "line-solar-battery": "M 350 288 L 352 330 L 310 342"
+    }),
+    "scene_day_rain_charging.png": Object.freeze({
+      "line-solar-load": "M 380 272 L 382 316 L 436 304",
+      "line-solar-grid": "M 380 272 L 382 354 L 468 378",
+      "line-solar-battery": "M 380 276 L 382 314 L 336 324"
+    }),
+    "scene_day_rain_dual_charging.png": Object.freeze({
+      "line-solar-load": "M 398 291 L 400 305 400 337",
+      "line-solar-grid": "M 400 336 L 399 378 497 411",
+      "line-solar-battery": "M 401 337 L 401 338 L 354 348"
+    }),
+    "scene_night_clear_idle.png": Object.freeze({
+      "line-solar-load": "M 351 292 L 352 338 L 352 338",
+      "line-solar-grid": "M 352 296 L 352 376 L 440 406",
+      "line-solar-battery": "M 350 292 L 352 338 L 310 348"
+    }),
+    "scene_night_clear_charging.png": Object.freeze({
+      "line-solar-load": "M 376 278 L 382 322 L 432 312",
+      "line-solar-grid": "M 378 282 L 382 360 L 480 392",
+      "line-solar-battery": "M 378 280 L 382 322 L 336 330"
+    }),
+    "scene_night_clear_dual_charging.png": Object.freeze({
+      "line-solar-load": "M 397 289 L 401 305 401 336",
+      "line-solar-grid": "M 400 337 L 400 378 480 401",
+      "line-solar-battery": "M 402 336 L 400 336 L 353 346"
+    }),
+    "scene_night_rain_idle.png": Object.freeze({
+      "line-solar-load": "M 351 292 L 352 338 L 352 338",
+      "line-solar-grid": "M 350 284 L 354 366 L 432 392",
+      "line-solar-battery": "M 350 286 L 354 322 L 310 330"
+    }),
+    "scene_night_rain_charging.png": Object.freeze({
+      "line-solar-load": "M 351 292 L 352 338 L 352 338",
+      "line-solar-grid": "M 350 290 L 350 376 L 434 402",
+      "line-solar-battery": "M 350 290 L 352 338 L 310 348"
+    }),
+    "scene_night_rain_dual_charging.png": Object.freeze({
+      "line-solar-load": "M 396 287 L 398 300 398 338",
+      "line-solar-grid": "M 399 340 L 398 376 470 400",
+      "line-solar-battery": "M 399 336 L 401 337 L 355 347"
+    })
+  });
+  const STANDARD_SCENE_FLOW_PATH_MAP = Object.freeze(Object.fromEntries(
+    Object.entries(SCENE_FLOW_PATH_MAP).map(([scene, profile]) => [
+      scene, Object.freeze({ ...profile, ...(ORIGINAL_SCENE_PATH_OVERRIDES[scene] || {}) })
+    ])
+  ));
+
   const DAY_CLEAR_IDLE_COMPONENTS = Object.freeze({
     'solar-label': Object.freeze({ x: -20, y: -94 }),
     'solar-power': Object.freeze({ x: -20, y: -72 }),
@@ -1093,9 +1181,9 @@
       'solar-label': Object.freeze({ x: 4, y: -110 }),
       'solar-power': Object.freeze({ x: 20, y: -86 }),
       'solar-guide': Object.freeze({ x1: 0, y1: -92, x2: 0, y2: -12 }),
-      'grid-label': Object.freeze({ x: 18, y: -14 }),
-      'grid-power': Object.freeze({ x: 18, y: 8 }),
-      'grid-guide': Object.freeze({ x1: 18, y1: 30, x2: 18, y2: 60 }),
+      'grid-label': Object.freeze({ x: 62, y: -14 }),
+      'grid-power': Object.freeze({ x: 62, y: 8 }),
+      'grid-guide': Object.freeze({ x1: 62, y1: 30, x2: 62, y2: 60 }),
       'load-label': Object.freeze({ x: -20, y: -125 }),
       'load-power': Object.freeze({ x: -20, y: -103 }),
       'load-guide': Object.freeze({ x1: -20, y1: -85, x2: -56, y2: -66 }),
@@ -1234,6 +1322,94 @@
       'ev2-guide': Object.freeze({ x1: -18, y1: -68, x2: -18, y2: -28 })
     })
   });
+
+  // Keep the original scene geometry for cards without a configured heat pump.
+  const ORIGINAL_SCENE_COMPONENT_OVERRIDES = Object.freeze({
+    "scene_day_clear_idle.png": Object.freeze({
+      "grid-label": Object.freeze({"x":4,"y":-14}),
+      "grid-power": Object.freeze({"x":4,"y":8}),
+      "grid-guide": Object.freeze({"x1":4,"y1":26,"x2":4,"y2":64}),
+      "load-label": Object.freeze({"x":-32,"y":-64}),
+      "load-power": Object.freeze({"x":-32,"y":-42}),
+      "load-guide": Object.freeze({"x1":-32,"y1":-6,"x2":-32,"y2":68})
+    }),
+    "scene_day_clear_charging.png": Object.freeze({
+      "load-label": Object.freeze({"x":-32,"y":-20}),
+      "load-power": Object.freeze({"x":-12,"y":2}),
+      "load-guide": Object.freeze({"x1":-32,"y1":2,"x2":-32,"y2":66})
+    }),
+    "scene_day_clear_dual_charging.png": Object.freeze({
+      "load-label": Object.freeze({"x":24,"y":-14}),
+      "load-power": Object.freeze({"x":28,"y":3}),
+      "load-guide": Object.freeze({"x1":17,"y1":8,"x2":17,"y2":72})
+    }),
+    "image2.png": Object.freeze({
+      "grid-label": Object.freeze({"x":4,"y":-14}),
+      "grid-power": Object.freeze({"x":4,"y":8}),
+      "grid-guide": Object.freeze({"x1":4,"y1":26,"x2":4,"y2":64}),
+      "load-label": Object.freeze({"x":-32,"y":-64}),
+      "load-power": Object.freeze({"x":-32,"y":-42}),
+      "load-guide": Object.freeze({"x1":-32,"y1":-6,"x2":-32,"y2":68})
+    }),
+    "image.png": Object.freeze({
+      "load-label": Object.freeze({"x":-32,"y":-20}),
+      "load-power": Object.freeze({"x":-12,"y":2}),
+      "load-guide": Object.freeze({"x1":-32,"y1":2,"x2":-32,"y2":66})
+    }),
+    "scene_day_rain_idle.png": Object.freeze({
+      "load-label": Object.freeze({"x":-36,"y":-38}),
+      "load-power": Object.freeze({"x":-14,"y":-12}),
+      "load-guide": Object.freeze({"x1":-32,"y1":-8,"x2":-32,"y2":64})
+    }),
+    "scene_day_rain_charging.png": Object.freeze({
+      "load-label": Object.freeze({"x":0,"y":-58}),
+      "load-power": Object.freeze({"x":18,"y":-34}),
+      "load-guide": Object.freeze({"x1":0,"y1":-26,"x2":0,"y2":46})
+    }),
+    "scene_day_rain_dual_charging.png": Object.freeze({
+      "load-label": Object.freeze({"x":0,"y":-58}),
+      "load-power": Object.freeze({"x":18,"y":-34}),
+      "load-guide": Object.freeze({"x1":0,"y1":-26,"x2":0,"y2":46})
+    }),
+    "scene_night_clear_idle.png": Object.freeze({
+      "grid-label": Object.freeze({ x: 18, y: -14 }),
+      "grid-power": Object.freeze({ x: 18, y: 8 }),
+      "grid-guide": Object.freeze({ x1: 18, y1: 30, x2: 18, y2: 60 }),
+      "load-label": Object.freeze({"x":-36,"y":-28}),
+      "load-power": Object.freeze({"x":-16,"y":-2}),
+      "load-guide": Object.freeze({"x1":-34,"y1":4,"x2":-34,"y2":76})
+    }),
+    "scene_night_clear_charging.png": Object.freeze({
+      "load-label": Object.freeze({"x":-10,"y":-40}),
+      "load-power": Object.freeze({"x":10,"y":-16}),
+      "load-guide": Object.freeze({"x1":-8,"y1":-8,"x2":-8,"y2":64})
+    }),
+    "scene_night_clear_dual_charging.png": Object.freeze({
+      "load-label": Object.freeze({"x":-10,"y":-40}),
+      "load-power": Object.freeze({"x":10,"y":-16}),
+      "load-guide": Object.freeze({"x1":-8,"y1":-8,"x2":-8,"y2":64})
+    }),
+    "scene_night_rain_idle.png": Object.freeze({
+      "load-label": Object.freeze({"x":-34,"y":-42}),
+      "load-power": Object.freeze({"x":-14,"y":-18}),
+      "load-guide": Object.freeze({"x1":-34,"y1":-12,"x2":-34,"y2":60})
+    }),
+    "scene_night_rain_charging.png": Object.freeze({
+      "load-label": Object.freeze({"x":-36,"y":-30}),
+      "load-power": Object.freeze({"x":-16,"y":-8}),
+      "load-guide": Object.freeze({"x1":-34,"y1":-2,"x2":-34,"y2":70})
+    }),
+    "scene_night_rain_dual_charging.png": Object.freeze({
+      "load-label": Object.freeze({"x":22,"y":-19}),
+      "load-power": Object.freeze({"x":29,"y":-4}),
+      "load-guide": Object.freeze({"x1":18,"y1":1,"x2":18,"y2":73})
+    })
+  });
+  const STANDARD_SCENE_FLOW_COMPONENT_MAP = Object.freeze(Object.fromEntries(
+    Object.entries(SCENE_FLOW_COMPONENT_MAP).map(([scene, profile]) => [
+      scene, Object.freeze({ ...profile, ...(ORIGINAL_SCENE_COMPONENT_OVERRIDES[scene] || {}) })
+    ])
+  ));
 
   const HEAT_PUMP_COMPONENTS = Object.freeze({
     'heat-pump-label': Object.freeze({ x: 0, y: -96 }),
@@ -1481,14 +1657,14 @@
     scene_component_map: {},
     scene_path_map: {},
     paths: {
-      line_solar_load: 'M 346 287 Q 349 289 351 295 L 352 338',
+      line_solar_load: 'M 351 292 L 352 338 L 352 338',
       line_grid_load: 'M 434 402 Q 434 402 351 375 Q 352 340 351 341',
       line_battery_load: 'M 310 348 Q 353 339 352 338',
       line_junction_home_load: 'M 354 338 Q 386 330 408 324',
       line_wallbox_ev: 'M 164 322 Q 160 368 182 344',
       line_wallbox_ev2: 'M 148 312 Q 126 310 112 316',
-      line_solar_grid: 'M 346 287 Q 349 289 351 295 L 352 374 L 434 402',
-      line_solar_battery: 'M 346 287 Q 349 289 351 295 L 352 338 L 312 348',
+      line_solar_grid: 'M 350 292 L 352 374 L 434 402',
+      line_solar_battery: 'M 350 292 L 352 338 L 312 348',
       line_grid_battery: 'M 352 340 L 312 348',
       line_heat_pump: 'M 352 345 L 447 323'
     }
@@ -1578,6 +1754,19 @@
     const clean = value.split('#')[0].split('?')[0];
     const parts = clean.split('/');
     return parts[parts.length - 1] || '';
+  }
+
+  function sceneProfileKey(urlOrFile) {
+    const file = sceneFileName(urlOrFile);
+    const standardFile = file.replace(/_heat_pump\.png$/, '.png');
+    return BUILT_IN_SCENE_FILES.has(standardFile) ? standardFile : file;
+  }
+
+  function configuredSceneUrl(url, base, heatPumpConfigured) {
+    if (!heatPumpConfigured) return url;
+    const file = sceneFileName(url);
+    if (!BUILT_IN_SCENE_FILES.has(file) || url !== joinAsset(base, file)) return url;
+    return joinAsset(base, heatPumpSceneFile(file));
   }
 
   function compactStringMap(map) {
@@ -2078,17 +2267,20 @@
 
     _defaultBackgroundMap() {
       const base = this._config.background_asset_base || '/local/community/tesla-style-energy-flow/backgrounds';
+      const fileForConfig = (file) => this._config.entities.heat_pump_power
+        ? heatPumpSceneFile(file)
+        : file;
       const out = {};
       Object.entries(SCENE_IMAGE_MAP).forEach(([k, v]) => {
-        out[k] = joinAsset(base, v);
+        out[k] = joinAsset(base, fileForConfig(v));
       });
       Object.entries(DUAL_CHARGING_SCENE_IMAGE_MAP).forEach(([k, v]) => {
-        out[k] = joinAsset(base, v);
+        out[k] = joinAsset(base, fileForConfig(v));
       });
 
-      out.day_default = out.day_clear_idle || joinAsset(base, 'scene_day_clear_idle.png');
-      out.night_default = out.night_clear_idle || joinAsset(base, 'scene_night_clear_idle.png');
-      out.default = out.day_clear_idle || joinAsset(base, 'scene_day_clear_idle.png');
+      out.day_default = out.day_clear_idle || joinAsset(base, fileForConfig('scene_day_clear_idle.png'));
+      out.night_default = out.night_clear_idle || joinAsset(base, fileForConfig('scene_night_clear_idle.png'));
+      out.default = out.day_clear_idle || joinAsset(base, fileForConfig('scene_day_clear_idle.png'));
 
       // Alias senza charging state
       out.day_clear = out.day_clear_idle;
@@ -2109,21 +2301,29 @@
     // nested objects each call, so memoize and invalidate in setConfig().
     _sceneFlowPathMap() {
       if (!this._sceneFlowPathMapCache) {
-        this._sceneFlowPathMapCache = deepMerge(SCENE_FLOW_PATH_MAP, this._config.scene_path_map || {});
+        const defaults = this._config.entities.heat_pump_power
+          ? SCENE_FLOW_PATH_MAP
+          : STANDARD_SCENE_FLOW_PATH_MAP;
+        this._sceneFlowPathMapCache = deepMerge(defaults, this._config.scene_path_map || {});
       }
       return this._sceneFlowPathMapCache;
     }
 
     _sceneFlowComponentMap() {
       if (!this._sceneFlowComponentMapCache) {
-        this._sceneFlowComponentMapCache = deepMerge(SCENE_COMPONENTS_WITH_HEAT_PUMP, this._config.scene_component_map || {});
+        const defaults = this._config.entities.heat_pump_power
+          ? SCENE_COMPONENTS_WITH_HEAT_PUMP
+          : STANDARD_SCENE_FLOW_COMPONENT_MAP;
+        this._sceneFlowComponentMapCache = deepMerge(defaults, this._config.scene_component_map || {});
       }
       return this._sceneFlowComponentMapCache;
     }
 
     _resolveBackground(evCharging, hasSecondaryEv = false, ev2Only = false) {
       const cfg = this._config;
-      if (!cfg.dynamic_background) return cfg.background;
+      if (!cfg.dynamic_background) {
+        return configuredSceneUrl(cfg.background, cfg.background_asset_base, !!cfg.entities.heat_pump_power);
+      }
 
       // Memoize: this is called every dynamic render but only changes when
       // weather/sun/EV state changes. The map composition and ~7 trim/lookup
@@ -2218,7 +2418,7 @@
         : SCENE_IMAGE_MAP.day_clear_idle;
       const legacyFallback = joinAsset(
         cfg.background_asset_base || '/local/community/tesla-style-energy-flow/backgrounds',
-        fallbackFile
+        cfg.entities.heat_pump_power ? heatPumpSceneFile(fallbackFile) : fallbackFile
       );
       if (legacyFallback) return legacyFallback;
 
@@ -2243,7 +2443,7 @@
 
     _initialPathProfile() {
       const configProfile = profileFromConfigPaths(this._config.paths);
-      const sceneKey = sceneFileName(this._config.background);
+      const sceneKey = sceneProfileKey(this._config.background);
       const sceneProfile = this._sceneFlowPathMap()[sceneKey];
       if (!sceneProfile) return configProfile;
       return { ...configProfile, ...sceneProfile };
@@ -2267,7 +2467,7 @@
     }
 
     _applySceneFlowPaths(sceneHref) {
-      const sceneKey = sceneFileName(sceneHref);
+      const sceneKey = sceneProfileKey(sceneHref);
       const sceneProfile = this._sceneFlowPathMap()[sceneKey];
       if (sceneProfile) {
         if (this._lastAppliedSceneFlowProfile !== sceneKey) {
@@ -2514,7 +2714,7 @@
     }
 
     _applySceneFlowComponents(sceneHref) {
-      const sceneKey = sceneFileName(sceneHref);
+      const sceneKey = sceneProfileKey(sceneHref);
       const map = this._sceneFlowComponentMap();
       const sceneProfile = map[sceneKey] || map['scene_day_clear_idle.png'];
       const marker = map[sceneKey] ? sceneKey : 'scene_day_clear_idle.png';
@@ -2527,6 +2727,7 @@
     _renderStatic() {
       const cfg = this._config;
       const p = this._initialPathProfile();
+      const initialBackground = configuredSceneUrl(cfg.background, cfg.background_asset_base, !!cfg.entities.heat_pump_power);
       const showLabelsClass = cfg.show_labels ? '' : 'hide-labels';
       const titleText = String(cfg.title || '');
       const titleHtml = (cfg.show_header !== false && titleText) ? `<div class="card-title">${titleText}</div>` : '';
@@ -2847,7 +3048,7 @@
                     <stop offset="100%" stop-color="#020817" stop-opacity="0.78"></stop>
                   </radialGradient>
                 </defs>
-                <image id="flow-scene-image" href="${cfg.background}" x="0" y="0" width="600" height="460" preserveAspectRatio="xMidYMid slice"></image>
+                <image id="flow-scene-image" href="${initialBackground}" x="0" y="0" width="600" height="460" preserveAspectRatio="xMidYMid slice"></image>
                 <g class="flow-background-dim" opacity="${backgroundDim}">
                   <rect class="flow-scene-dim" x="0" y="0" width="600" height="460"></rect>
                   <rect class="flow-sky-dim" x="0" y="0" width="600" height="260"></rect>
@@ -3108,7 +3309,7 @@
       this._setHeatPumpIcon(joinAsset(cfg.background_asset_base, heatPumpIconFile));
       // Scene-specific placement (see HEAT_PUMP_SCENE_ORIGINS).
       if (heatPumpNodeGroup) {
-        const hpOrigin = heatPumpOrigin(sceneFileName(sceneHref));
+        const hpOrigin = heatPumpOrigin(sceneProfileKey(sceneHref));
         const hpTransform = `translate(${hpOrigin.x}, ${hpOrigin.y})`;
         if (heatPumpNodeGroup.getAttribute('transform') !== hpTransform) {
           heatPumpNodeGroup.setAttribute('transform', hpTransform);
@@ -3565,7 +3766,10 @@
     }
 
     _sceneFlowComponentMap() {
-      return deepMerge(SCENE_COMPONENTS_WITH_HEAT_PUMP, this._config.scene_component_map || {});
+      const defaults = this._config.entities.heat_pump_power
+        ? SCENE_COMPONENTS_WITH_HEAT_PUMP
+        : STANDARD_SCENE_FLOW_COMPONENT_MAP;
+      return deepMerge(defaults, this._config.scene_component_map || {});
     }
 
     _selectedPositionScene() {
@@ -3616,7 +3820,8 @@
 
     _positionPreviewBackground(sceneKey) {
       const base = this._config.background_asset_base || '/local/community/tesla-style-energy-flow/backgrounds';
-      return joinAsset(base, sceneKey);
+      const file = this._config.entities.heat_pump_power ? heatPumpSceneFile(sceneKey) : sceneKey;
+      return joinAsset(base, file);
     }
 
     _positionPreviewTextCenter(sceneKey, group) {
@@ -3703,7 +3908,10 @@
     // on top. Path resolution mirrors the card's _initialPathProfile exactly.
     _positionPreviewFlowPaths(sceneKey) {
       const configProfile = profileFromConfigPaths(this._config.paths);
-      const sceneProfile = deepMerge(SCENE_FLOW_PATH_MAP, this._config.scene_path_map || {})[sceneKey];
+      const defaults = this._config.entities.heat_pump_power
+        ? SCENE_FLOW_PATH_MAP
+        : STANDARD_SCENE_FLOW_PATH_MAP;
+      const sceneProfile = deepMerge(defaults, this._config.scene_path_map || {})[sceneKey];
       const profile = sceneProfile ? { ...configProfile, ...sceneProfile } : configProfile;
       return Object.entries(FLOW_PATH_KEYS).map(([pathId, configKey]) => {
         const d = profile[pathId] || DEFAULT_CONFIG.paths[configKey];

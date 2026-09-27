@@ -123,8 +123,8 @@ assert.match(
 
 assert.match(
   source,
-  /'scene_night_clear_idle\.png': Object\.freeze\(\{[\s\S]*'grid-label': Object\.freeze\(\{ x: 18, y: -14 \}\),\s*'grid-power': Object\.freeze\(\{ x: 18, y: 8 \}\),\s*'grid-guide': Object\.freeze\(\{ x1: 18, y1: 30, x2: 18, y2: 60 \}\)/,
-  'night clear idle grid label and power should sit above the grid guide line'
+  /'scene_night_clear_idle\.png': Object\.freeze\(\{[\s\S]*'grid-label': Object\.freeze\(\{ x: 62, y: -14 \}\),\s*'grid-power': Object\.freeze\(\{ x: 62, y: 8 \}\),\s*'grid-guide': Object\.freeze\(\{ x1: 62, y1: 30, x2: 62, y2: 60 \}\)/,
+  'night clear idle grid label and power should clear the heat pump artwork'
 );
 
 assert.match(

@@ -57,15 +57,56 @@ assert.notEqual(selectedScene, '/local/my-second-car.png', 'EV 1 charging means 
 
 const sceneDefaults = sceneCard._sceneFlowComponentMap();
 for (const scene of ['scene_day_clear_idle.png', 'scene_night_rain_dual_charging.png']) {
-  assert.equal(sceneDefaults[scene]['heat-pump-label'].y, -96, 'each scene needs a heat pump label reset position');
-  assert.equal(sceneDefaults[scene]['heat-pump-guide'].y2, -55);
+  assert.equal(sceneDefaults[scene]['heat-pump-label'], undefined, 'standard scenes omit heat pump positions');
 }
 assert.match(sceneCard.shadowRoot.innerHTML, /id="flow-heat-pump-guide"/);
+
+const sceneFiles = ['day_clear_idle', 'day_clear_charging', 'day_clear_dual_charging',
+  'day_rain_idle', 'day_rain_charging', 'day_rain_dual_charging',
+  'night_clear_idle', 'night_clear_charging', 'night_clear_dual_charging',
+  'night_rain_idle', 'night_rain_charging', 'night_rain_dual_charging'];
+const backgrounds = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../dist/backgrounds');
+for (const scene of sceneFiles) {
+  assert.ok(fs.existsSync(path.join(backgrounds, `scene_${scene}.png`)), `${scene} standard asset exists`);
+  assert.ok(fs.existsSync(path.join(backgrounds, `scene_${scene}_heat_pump.png`)), `${scene} heat pump asset exists`);
+}
+
+const modeCard = new Card();
+modeCard.setConfig({ language: 'en' });
+assert.match(modeCard._defaultBackgroundMap().day_clear_idle, /scene_day_clear_idle\.png$/);
+assert.equal(modeCard._sceneFlowPathMap()['scene_day_clear_idle.png']['line-solar-load'],
+  'M 351 292 L 352 338 L 352 338');
+assert.equal(modeCard._sceneFlowComponentMap()['scene_day_clear_idle.png']['load-label'].y, -64);
+assert.equal(modeCard._sceneFlowComponentMap()['scene_night_clear_idle.png']['grid-label'].x, 18);
+
+modeCard.setConfig({ language: 'en', entities: { heat_pump_power: 'sensor.heat_pump' } });
+for (const scene of sceneFiles) {
+  assert.match(modeCard._defaultBackgroundMap()[scene], new RegExp(`scene_${scene}_heat_pump\\.png$`));
+}
+assert.equal(modeCard._sceneFlowPathMap()['scene_day_clear_idle.png']['line-solar-load'],
+  'M 346 287 Q 349 289 351 295 L 352 338');
+assert.equal(modeCard._sceneFlowComponentMap()['scene_day_clear_idle.png']['load-label'].y, -125);
+assert.equal(modeCard._sceneFlowComponentMap()['scene_day_clear_idle.png']['heat-pump-label'].y, -96);
+assert.equal(modeCard._sceneFlowComponentMap()['scene_night_clear_idle.png']['grid-label'].x, 62);
+const base = '/local/community/tesla-style-energy-flow/backgrounds';
+modeCard.setConfig({ language: 'en', dynamic_background: false,
+  background: `${base}/scene_night_rain_idle.png`, entities: { heat_pump_power: 'sensor.heat_pump' } });
+assert.equal(modeCard._resolveBackground(false), `${base}/scene_night_rain_idle_heat_pump.png`);
+modeCard.setConfig({ language: 'en', dynamic_background: false,
+  background: '/local/my-scene.png', entities: { heat_pump_power: 'sensor.heat_pump' } });
+assert.equal(modeCard._resolveBackground(false), '/local/my-scene.png');
+modeCard.setConfig({ language: 'en', background_map: { day_clear_idle: '/local/my-scene.png' },
+  entities: { heat_pump_power: 'sensor.heat_pump' } });
+modeCard._hass = { states: { 'sun.sun': { state: 'above_horizon' } } };
+assert.equal(modeCard._computeBackground(false, false, 'sunny'), '/local/my-scene.png');
 
 const Editor = elements.get('tesla-style-energy-flow-editor');
 const editor = new Editor();
 editor.setConfig({ language: 'en' });
 assert.ok(!editor._positionEditorGroups('scene_day_clear_idle.png').some((group) => group.node === 'heat-pump'));
+assert.match(editor._positionPreviewBackground('scene_day_clear_idle.png'), /scene_day_clear_idle\.png$/);
 editor.setConfig({ language: 'en', entities: { heat_pump_power: 'sensor.heat_pump' } });
 assert.ok(editor._positionEditorGroups('scene_day_clear_idle.png').some((group) => group.node === 'heat-pump'));
 assert.equal(editor._positionValue('scene_day_clear_idle.png', 'heat-pump-label', 'y'), -96);
+assert.match(editor._positionPreviewBackground('scene_day_clear_idle.png'), /scene_day_clear_idle_heat_pump\.png$/);
+assert.match(editor._positionPreviewFlowPaths('scene_day_clear_idle.png'), /M 346 287 Q 349 289 351 295 L 352 338/);
