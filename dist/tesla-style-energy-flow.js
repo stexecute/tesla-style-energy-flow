@@ -1508,6 +1508,8 @@
     ])
   ));
 
+  // Heat pump artwork box relative to its node origin (see #heat-pump-icon).
+  const HEAT_PUMP_ICON = Object.freeze({ right: 35, top: -54 });
   // The label sits beside the unit on the open ground. Above the unit it would
   // cross the high-contrast roof eave in most renders.
   const HEAT_PUMP_COMPONENTS = Object.freeze({
@@ -1558,6 +1560,10 @@
     Object.freeze({ title: 'EV 2', node: 'ev2', label: 'ev2-label', power: 'ev2-power', guide: 'ev2-guide', scene: 'dual_charging' }),
     Object.freeze({ title: 'Heat Pump', node: 'heat-pump', label: 'heat-pump-label', power: 'heat-pump-power', guide: 'heat-pump-guide' })
   ]);
+
+  // Nodes whose label and value the card centres on the guide's x1
+  // (see GUIDE_ALIGNED_TEXT_PAIRS).
+  const POSITION_EDITOR_ALIGNED_NODES = new Set(['solar', 'grid', 'load', 'ev', 'ev2']);
 
   const POSITION_EDITOR_GROUP_I18N_KEYS = Object.freeze({
     solar: 'card.node.solar',
@@ -2716,17 +2722,21 @@
 
     // The heat pump text sits right of the unit, and several scenes place the
     // unit close to the right edge. Long translations or custom labels would
-    // run off the card there, so pull the text left just enough to fit.
+    // run off the card there, so pull the text left just enough to fit. When
+    // even that would put it on the artwork, move it above the unit instead.
     _fitHeatPumpTextToViewBox(sceneKey, origin) {
       const label = this._query('#flow-heat-pump-label');
       const power = this._query('#flow-heat-pump-power');
-      if (!label || !power || typeof label.getBBox !== 'function') return;
-      const fitKey = `${sceneKey}|${label.textContent}|${power.textContent.length}`;
+      const guide = this._query('#flow-heat-pump-guide');
+      if (!label || !power || !guide || typeof label.getBBox !== 'function') return;
+      const fitKey = `${sceneKey}|${label.textContent}|${power.textContent}`;
       if (this._heatPumpFitKey === fitKey) return;
       const map = this._sceneFlowComponentMap();
       const profile = map[sceneKey] || map['scene_day_clear_idle.png'] || {};
-      const labelX = safeNum(profile['heat-pump-label']?.x, safeNum(label.getAttribute('x'), 0));
-      const powerX = safeNum(profile['heat-pump-power']?.x, safeNum(power.getAttribute('x'), 0));
+      const base = (key, fallback) => ({ ...fallback, ...(profile[key] || {}) });
+      const baseLabel = base('heat-pump-label', HEAT_PUMP_COMPONENTS['heat-pump-label']);
+      const basePower = base('heat-pump-power', HEAT_PUMP_COMPONENTS['heat-pump-power']);
+      const baseGuide = base('heat-pump-guide', HEAT_PUMP_COMPONENTS['heat-pump-guide']);
       let labelWidth = 0;
       let powerWidth = 0;
       try {
@@ -2737,11 +2747,51 @@
       }
       // Hidden or not yet laid out; try again on the next render.
       if (!labelWidth && !powerWidth) return;
-      const maxX = this._sceneViewBox().maxX - 6;
-      const right = origin.x + Math.max(labelX + labelWidth / 2, powerX + powerWidth / 2);
-      const shift = Math.min(0, maxX - right);
-      this._setSvgAttrs(label, { x: Number((labelX + shift).toFixed(2)) });
-      this._setSvgAttrs(power, { x: Number((powerX + shift).toFixed(2)) });
+      const maxX = this._sceneViewBox().maxX - 4 - origin.x;
+      const halfWidth = Math.max(labelWidth, powerWidth) / 2;
+      const besideUnit = basePower.y > HEAT_PUMP_ICON.top;
+      const shiftToFit = (x) => Math.min(x, maxX - halfWidth);
+      // Beside the unit the text must start right of the artwork; move it
+      // right for long labels, left near the edge, as far as the card allows.
+      const sideGuide = baseGuide.y1 === baseGuide.y2;
+      // Preferred: text right of a short sideways guide. Tighter: text right
+      // against the artwork without the guide. Otherwise: above the unit.
+      const withGuideX = (sideGuide ? baseGuide.x1 + 6 : HEAT_PUMP_ICON.right + 3) + halfWidth;
+      const bareX = HEAT_PUMP_ICON.right + halfWidth;
+      const besideX = shiftToFit(Math.max(basePower.x, withGuideX));
+      const bareBesideX = shiftToFit(Math.max(basePower.x, bareX));
+      let next;
+      if (!besideUnit || besideX >= withGuideX || bareBesideX >= bareX) {
+        const targetX = !besideUnit ? shiftToFit(basePower.x) : (besideX >= withGuideX ? besideX : bareBesideX);
+        const shift = targetX - basePower.x;
+        const textLeft = targetX - halfWidth;
+        const showGuide = !besideUnit || besideX >= withGuideX;
+        next = {
+          label: { ...baseLabel, x: baseLabel.x + shift },
+          power: { ...basePower, x: basePower.x + shift },
+          // A sideways guide ends just short of the text.
+          guide: besideUnit && sideGuide ? { ...baseGuide, x2: textLeft - 2 } : baseGuide,
+          guideVisible: showGuide
+        };
+      } else {
+        const above = HEAT_PUMP_DUAL_COMPONENTS;
+        const x = shiftToFit(above['heat-pump-power'].x);
+        const guideX = Math.min(x, HEAT_PUMP_ICON.right - 6);
+        next = {
+          label: { x, y: above['heat-pump-label'].y },
+          power: { x, y: above['heat-pump-power'].y },
+          guide: { x1: guideX, y1: above['heat-pump-power'].y + 6, x2: guideX, y2: HEAT_PUMP_ICON.top + 6 },
+          guideVisible: true
+        };
+      }
+      const round = (v) => Number(v.toFixed(2));
+      this._setSvgAttrs(label, { x: round(next.label.x), y: round(next.label.y) });
+      this._setSvgAttrs(power, { x: round(next.power.x), y: round(next.power.y) });
+      this._setSvgAttrs(guide, {
+        x1: round(next.guide.x1), y1: round(next.guide.y1),
+        x2: round(next.guide.x2), y2: round(next.guide.y2),
+        visibility: next.guideVisible ? 'visible' : 'hidden'
+      });
       this._heatPumpFitKey = fitKey;
     }
 
@@ -4010,28 +4060,32 @@
     }
 
     _positionPreviewTextCenter(sceneKey, group) {
-      const x = this._positionScenePoint(sceneKey, group, group.guide, 'x1', 'y1').x;
-      const label = this._positionScenePoint(sceneKey, group, group.label);
-      const power = this._positionScenePoint(sceneKey, group, group.power);
+      return this._positionPreviewGeometry(sceneKey, group).textCenter;
+    }
+
+    // Mirrors the card: text of guide-aligned nodes is centred on a vertical
+    // guide, every other node (battery value row, heat pump) keeps its own
+    // coordinates and guide direction.
+    _positionPreviewGeometry(sceneKey, group) {
+      const guideStart = this._positionScenePoint(sceneKey, group, group.guide, 'x1', 'y1');
+      const guideEndRaw = this._positionScenePoint(sceneKey, group, group.guide, 'x2', 'y2');
+      const labelRaw = this._positionScenePoint(sceneKey, group, group.label);
+      const powerRaw = this._positionScenePoint(sceneKey, group, group.power);
+      const aligned = POSITION_EDITOR_ALIGNED_NODES.has(group.node);
+      const guideEnd = aligned ? { x: guideStart.x, y: guideEndRaw.y } : guideEndRaw;
+      const label = aligned ? { ...labelRaw, x: guideStart.x } : labelRaw;
+      const power = aligned ? { ...powerRaw, x: guideStart.x } : powerRaw;
       return {
-        x,
-        y: (label.y + power.y) / 2
+        guideStart,
+        guideEnd,
+        label,
+        power,
+        textCenter: { x: (label.x + power.x) / 2, y: (label.y + power.y) / 2 }
       };
     }
 
     _positionPreviewGroup(sceneKey, group) {
-      const guideStart = this._positionScenePoint(sceneKey, group, group.guide, 'x1', 'y1');
-      const guideEndRaw = this._positionScenePoint(sceneKey, group, group.guide, 'x2', 'y2');
-      const guideEnd = { x: guideStart.x, y: guideEndRaw.y };
-      const label = {
-        ...this._positionScenePoint(sceneKey, group, group.label),
-        x: guideStart.x
-      };
-      const power = {
-        ...this._positionScenePoint(sceneKey, group, group.power),
-        x: guideStart.x
-      };
-      const textCenter = this._positionPreviewTextCenter(sceneKey, group);
+      const { guideStart, guideEnd, label, power, textCenter } = this._positionPreviewGeometry(sceneKey, group);
       const title = this._escapeHtml(this._positionGroupTitle(group).toUpperCase());
       const scene = this._escapeHtml(sceneKey);
       return `
@@ -4219,15 +4273,25 @@
       ));
     }
 
-    _positionTextDragValues(sceneKey, group) {
-      const x = this._positionValue(sceneKey, group.guide, 'x1');
+    // Horizontal moves shift text and guide together and keep their offsets,
+    // so a sideways guide (heat pump) or an offset value row stays intact.
+    _positionHorizontalMembers(group) {
       return [
-        { componentKey: group.label, attr: 'x', value: x },
+        { componentKey: group.label, attr: 'x' },
+        { componentKey: group.power, attr: 'x' },
+        { componentKey: group.guide, attr: 'x1' },
+        { componentKey: group.guide, attr: 'x2' }
+      ];
+    }
+
+    _positionTextDragValues(sceneKey, group) {
+      return [
+        ...this._positionHorizontalMembers(group).map((member) => ({
+          ...member,
+          value: this._positionValue(sceneKey, member.componentKey, member.attr)
+        })),
         { componentKey: group.label, attr: 'y', value: this._positionValue(sceneKey, group.label, 'y') },
-        { componentKey: group.power, attr: 'x', value: x },
-        { componentKey: group.power, attr: 'y', value: this._positionValue(sceneKey, group.power, 'y') },
-        { componentKey: group.guide, attr: 'x1', value: x },
-        { componentKey: group.guide, attr: 'x2', value: x }
+        { componentKey: group.power, attr: 'y', value: this._positionValue(sceneKey, group.power, 'y') }
       ];
     }
 
@@ -4240,12 +4304,11 @@
     _positionLinkedChanges(sceneKey, componentKey, attr, value) {
       const group = this._positionGroupForComponent(componentKey);
       if (['x', 'x1', 'x2'].includes(attr) && group) {
-        return [
-          { componentKey: group.label, attr: 'x', value },
-          { componentKey: group.power, attr: 'x', value },
-          { componentKey: group.guide, attr: 'x1', value },
-          { componentKey: group.guide, attr: 'x2', value }
-        ];
+        const delta = safeNum(value, 0) - this._positionValue(sceneKey, componentKey, attr);
+        return this._positionHorizontalMembers(group).map((member) => ({
+          ...member,
+          value: this._positionValue(sceneKey, member.componentKey, member.attr) + delta
+        }));
       }
       return [{ componentKey, attr, value }];
     }
@@ -4311,18 +4374,7 @@
     }
 
     _updatePositionPreviewGroupDom(svg, sceneKey, group) {
-      const guideStart = this._positionScenePoint(sceneKey, group, group.guide, 'x1', 'y1');
-      const guideEndRaw = this._positionScenePoint(sceneKey, group, group.guide, 'x2', 'y2');
-      const guideEnd = { x: guideStart.x, y: guideEndRaw.y };
-      const label = {
-        ...this._positionScenePoint(sceneKey, group, group.label),
-        x: guideStart.x
-      };
-      const power = {
-        ...this._positionScenePoint(sceneKey, group, group.power),
-        x: guideStart.x
-      };
-      const textCenter = this._positionPreviewTextCenter(sceneKey, group);
+      const { guideStart, guideEnd, label, power, textCenter } = this._positionPreviewGeometry(sceneKey, group);
       this._setPreviewAttrs(svg, `[data-preview-component="${group.label}"]`, label);
       this._setPreviewAttrs(svg, `[data-preview-component="${group.power}"]`, power);
       this._setPreviewAttrs(svg, `[data-preview-component="${group.guide}"]`, {

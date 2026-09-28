@@ -297,7 +297,7 @@ assert.match(
 
 assert.match(
   source,
-  /_positionTextDragValues\(sceneKey, group\) \{[\s\S]*group\.label, attr: 'x'[\s\S]*group\.power, attr: 'x'[\s\S]*group\.guide, attr: 'x1'[\s\S]*group\.guide, attr: 'x2'/,
+  /_positionHorizontalMembers\(group\) \{[\s\S]*group\.label, attr: 'x'[\s\S]*group\.power, attr: 'x'[\s\S]*group\.guide, attr: 'x1'[\s\S]*group\.guide, attr: 'x2'[\s\S]*_positionTextDragValues\(sceneKey, group\) \{[\s\S]*this\._positionHorizontalMembers\(group\)/,
   'dragging a label block should move the label, kW value and guide x coordinate together'
 );
 
@@ -315,7 +315,7 @@ assert.match(
 
 assert.match(
   source,
-  /_positionLinkedChanges\(sceneKey, componentKey, attr, value\) \{[\s\S]*if \(\['x', 'x1', 'x2'\]\.includes\(attr\) && group\)[\s\S]*componentKey: group\.label, attr: 'x'[\s\S]*componentKey: group\.power, attr: 'x'[\s\S]*componentKey: group\.guide, attr: 'x1'[\s\S]*componentKey: group\.guide, attr: 'x2'/,
+  /_positionLinkedChanges\(sceneKey, componentKey, attr, value\) \{[\s\S]*if \(\['x', 'x1', 'x2'\]\.includes\(attr\) && group\)[\s\S]*this\._positionHorizontalMembers\(group\)/,
   'manual x edits should keep labels, kW values and guide lines centered in the GUI editor'
 );
 

@@ -133,6 +133,16 @@ assert.doesNotMatch(editor._positionPreviewSvg('scene_day_clear_idle.png'), /pos
 editor.setConfig({ language: 'en', entities: { heat_pump_power: 'sensor.heat_pump' } });
 assert.ok(editor._positionEditorGroups('scene_day_clear_idle.png').some((group) => group.node === 'heat-pump'));
 assert.equal(editor._positionValue('scene_day_clear_idle.png', 'heat-pump-label', 'y'), -38);
+// Moving a block sideways keeps the offsets between text and guide, so the
+// sideways heat pump guide survives manual edits.
+const hpMove = Object.fromEntries(editor._positionLinkedChanges('scene_day_clear_idle.png', 'heat-pump-label', 'x', 90)
+  .map(({ componentKey, attr, value }) => [`${componentKey}.${attr}`, value]));
+assert.deepEqual(hpMove, {
+  'heat-pump-label.x': 90, 'heat-pump-power.x': 90, 'heat-pump-guide.x1': 48, 'heat-pump-guide.x2': 58
+});
+const hpPreview = editor._positionPreviewGeometry('scene_day_clear_idle.png',
+  editor._positionEditorGroups('scene_day_clear_idle.png').find((group) => group.node === 'heat-pump'));
+assert.notEqual(hpPreview.guideStart.x, hpPreview.guideEnd.x, 'editor preview keeps the heat pump guide horizontal');
 assert.match(editor._positionPreviewBackground('scene_day_clear_idle.png'), /scene_day_clear_idle_heat_pump\.png$/);
 assert.match(editor._positionPreviewSvg('scene_day_clear_idle.png'), /position-preview-heat-pump-icon" href="[^\"]*heat_pump_icon_day\.png" x="410" y="311"/);
 assert.match(editor._positionPreviewSvg('scene_day_rain_idle.png'), /position-preview-heat-pump-icon" href="[^\"]*heat_pump_icon_rain\.png" x="398" y="304"/);
