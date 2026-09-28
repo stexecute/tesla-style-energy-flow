@@ -5,6 +5,10 @@
 - Added Brazilian Portuguese (`pt-BR`) and European Portuguese (`pt-PT`) translations for the card and the config editor
 - Added region-aware language resolution so `pt-BR` and `pt-PT` are kept apart, with a bare `pt` profile mapping to `pt-PT`
 - Added `tests/i18n.test.mjs` to keep every translation bundle in key parity with `en`
+- Moved the heat pump label beside the unit so it no longer crosses the roof eave, and pull it back from the right edge for long labels
+- Home, battery, grid, EV 1 and EV 2 guides now drop vertically onto their object in every scene: home onto the centre of the window block (or the distribution box with a heat pump), battery into the battery, grid onto the ground cable, EVs onto each car's plug
+- EV 1 and EV 2 text is stacked so the two never share a row or cover the lit gable window
+- Restored the grid guide line, which was dropped from the card markup, and moved solar and home text a little closer to the house
 
 ## 0.3.30 - 2026-06-28
 

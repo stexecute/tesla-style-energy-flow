@@ -1338,26 +1338,9 @@
     })
   });
 
-  // Keep the original scene geometry for cards without a configured heat pump.
+  // Legacy scene aliases without anchors keep their original geometry when no
+  // heat pump is configured.
   const ORIGINAL_SCENE_COMPONENT_OVERRIDES = Object.freeze({
-    "scene_day_clear_idle.png": Object.freeze({
-      "grid-label": Object.freeze({"x":4,"y":-14}),
-      "grid-power": Object.freeze({"x":4,"y":8}),
-      "grid-guide": Object.freeze({"x1":4,"y1":26,"x2":4,"y2":64}),
-      "load-label": Object.freeze({"x":-32,"y":-64}),
-      "load-power": Object.freeze({"x":-32,"y":-42}),
-      "load-guide": Object.freeze({"x1":-32,"y1":-6,"x2":-32,"y2":68})
-    }),
-    "scene_day_clear_charging.png": Object.freeze({
-      "load-label": Object.freeze({"x":-32,"y":-20}),
-      "load-power": Object.freeze({"x":-12,"y":2}),
-      "load-guide": Object.freeze({"x1":-32,"y1":2,"x2":-32,"y2":66})
-    }),
-    "scene_day_clear_dual_charging.png": Object.freeze({
-      "load-label": Object.freeze({"x":24,"y":-14}),
-      "load-power": Object.freeze({"x":28,"y":3}),
-      "load-guide": Object.freeze({"x1":17,"y1":8,"x2":17,"y2":72})
-    }),
     "image2.png": Object.freeze({
       "grid-label": Object.freeze({"x":4,"y":-14}),
       "grid-power": Object.freeze({"x":4,"y":8}),
@@ -1370,70 +1353,190 @@
       "load-label": Object.freeze({"x":-32,"y":-20}),
       "load-power": Object.freeze({"x":-12,"y":2}),
       "load-guide": Object.freeze({"x1":-32,"y1":2,"x2":-32,"y2":66})
-    }),
-    "scene_day_rain_idle.png": Object.freeze({
-      "load-label": Object.freeze({"x":-36,"y":-38}),
-      "load-power": Object.freeze({"x":-14,"y":-12}),
-      "load-guide": Object.freeze({"x1":-32,"y1":-8,"x2":-32,"y2":64})
-    }),
-    "scene_day_rain_charging.png": Object.freeze({
-      "load-label": Object.freeze({"x":0,"y":-58}),
-      "load-power": Object.freeze({"x":18,"y":-34}),
-      "load-guide": Object.freeze({"x1":0,"y1":-26,"x2":0,"y2":46})
-    }),
-    "scene_day_rain_dual_charging.png": Object.freeze({
-      "load-label": Object.freeze({"x":0,"y":-58}),
-      "load-power": Object.freeze({"x":18,"y":-34}),
-      "load-guide": Object.freeze({"x1":0,"y1":-26,"x2":0,"y2":46})
-    }),
-    "scene_night_clear_idle.png": Object.freeze({
-      "grid-label": Object.freeze({ x: 18, y: -14 }),
-      "grid-power": Object.freeze({ x: 18, y: 8 }),
-      "grid-guide": Object.freeze({ x1: 18, y1: 30, x2: 18, y2: 60 }),
-      "load-label": Object.freeze({"x":-36,"y":-28}),
-      "load-power": Object.freeze({"x":-16,"y":-2}),
-      "load-guide": Object.freeze({"x1":-34,"y1":4,"x2":-34,"y2":76})
-    }),
-    "scene_night_clear_charging.png": Object.freeze({
-      "load-label": Object.freeze({"x":-10,"y":-40}),
-      "load-power": Object.freeze({"x":10,"y":-16}),
-      "load-guide": Object.freeze({"x1":-8,"y1":-8,"x2":-8,"y2":64})
-    }),
-    "scene_night_clear_dual_charging.png": Object.freeze({
-      "load-label": Object.freeze({"x":-10,"y":-40}),
-      "load-power": Object.freeze({"x":10,"y":-16}),
-      "load-guide": Object.freeze({"x1":-8,"y1":-8,"x2":-8,"y2":64})
-    }),
-    "scene_night_rain_idle.png": Object.freeze({
-      "load-label": Object.freeze({"x":-34,"y":-42}),
-      "load-power": Object.freeze({"x":-14,"y":-18}),
-      "load-guide": Object.freeze({"x1":-34,"y1":-12,"x2":-34,"y2":60})
-    }),
-    "scene_night_rain_charging.png": Object.freeze({
-      "load-label": Object.freeze({"x":-36,"y":-30}),
-      "load-power": Object.freeze({"x":-16,"y":-8}),
-      "load-guide": Object.freeze({"x1":-34,"y1":-2,"x2":-34,"y2":70})
-    }),
-    "scene_night_rain_dual_charging.png": Object.freeze({
-      "load-label": Object.freeze({"x":22,"y":-19}),
-      "load-power": Object.freeze({"x":29,"y":-4}),
-      "load-guide": Object.freeze({"x1":18,"y1":1,"x2":18,"y2":73})
     })
   });
+  // Where the scene paths meet the artwork, identical in the renders with and
+  // without heat pump:
+  //   home      end of line-junction-home-load (left edge of the distribution
+  //             box, which is the four-pane window block without a heat pump)
+  //   battery   start of line-battery-load (top-right corner of the battery)
+  //   gridCable point on line-grid-load, on the visible ground cable, high
+  //             enough to leave room for a guide and text below it
+  //   ev, ev2   end of line-wallbox-ev / line-wallbox-ev2 (the car's plug)
+  // The guides are derived from these so each one drops vertically onto its
+  // object.
+  const SCENE_ANCHORS = Object.freeze({
+    'scene_day_clear_idle.png': Object.freeze({ home: [408, 324], battery: [310, 348], gridCable: [397, 390], ev: [182, 344], ev2: [112, 316] }),
+    'scene_day_clear_charging.png': Object.freeze({ home: [408, 324], battery: [310, 348], gridCable: [397, 390], ev: [182, 344], ev2: [112, 316] }),
+    'scene_day_clear_dual_charging.png': Object.freeze({ home: [456, 325], battery: [355, 347], gridCable: [439, 390], ev: [220, 340], ev2: [126, 315], dual: true }),
+    'scene_day_rain_idle.png': Object.freeze({ home: [410, 318], battery: [310, 342], gridCable: [397, 390], ev: [182, 344], ev2: [112, 308] }),
+    'scene_day_rain_charging.png': Object.freeze({ home: [438, 302], battery: [336, 324], gridCable: [464, 378], ev: [188, 314], ev2: [106, 292] }),
+    'scene_day_rain_dual_charging.png': Object.freeze({ home: [458, 324], battery: [354, 348], gridCable: [436, 390], ev: [216, 345], ev2: [128, 322], dual: true }),
+    'scene_night_clear_idle.png': Object.freeze({ home: [408, 324], battery: [310, 348], gridCable: [397, 390], ev: [182, 344], ev2: [112, 318] }),
+    'scene_night_clear_charging.png': Object.freeze({ home: [434, 310], battery: [336, 330], gridCable: [478, 390], ev: [206, 326], ev2: [118, 300] }),
+    'scene_night_clear_dual_charging.png': Object.freeze({ home: [458, 323], battery: [353, 346], gridCable: [435, 390], ev: [221, 341], ev2: [127, 317], dual: true }),
+    'scene_night_rain_idle.png': Object.freeze({ home: [406, 312], battery: [310, 330], gridCable: [422, 390], ev: [184, 334], ev2: [110, 306] }),
+    'scene_night_rain_charging.png': Object.freeze({ home: [410, 320], battery: [310, 348], gridCable: [397, 390], ev: [182, 332], ev2: [112, 308] }),
+    'scene_night_rain_dual_charging.png': Object.freeze({ home: [458, 323], battery: [355, 347], gridCable: [446, 390], ev: [223, 338], ev2: [129, 317], dual: true })
+  });
+  // Node group origins from the card markup (translate(...) of each node).
+  const FLOW_LAYOUT_ORIGINS = Object.freeze({
+    load: Object.freeze({ x: 465, y: 247 }),
+    battery: Object.freeze({ x: 314, y: 330 }),
+    grid: Object.freeze({ x: 448, y: 336 }),
+    ev: Object.freeze({ x: 184, y: 332 }),
+    ev2: Object.freeze({ x: 106, y: 316 })
+  });
+  // Vertical rhythm shared by every derived text block.
+  const LAYOUT_LINE_GAP = 22;
+  const LAYOUT_GUIDE_TEXT_GAP = 12;
+
+  const layoutPoint = (x, y) => Object.freeze({ x: Math.round(x), y: Math.round(y) });
+  const layoutSegment = (x1, y1, x2, y2) => Object.freeze({
+    x1: Math.round(x1), y1: Math.round(y1), x2: Math.round(x2), y2: Math.round(y2)
+  });
+  // The dual-charging renders show the house ~8% larger.
+  const anchorScale = (anchors) => (anchors.dual ? 1.08 : 1);
+
+  // Text block above a vertical guide that ends just above the target point.
+  // Coordinates are absolute scene units; `origin` converts them to the node.
+  function textAboveTarget(prefix, origin, x, targetY, guideLength) {
+    const guideBottom = targetY - origin.y;
+    const guideTop = guideBottom - guideLength;
+    const powerY = guideTop - LAYOUT_GUIDE_TEXT_GAP;
+    const localX = x - origin.x;
+    return {
+      [`${prefix}-label`]: layoutPoint(localX, powerY - LAYOUT_LINE_GAP),
+      [`${prefix}-power`]: layoutPoint(localX, powerY),
+      [`${prefix}-guide`]: layoutSegment(localX, guideTop, localX, guideBottom)
+    };
+  }
+
+  // Battery: text below the battery, guide centred on it and reaching up into
+  // its lower face.
+  function batteryAnchoredComponents(anchors) {
+    const s = anchorScale(anchors);
+    const o = FLOW_LAYOUT_ORIGINS;
+    const battX = anchors.battery[0] - 13 * s - o.battery.x;
+    const battBottom = anchors.battery[1] + 54 * s - o.battery.y;
+    return {
+      'battery-label': layoutPoint(battX, battBottom + 20),
+      'battery-power': layoutPoint(battX - 8, battBottom + 38),
+      'battery-guide': layoutSegment(battX, battBottom - 14, battX, battBottom + 6)
+    };
+  }
+
+  // Grid: text below the ground cable, guide rising vertically onto it.
+  function gridAnchoredComponents(anchors) {
+    const o = FLOW_LAYOUT_ORIGINS;
+    const x = anchors.gridCable[0] - o.grid.x;
+    const y = anchors.gridCable[1] - o.grid.y;
+    return {
+      'grid-label': layoutPoint(x, y + 34),
+      'grid-power': layoutPoint(x, y + 34 + LAYOUT_LINE_GAP - 4),
+      'grid-guide': layoutSegment(x, y + 3, x, y + 22)
+    };
+  }
+
+  // Top of the gable window in the heat-pump night renders where it is lit and
+  // reaches under EV 1's value row.
+  const HEAT_PUMP_LIT_WINDOW_TOP = Object.freeze({
+    'scene_night_clear_charging.png': 194,
+    'scene_night_clear_dual_charging.png': 192,
+    'scene_night_rain_dual_charging.png': 192
+  });
+
+  // EV 1 and EV 2: guides drop onto each car's plug. The plugs are only
+  // 70-95 units apart, so the blocks are stacked: EV 2 sits just above its
+  // plug, below the gable window that is lit at night, and EV 1 sits above
+  // it, right of that window. EV 1's guide stays right of EV 2's text.
+  function evAnchoredComponents(anchors, litWindowTop) {
+    const o = FLOW_LAYOUT_ORIGINS;
+    const ev2 = textAboveTarget('ev2', o.ev2, anchors.ev2[0], anchors.ev2[1] - 6, 12);
+    const ev2LabelY = ev2['ev2-label'].y + o.ev2.y;
+    // Where EV 1's value row would clip the lit window, lift it above.
+    const ev1PowerY = Math.min(ev2LabelY - LAYOUT_LINE_GAP - 12, (litWindowTop ?? Infinity) - 6);
+    const ev1GuideTop = ev1PowerY + LAYOUT_GUIDE_TEXT_GAP;
+    const ev1Length = (anchors.ev[1] - 6) - ev1GuideTop;
+    return { ...ev2, ...textAboveTarget('ev', o.ev, anchors.ev[0], anchors.ev[1] - 6, ev1Length) };
+  }
+
+  // Home: vertical guide down onto the centre of the four-pane window block
+  // (scenes without heat pump) or onto the distribution box (heat-pump scenes).
+  function homeAnchoredComponents(anchors, heatPump) {
+    const s = anchorScale(anchors);
+    const x = anchors.home[0] + (heatPump ? 10 : 23) * s;
+    const top = anchors.home[1] - (heatPump ? 13 : 33) * s;
+    return textAboveTarget('load', FLOW_LAYOUT_ORIGINS.load, x, top - 2, 44);
+  }
+
+  // Solar text sits a little lower than the hand-placed originals, closer to
+  // the roof; the guide keeps its end on the panels.
+  const SOLAR_TEXT_DROP = 20;
+  function loweredSolarComponents(profile) {
+    const label = profile['solar-label'];
+    const power = profile['solar-power'];
+    const guide = profile['solar-guide'];
+    if (!label || !power || !guide) return {};
+    const topAttr = guide.y1 <= guide.y2 ? 'y1' : 'y2';
+    return {
+      'solar-label': layoutPoint(label.x, label.y + SOLAR_TEXT_DROP),
+      'solar-power': layoutPoint(power.x, power.y + SOLAR_TEXT_DROP),
+      'solar-guide': Object.freeze({ ...guide, [topAttr]: guide[topAttr] + SOLAR_TEXT_DROP })
+    };
+  }
+
+  function sceneAnchoredComponents(scene, heatPump, profile) {
+    const anchors = SCENE_ANCHORS[scene];
+    if (!anchors) return {};
+    return {
+      ...loweredSolarComponents(profile),
+      ...batteryAnchoredComponents(anchors),
+      ...gridAnchoredComponents(anchors),
+      ...evAnchoredComponents(anchors, heatPump ? HEAT_PUMP_LIT_WINDOW_TOP[scene] : undefined),
+      ...homeAnchoredComponents(anchors, heatPump)
+    };
+  }
+
   const STANDARD_SCENE_FLOW_COMPONENT_MAP = Object.freeze(Object.fromEntries(
     Object.entries(SCENE_FLOW_COMPONENT_MAP).map(([scene, profile]) => [
-      scene, Object.freeze({ ...profile, ...(ORIGINAL_SCENE_COMPONENT_OVERRIDES[scene] || {}) })
+      scene, Object.freeze({
+        ...profile,
+        ...(ORIGINAL_SCENE_COMPONENT_OVERRIDES[scene] || {}),
+        ...sceneAnchoredComponents(scene, false, profile)
+      })
     ])
   ));
 
+  // The label sits beside the unit on the open ground. Above the unit it would
+  // cross the high-contrast roof eave in most renders.
   const HEAT_PUMP_COMPONENTS = Object.freeze({
-    'heat-pump-label': Object.freeze({ x: 0, y: -96 }),
-    'heat-pump-power': Object.freeze({ x: 0, y: -78 }),
-    'heat-pump-guide': Object.freeze({ x1: 0, y1: -65, x2: 0, y2: -55 })
+    'heat-pump-label': Object.freeze({ x: 80, y: -38 }),
+    'heat-pump-power': Object.freeze({ x: 80, y: -20 }),
+    'heat-pump-guide': Object.freeze({ x1: 38, y1: -27, x2: 48, y2: -27 })
   });
+  // The dual-charging frames leave too little room right of the unit, so the
+  // label moves above-right, clear of the roof edge.
+  const HEAT_PUMP_DUAL_COMPONENTS = Object.freeze({
+    'heat-pump-label': Object.freeze({ x: 62, y: -80 }),
+    'heat-pump-power': Object.freeze({ x: 62, y: -62 }),
+    'heat-pump-guide': Object.freeze({ x1: 34, y1: -52, x2: 44, y2: -58 })
+  });
+  const HEAT_PUMP_SCENE_COMPONENT_OVERRIDES = Object.freeze({
+    'scene_day_clear_dual_charging.png': HEAT_PUMP_DUAL_COMPONENTS,
+    'scene_day_rain_dual_charging.png': HEAT_PUMP_DUAL_COMPONENTS,
+    'scene_night_clear_dual_charging.png': HEAT_PUMP_DUAL_COMPONENTS,
+    'scene_night_rain_dual_charging.png': HEAT_PUMP_DUAL_COMPONENTS
+  });
+
   const SCENE_COMPONENTS_WITH_HEAT_PUMP = Object.freeze(Object.fromEntries(
     Object.entries(SCENE_FLOW_COMPONENT_MAP).map(([scene, components]) => [
-      scene, Object.freeze({ ...components, ...HEAT_PUMP_COMPONENTS })
+      scene, Object.freeze({
+        ...components,
+        ...sceneAnchoredComponents(scene, true, components),
+        ...HEAT_PUMP_COMPONENTS,
+        ...(HEAT_PUMP_SCENE_COMPONENT_OVERRIDES[scene] || {})
+      })
     ])
   ));
 
@@ -2604,9 +2707,42 @@
     _sceneViewBox() {
       const sceneScale = clamp(safeNum(this._config.scene_scale, 1), 0.6, 1.4);
       return {
+        minX: 300 - (300 / sceneScale),
+        maxX: 300 + (300 / sceneScale),
         minY: 230 - (230 / sceneScale),
         maxY: 230 + (230 / sceneScale)
       };
+    }
+
+    // The heat pump text sits right of the unit, and several scenes place the
+    // unit close to the right edge. Long translations or custom labels would
+    // run off the card there, so pull the text left just enough to fit.
+    _fitHeatPumpTextToViewBox(sceneKey, origin) {
+      const label = this._query('#flow-heat-pump-label');
+      const power = this._query('#flow-heat-pump-power');
+      if (!label || !power || typeof label.getBBox !== 'function') return;
+      const fitKey = `${sceneKey}|${label.textContent}|${power.textContent.length}`;
+      if (this._heatPumpFitKey === fitKey) return;
+      const map = this._sceneFlowComponentMap();
+      const profile = map[sceneKey] || map['scene_day_clear_idle.png'] || {};
+      const labelX = safeNum(profile['heat-pump-label']?.x, safeNum(label.getAttribute('x'), 0));
+      const powerX = safeNum(profile['heat-pump-power']?.x, safeNum(power.getAttribute('x'), 0));
+      let labelWidth = 0;
+      let powerWidth = 0;
+      try {
+        labelWidth = label.getBBox().width;
+        powerWidth = power.getBBox().width;
+      } catch (_) {
+        return;
+      }
+      // Hidden or not yet laid out; try again on the next render.
+      if (!labelWidth && !powerWidth) return;
+      const maxX = this._sceneViewBox().maxX - 6;
+      const right = origin.x + Math.max(labelX + labelWidth / 2, powerX + powerWidth / 2);
+      const shift = Math.min(0, maxX - right);
+      this._setSvgAttrs(label, { x: Number((labelX + shift).toFixed(2)) });
+      this._setSvgAttrs(power, { x: Number((powerX + shift).toFixed(2)) });
+      this._heatPumpFitKey = fitKey;
     }
 
     _elementSceneY(el) {
@@ -2779,6 +2915,7 @@
       const pathD = (id, configKey) => p[id] || cfg.paths?.[configKey] || DEFAULT_CONFIG.paths[configKey];
       this._lastAppliedSceneFlowProfile = '';
       this._lastAppliedSceneFlowComponentProfile = '';
+      this._heatPumpFitKey = '';
       // The previous element tree is about to be replaced — drop cached refs.
       this._elCache = new Map();
       this._flowLinesCache = null;
@@ -3102,9 +3239,9 @@
                 <g class="flow-node heat-pump-hidden" id="heat-pump-node-group" transform="translate(445, 365)">
                   <image id="heat-pump-icon" href="${joinAsset(cfg.background_asset_base, 'heat_pump_icon_day.png')}" x="-35" y="-54" width="70" height="54" preserveAspectRatio="xMidYMax meet"></image>
                   <circle class="flow-node-bg" id="node-heat-pump-bg" cx="0" cy="0" r="5"></circle>
-                  <line class="flow-node-guide" id="flow-heat-pump-guide" x1="0" y1="-65" x2="0" y2="-55"></line>
-                  <text class="flow-label" id="flow-heat-pump-label" x="0" y="-96">${this._t('card.node.heat_pump', 'Heat Pump')}</text>
-                  <text class="flow-power" id="flow-heat-pump-power" x="0" y="-78">0.0 kW</text>
+                  <line class="flow-node-guide" id="flow-heat-pump-guide" x1="38" y1="-27" x2="48" y2="-27"></line>
+                  <text class="flow-label" id="flow-heat-pump-label" x="80" y="-38">${this._t('card.node.heat_pump', 'Heat Pump')}</text>
+                  <text class="flow-power" id="flow-heat-pump-power" x="80" y="-20">0.0 kW</text>
                   <text class="flow-status" id="flow-heat-pump-status" x="0" y="-62"></text>
                 </g>
 
@@ -3132,6 +3269,7 @@
 
                 <g class="flow-node" transform="translate(448, 336)">
                   <circle class="flow-node-bg" id="node-grid-bg" cx="0" cy="0" r="5"></circle>
+                  <line class="flow-node-guide" id="flow-grid-guide" x1="0" y1="12" x2="0" y2="42"></line>
                   <text class="flow-label" id="flow-grid-label" x="6" y="67">${this._t('card.node.grid', 'Rete')}</text>
                   <text class="flow-power" id="flow-grid-power" x="6" y="85">0.0 kW</text>
                   <text class="flow-status" id="flow-grid-status" x="6" y="100">${this._t('card.status.connected', 'CONNESSA')}</text>
@@ -3361,6 +3499,10 @@
       this._setText('#flow-load-power', this._formatKW(loadPower));
       this._setText('#flow-heat-pump-label', cfg.heat_pump_label || this._t('card.node.heat_pump', 'Heat Pump'));
       this._setText('#flow-heat-pump-power', heatPumpConfigured ? this._formatKW(heatPumpPower) : '');
+      if (heatPumpConfigured) {
+        const hpSceneKey = sceneProfileKey(sceneHref);
+        this._fitHeatPumpTextToViewBox(hpSceneKey, heatPumpOrigin(hpSceneKey));
+      }
       this._setText('#flow-battery-power', batteryConfigured ? this._formatKW(batteryPower) : '');
       const batteryArrow = !batteryConfigured ? '' : (batteryPower > batteryMin ? '▲' : (batteryPower < -batteryMin ? '▼' : ''));
       this._setText('#flow-battery-arrow', batteryArrow);

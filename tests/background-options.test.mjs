@@ -76,8 +76,28 @@ modeCard.setConfig({ language: 'en' });
 assert.match(modeCard._defaultBackgroundMap().day_clear_idle, /scene_day_clear_idle\.png$/);
 assert.equal(modeCard._sceneFlowPathMap()['scene_day_clear_idle.png']['line-solar-load'],
   'M 351 292 L 352 338 L 352 338');
-assert.equal(modeCard._sceneFlowComponentMap()['scene_day_clear_idle.png']['load-label'].y, -64);
-assert.equal(modeCard._sceneFlowComponentMap()['scene_night_clear_idle.png']['grid-label'].x, 18);
+// Every derived guide drops vertically and sits centred under its text, with
+// EV 2's block below EV 1's so the two never share a row.
+const assertDerivedLayout = (map, mode) => {
+  for (const scene of sceneFiles) {
+    const profile = map[`scene_${scene}.png`];
+    for (const node of ['load', 'battery', 'grid', 'ev', 'ev2']) {
+      const guide = profile[`${node}-guide`];
+      assert.equal(guide.x1, guide.x2, `${mode} ${scene} ${node} guide is vertical`);
+      assert.equal(profile[`${node}-label`].x, guide.x1, `${mode} ${scene} ${node} label centred on guide`);
+    }
+    assert.ok(profile['ev2-label'].y + 316 > profile['ev-power'].y + 332,
+      `${mode} ${scene} EV 2 text sits below EV 1 text`);
+  }
+};
+assertDerivedLayout(modeCard._sceneFlowComponentMap(), 'standard');
+const stdDayIdle = modeCard._sceneFlowComponentMap()['scene_day_clear_idle.png'];
+assert.equal(stdDayIdle['load-guide'].x1 + 465, 431, 'home guide centred on the four-pane window');
+assert.deepEqual({ ...stdDayIdle['battery-guide'] }, { x1: -17, y1: 58, x2: -17, y2: 78 },
+  'battery guide points into the battery');
+assert.deepEqual({ ...stdDayIdle['grid-guide'] }, { x1: -51, y1: 57, x2: -51, y2: 76 },
+  'grid guide rises onto the ground cable');
+assert.match(sceneCard.shadowRoot.innerHTML, /id="flow-grid-guide"/, 'grid guide is rendered');
 
 modeCard.setConfig({ language: 'en', entities: { heat_pump_power: 'sensor.heat_pump' } });
 for (const scene of sceneFiles) {
@@ -85,9 +105,13 @@ for (const scene of sceneFiles) {
 }
 assert.equal(modeCard._sceneFlowPathMap()['scene_day_clear_idle.png']['line-solar-load'],
   'M 346 287 Q 349 289 351 295 L 352 338');
-assert.equal(modeCard._sceneFlowComponentMap()['scene_day_clear_idle.png']['load-label'].y, -125);
-assert.equal(modeCard._sceneFlowComponentMap()['scene_day_clear_idle.png']['heat-pump-label'].y, -96);
-assert.equal(modeCard._sceneFlowComponentMap()['scene_night_clear_idle.png']['grid-label'].x, 62);
+assertDerivedLayout(modeCard._sceneFlowComponentMap(), 'heat pump');
+const hpDayIdle = modeCard._sceneFlowComponentMap()['scene_day_clear_idle.png'];
+assert.equal(hpDayIdle['load-guide'].x1 + 465, 418, 'home guide drops onto the distribution box');
+assert.deepEqual({ ...modeCard._sceneFlowComponentMap()['scene_day_clear_idle.png']['heat-pump-label'] },
+  { x: 80, y: -38 }, 'heat pump label sits beside the unit, below the roof eave');
+assert.deepEqual({ ...modeCard._sceneFlowComponentMap()['scene_day_clear_dual_charging.png']['heat-pump-label'] },
+  { x: 62, y: -80 }, 'dual scenes lack room right of the unit');
 const base = '/local/community/tesla-style-energy-flow/backgrounds';
 modeCard.setConfig({ language: 'en', dynamic_background: false,
   background: `${base}/scene_night_rain_idle.png`, entities: { heat_pump_power: 'sensor.heat_pump' } });
@@ -108,7 +132,7 @@ assert.match(editor._positionPreviewBackground('scene_day_clear_idle.png'), /sce
 assert.doesNotMatch(editor._positionPreviewSvg('scene_day_clear_idle.png'), /position-preview-heat-pump-icon/);
 editor.setConfig({ language: 'en', entities: { heat_pump_power: 'sensor.heat_pump' } });
 assert.ok(editor._positionEditorGroups('scene_day_clear_idle.png').some((group) => group.node === 'heat-pump'));
-assert.equal(editor._positionValue('scene_day_clear_idle.png', 'heat-pump-label', 'y'), -96);
+assert.equal(editor._positionValue('scene_day_clear_idle.png', 'heat-pump-label', 'y'), -38);
 assert.match(editor._positionPreviewBackground('scene_day_clear_idle.png'), /scene_day_clear_idle_heat_pump\.png$/);
 assert.match(editor._positionPreviewSvg('scene_day_clear_idle.png'), /position-preview-heat-pump-icon" href="[^\"]*heat_pump_icon_day\.png" x="410" y="311"/);
 assert.match(editor._positionPreviewSvg('scene_day_rain_idle.png'), /position-preview-heat-pump-icon" href="[^\"]*heat_pump_icon_rain\.png" x="398" y="304"/);
