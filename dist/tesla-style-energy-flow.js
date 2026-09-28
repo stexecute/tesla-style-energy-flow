@@ -1467,7 +1467,7 @@
     const s = anchorScale(anchors);
     const x = anchors.home[0] + (heatPump ? 10 : 23) * s;
     const top = anchors.home[1] - (heatPump ? 13 : 33) * s;
-    return textAboveTarget('load', FLOW_LAYOUT_ORIGINS.load, x, top - 2, 44);
+    return textAboveTarget('load', FLOW_LAYOUT_ORIGINS.load, x, top - 2, heatPump ? 64 : 44);
   }
 
   // Solar text sits a little lower than the hand-placed originals, closer to
@@ -1518,11 +1518,13 @@
     'heat-pump-guide': Object.freeze({ x1: 38, y1: -27, x2: 48, y2: -27 })
   });
   // The dual-charging frames leave too little room right of the unit, so the
-  // label moves above-right, clear of the roof edge.
+  // text sits above it with a vertical guide. It is nudged right at runtime
+  // just far enough to clear the home guide dropping onto the distribution
+  // box on the unit's left (see _fitHeatPumpTextToViewBox).
   const HEAT_PUMP_DUAL_COMPONENTS = Object.freeze({
-    'heat-pump-label': Object.freeze({ x: 62, y: -80 }),
-    'heat-pump-power': Object.freeze({ x: 62, y: -62 }),
-    'heat-pump-guide': Object.freeze({ x1: 34, y1: -52, x2: 44, y2: -58 })
+    'heat-pump-label': Object.freeze({ x: 10, y: -86 }),
+    'heat-pump-power': Object.freeze({ x: 10, y: -68 }),
+    'heat-pump-guide': Object.freeze({ x1: 10, y1: -62, x2: 10, y2: -50 })
   });
   const HEAT_PUMP_SCENE_COMPONENT_OVERRIDES = Object.freeze({
     'scene_day_clear_dual_charging.png': HEAT_PUMP_DUAL_COMPONENTS,
@@ -2760,29 +2762,37 @@
       const bareX = HEAT_PUMP_ICON.right + halfWidth;
       const besideX = shiftToFit(Math.max(basePower.x, withGuideX));
       const bareBesideX = shiftToFit(Math.max(basePower.x, bareX));
+      // Above the unit the text is centred as far as the home guide allows:
+      // that guide drops onto the distribution box just left of the unit.
+      const homeGuide = profile['load-guide'];
+      const homeGuideX = homeGuide ? homeGuide.x1 + FLOW_LAYOUT_ORIGINS.load.x - origin.x : -Infinity;
+      const aboveLayout = (above) => {
+        const x = shiftToFit(Math.max(0, homeGuideX + 4 + halfWidth));
+        const guideX = clamp(x, -HEAT_PUMP_ICON.right + 10, HEAT_PUMP_ICON.right - 10);
+        const guide = above['heat-pump-guide'];
+        return {
+          label: { x, y: above['heat-pump-label'].y },
+          power: { x, y: above['heat-pump-power'].y },
+          guide: { x1: guideX, y1: guide.y1, x2: guideX, y2: guide.y2 },
+          guideVisible: true
+        };
+      };
       let next;
-      if (!besideUnit || besideX >= withGuideX || bareBesideX >= bareX) {
-        const targetX = !besideUnit ? shiftToFit(basePower.x) : (besideX >= withGuideX ? besideX : bareBesideX);
+      if (!besideUnit) {
+        next = aboveLayout({ 'heat-pump-label': baseLabel, 'heat-pump-power': basePower, 'heat-pump-guide': baseGuide });
+      } else if (besideX >= withGuideX || bareBesideX >= bareX) {
+        const targetX = besideX >= withGuideX ? besideX : bareBesideX;
         const shift = targetX - basePower.x;
         const textLeft = targetX - halfWidth;
-        const showGuide = !besideUnit || besideX >= withGuideX;
         next = {
           label: { ...baseLabel, x: baseLabel.x + shift },
           power: { ...basePower, x: basePower.x + shift },
           // A sideways guide ends just short of the text.
-          guide: besideUnit && sideGuide ? { ...baseGuide, x2: textLeft - 2 } : baseGuide,
-          guideVisible: showGuide
+          guide: sideGuide ? { ...baseGuide, x2: textLeft - 2 } : baseGuide,
+          guideVisible: besideX >= withGuideX
         };
       } else {
-        const above = HEAT_PUMP_DUAL_COMPONENTS;
-        const x = shiftToFit(above['heat-pump-power'].x);
-        const guideX = Math.min(x, HEAT_PUMP_ICON.right - 6);
-        next = {
-          label: { x, y: above['heat-pump-label'].y },
-          power: { x, y: above['heat-pump-power'].y },
-          guide: { x1: guideX, y1: above['heat-pump-power'].y + 6, x2: guideX, y2: HEAT_PUMP_ICON.top + 6 },
-          guideVisible: true
-        };
+        next = aboveLayout(HEAT_PUMP_DUAL_COMPONENTS);
       }
       const round = (v) => Number(v.toFixed(2));
       this._setSvgAttrs(label, { x: round(next.label.x), y: round(next.label.y) });

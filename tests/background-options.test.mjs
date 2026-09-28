@@ -111,7 +111,9 @@ assert.equal(hpDayIdle['load-guide'].x1 + 465, 418, 'home guide drops onto the d
 assert.deepEqual({ ...modeCard._sceneFlowComponentMap()['scene_day_clear_idle.png']['heat-pump-label'] },
   { x: 80, y: -38 }, 'heat pump label sits beside the unit, below the roof eave');
 assert.deepEqual({ ...modeCard._sceneFlowComponentMap()['scene_day_clear_dual_charging.png']['heat-pump-label'] },
-  { x: 62, y: -80 }, 'dual scenes lack room right of the unit');
+  { x: 10, y: -86 }, 'dual scenes lack room right of the unit');
+const dualGuide = modeCard._sceneFlowComponentMap()['scene_day_clear_dual_charging.png']['heat-pump-guide'];
+assert.equal(dualGuide.x1, dualGuide.x2, 'dual heat pump guide drops vertically onto the unit');
 const base = '/local/community/tesla-style-energy-flow/backgrounds';
 modeCard.setConfig({ language: 'en', dynamic_background: false,
   background: `${base}/scene_night_rain_idle.png`, entities: { heat_pump_power: 'sensor.heat_pump' } });
