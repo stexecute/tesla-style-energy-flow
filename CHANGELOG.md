@@ -1,14 +1,20 @@
 # Changelog
 
-## Unreleased
+## 0.3.31 - 2026-09-29
 
-- Added Brazilian Portuguese (`pt-BR`) and European Portuguese (`pt-PT`) translations for the card and the config editor
-- Added region-aware language resolution so `pt-BR` and `pt-PT` are kept apart, with a bare `pt` profile mapping to `pt-PT`
-- Added `tests/i18n.test.mjs` to keep every translation bundle in key parity with `en`
-- Moved the heat pump label beside the unit so it no longer crosses the roof eave, and pull it back from the right edge for long labels
-- Home, battery, grid, EV 1 and EV 2 guides now drop vertically onto their object in every scene: home onto the centre of the window block (or the distribution box with a heat pump), battery into the battery, grid onto the ground cable, EVs onto each car's plug
+- Added optional heat-pump scenes: with `heat_pump_power` configured the card uses dedicated artwork and shows a heat pump node; `heat_pump_in_load` avoids counting that consumption twice. Dashboards without the sensor keep the original backgrounds. For manual installs, copy the complete `dist/backgrounds/` directory alongside the card script
+- Replaced the moving dashes with a bright leading edge and fading tail on a shared two-second cycle; reverse flows mirror the tail, and reduced-motion and offscreen behavior are kept
+- Added background dimming and EV-2-only image overrides
+- The visual position editor shows the heat pump artwork and keeps the heat pump's sideways guide intact when you drag or edit it
+- Home, battery, grid, EV 1 and EV 2 guides now drop vertically onto their object in every scene: home onto the window block (or the distribution box with a heat pump), battery into the battery, grid onto the ground cable, EVs onto each car's plug
+- Restored the grid guide line, and moved solar and home text closer to the house
 - EV 1 and EV 2 text is stacked so the two never share a row or cover the lit gable window
-- Restored the grid guide line, which was dropped from the card markup, and moved solar and home text a little closer to the house
+- The heat pump label sits beside the unit, or above it in the dual-charging scenes, and stays clear of the roof eave, the card edge and the artwork for long translations
+- Added Brazilian Portuguese (`pt-BR`) and European Portuguese (`pt-PT`) translations for the card and the config editor, with a bare `pt` profile mapping to `pt-PT`
+- Fixed the solar-to-grid export line rendering in the battery color
+- Fixed the afternoon scene rendering darker than the evening and night scenes
+- Fixed editor entity selection, stale flow elements and mW/MW power conversion
+- Added `tests/i18n.test.mjs` to keep every translation bundle in key parity with `en`
 
 ## 0.3.30 - 2026-06-28
 
