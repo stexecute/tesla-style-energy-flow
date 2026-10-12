@@ -67,3 +67,48 @@ allocationCard.hass = { language: 'en', states: {
 assert.equal(labels.get('#flow-load-power'), '1.0 kW', 'whole-home load must exclude the separate heat pump draw');
 assert.equal(labels.get('#flow-heat-pump-power'), '1.0 kW');
 assert.ok(active.includes('line-heat-pump'), 'configured heat pump draw should light its own path');
+
+// EV line colour: solar-only stays yellow, with hysteresis around the 5 % boundary.
+// Each step is [solarW, gridW, batteryW (negative = discharging)]; the 500 W base load is covered by solar first.
+function evLineClasses(steps, evW = 4000) {
+  const card = new Card();
+  card.setConfig({
+    language: 'en',
+    entities: { solar_power: 'sensor.solar', grid_power: 'sensor.grid', battery_power: 'sensor.battery', load_power: 'sensor.home', ev_power: 'sensor.ev' }
+  });
+  let cls = null;
+  card._setText = () => {};
+  card._activatePath = (id, c, watts, threshold) => {
+    if (id === 'line-wallbox-ev' && watts >= threshold) cls = c;
+  };
+  const state = (v) => ({ state: String(v), attributes: { unit_of_measurement: 'W' } });
+  return steps.map(([solarW, gridW, batteryW = 0]) => {
+    cls = null;
+    card.hass = { language: 'en', states: {
+      'sensor.solar': state(solarW), 'sensor.grid': state(gridW), 'sensor.battery': state(batteryW),
+      'sensor.home': state(500), 'sensor.ev': state(evW)
+    } };
+    return cls;
+  });
+}
+
+assert.deepEqual(evLineClasses([[4500, 0]]), ['flow-solar'], 'solar-only EV charging is yellow');
+assert.deepEqual(
+  evLineClasses([[4500, 0, 0], [4260, 0, -240], [4340, 0, -160], [4260, 0, -240], [4340, 0, -160]]),
+  ['flow-solar', 'flow-solar', 'flow-solar', 'flow-solar', 'flow-solar'],
+  'a battery share crossing 5 % (but below 10 %) must not flicker between yellow and green'
+);
+assert.equal(evLineClasses([[1500, 3000]])[0], 'flow-broken', 'grid-dominated EV charging is not solar-only');
+assert.deepEqual(
+  evLineClasses([[4500, 0, 0], [2500, 0, -2000], [4260, 0, -240], [4400, 0, -100]]),
+  ['flow-solar', 'flow-green', 'flow-green', 'flow-solar'],
+  'once green it needs a battery share below 5 % to return to solar-only'
+);
+
+// Without a battery contribution the line never turns green, even at >= 80 % renewable.
+assert.deepEqual(
+  evLineClasses([[3600, 900]]),
+  ['flow-solar'],
+  '90 % solar + 10 % grid and no battery stays yellow, not green'
+);
+assert.equal(evLineClasses([[1600, 3000]])[0], 'flow-broken', 'grid-dominant mix with no battery is red');

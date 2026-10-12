@@ -2038,6 +2038,7 @@
       this._smoothState = {};
       this._pathLastActive = {};
       this._lastDominant = {};
+      this._evSolarOnlyActive = false;
       this._elCache = new Map();
       this._flowLinesCache = null;
       this._syncedFlowAnimations = new WeakSet();
@@ -2058,6 +2059,7 @@
       this._smoothState = {};
       this._pathLastActive = {};
       this._lastDominant = {};
+      this._evSolarOnlyActive = false;
       // Config-derived caches — invalidate so the next render rebuilds them.
       this._elCache = new Map();
       this._flowLinesCache = null;
@@ -3713,7 +3715,19 @@
       const evRenewableShare = evTotal > 0
         ? (solarToEv + battToEv) / evTotal
         : 0;
-      const evCls = evRenewableShare >= 0.8
+      // Green only appears when the battery actually contributes; without a
+      // battery share the line falls back to the source-dominant colour.
+      // Exception: when the wallbox is powered by solar alone (battery and grid
+      // negligible), keep the line yellow so it matches the solar source.
+      // Hysteresis: enter below 5 % non-solar share, leave above 10 %, so a share
+      // hovering around the boundary does not flip the colour on every update.
+      const evNonSolarShare = evTotal > 0 ? (battToEv + gridToEv) / evTotal : 1;
+      const evSolarOnly = evTotal > 0 &&
+        evNonSolarShare < (this._evSolarOnlyActive ? 0.10 : 0.05);
+      this._evSolarOnlyActive = evSolarOnly;
+      const evCls = evSolarOnly
+        ? 'flow-solar'
+        : (evRenewableShare >= 0.8 && battToEv >= batteryMin)
         ? 'flow-green'
         : this._dominantFlowClass('ev', solarToEv, battToEv, gridToEv, 'flow-green');
       const ev1Share = evDraw > 0 ? ev1Draw / evDraw : 0;
