@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.32 - 2026-10-24
+
+- The EV line stays yellow when the car charges from solar alone; green now requires the battery to contribute. Solar with a small grid contribution and no battery stays yellow instead of turning green (#45)
+- Added `ev2_keep_position`: when EV 2 is the only active vehicle, it keeps its position in the dual scene with its label and line, using the `ev2_only` image or the dual scene as background (#47)
+
 ## 0.3.31 - 2026-09-29
 
 - Added optional heat-pump scenes: with `heat_pump_power` configured the card uses dedicated artwork and shows a heat pump node; `heat_pump_in_load` avoids counting that consumption twice. Dashboards without the sensor keep the original backgrounds. For manual installs, copy the complete `dist/backgrounds/` directory alongside the card script
