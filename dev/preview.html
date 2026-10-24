@@ -184,6 +184,7 @@
       <label><input type="checkbox" id="battOn" checked> battery</label>
       <label><input type="checkbox" id="hpInLoad"> hp_in_load</label>
       <label><input type="checkbox" id="evInLoad"> ev_in_load</label>
+      <label><input type="checkbox" id="ev2Keep"> ev2_keep_position</label>
     </div>
   </fieldset>
 
@@ -259,6 +260,7 @@ function buildConfig() {
     dynamic_background: on('dynamicBg'),
     heat_pump_in_load: on('hpInLoad'),
     ev_in_load: on('evInLoad'),
+    ev2_keep_position: on('ev2Keep'),
     entities: e
   };
 }

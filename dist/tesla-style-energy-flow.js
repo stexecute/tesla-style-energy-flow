@@ -76,6 +76,7 @@
         field_grid_invert: 'Inverti segno rete',
         field_ev_in_load: 'Potenza EV gia inclusa nel consumo casa',
         field_ev2_in_load: 'Potenza EV 2 gia inclusa nel consumo casa',
+        field_ev2_keep_position: 'Mantieni EV 2 nella sua posizione quando e da solo',
         field_heat_pump_in_load: 'Potenza pompa di calore gia inclusa nel consumo casa',
         field_smoothing: 'Attenuazione (sec, 0 = off)',
         field_show_labels: 'Mostra etichette',
@@ -172,6 +173,7 @@
         field_grid_invert: 'Invert grid sign',
         field_ev_in_load: 'EV power already included in home load',
         field_ev2_in_load: 'EV 2 power already included in home load',
+        field_ev2_keep_position: 'Keep EV 2 in its own position when alone',
         field_heat_pump_in_load: 'Heat pump power already included in home load',
         field_smoothing: 'Smoothing (sec, 0 = off)',
         field_show_labels: 'Show labels',
@@ -268,6 +270,7 @@
         field_grid_invert: 'Invertir signo de red',
         field_ev_in_load: 'Potencia EV ya incluida en consumo casa',
         field_ev2_in_load: 'Potencia EV 2 ya incluida en consumo casa',
+        field_ev2_keep_position: 'Mantener EV 2 en su posicion cuando esta solo',
         field_heat_pump_in_load: 'Potencia bomba de calor ya incluida en consumo casa',
         field_smoothing: 'Suavizado (seg, 0 = off)',
         field_show_labels: 'Mostrar etiquetas',
@@ -364,6 +367,7 @@
         field_grid_invert: 'Inverser signe reseau',
         field_ev_in_load: 'Puissance EV deja incluse dans conso maison',
         field_ev2_in_load: 'Puissance EV 2 deja incluse dans conso maison',
+        field_ev2_keep_position: 'Garder EV 2 a sa place quand il est seul',
         field_heat_pump_in_load: 'Puissance pompe a chaleur deja incluse dans conso maison',
         field_smoothing: 'Lissage (sec, 0 = off)',
         field_show_labels: 'Afficher etiquettes',
@@ -460,6 +464,7 @@
         field_grid_invert: 'Netz-Vorzeichen invertieren',
         field_ev_in_load: 'EV-Leistung bereits im Hausverbrauch enthalten',
         field_ev2_in_load: 'EV 2 Leistung bereits im Hausverbrauch enthalten',
+        field_ev2_keep_position: 'EV 2 allein an eigener Position zeigen',
         field_heat_pump_in_load: 'Wärmepumpen-Leistung bereits im Hausverbrauch enthalten',
         field_smoothing: 'Glättung (Sek, 0 = aus)',
         field_show_labels: 'Labels anzeigen',
@@ -556,6 +561,7 @@
         field_grid_invert: 'Inverter sinal da rede',
         field_ev_in_load: 'Potência do EV já incluída no consumo da casa',
         field_ev2_in_load: 'Potência do EV 2 já incluída no consumo da casa',
+        field_ev2_keep_position: 'Manter o EV 2 na sua posição quando estiver sozinho',
         field_heat_pump_in_load: 'Potência da bomba de calor já incluída no consumo da casa',
         field_heat_pump_label: 'Nome da bomba de calor',
         field_heat_pump_threshold: 'Limite da bomba de calor (W)',
@@ -652,6 +658,7 @@
         field_grid_invert: 'Inverter sinal da rede',
         field_ev_in_load: 'Potência do EV já incluída no consumo da casa',
         field_ev2_in_load: 'Potência do EV 2 já incluída no consumo da casa',
+        field_ev2_keep_position: 'Manter o EV 2 na sua posição quando estiver sozinho',
         field_heat_pump_in_load: 'Potência da bomba de calor já incluída no consumo da casa',
         field_heat_pump_label: 'Etiqueta da bomba de calor',
         field_heat_pump_threshold: 'Limiar da bomba de calor (W)',
@@ -1680,6 +1687,9 @@
     // by double-counted EV draw. Same for ev2_in_load.
     ev_in_load: false,
     ev2_in_load: false,
+    // When EV 2 is the only active vehicle, keep it at its dual-scene
+    // position instead of moving it onto the EV 1 spot of the single scene.
+    ev2_keep_position: false,
     // Same idea as ev_in_load, but for a heat pump on the main circuit.
     heat_pump_in_load: false,
     // Tesla-style EWMA smoothing on solar / grid / battery / load values to
@@ -3493,6 +3503,9 @@
         ? (sceneVehicles.length > 1)
         : evData.hasConfiguredSecondaryEv;
       const ev2OnlyScene = evData.activeVehicles.length === 1 && evData.activeVehicles[0].key === 'ev2';
+      // ev2_keep_position: a lone EV 2 stays in its own slot on the dual-scene
+      // geometry instead of taking over the EV 1 spot of the single scene.
+      const ev2KeepPosition = !!cfg.ev2_keep_position && ev2OnlyScene && evSceneActive;
       const evHideIdle = !!cfg.ev_hide_when_idle;
       const evNodeGroup = this._query('#ev-node-group');
       const ev2NodeGroup = this._query('#ev2-node-group');
@@ -3500,8 +3513,8 @@
       const heatPumpNodeGroup = this._query('#heat-pump-node-group');
       const roofAGroup = this._query('#roof-array-a-group');
       const roofBGroup = this._query('#roof-array-b-group');
-      const ev1 = primaryVisibleVehicle || { power: 0, batteryText: '--%', labelText: this._t('card.node.ev', 'EV'), switchOn: false, configured: false, present: false };
-      const ev2 = secondaryVisibleVehicle || { power: 0, batteryText: '--%', labelText: 'EV 2', switchOn: false, configured: false, present: false };
+      const ev1 = (ev2KeepPosition ? null : primaryVisibleVehicle) || { power: 0, batteryText: '--%', labelText: this._t('card.node.ev', 'EV'), switchOn: false, configured: false, present: false };
+      const ev2 = (ev2KeepPosition ? primaryVisibleVehicle : secondaryVisibleVehicle) || { power: 0, batteryText: '--%', labelText: 'EV 2', switchOn: false, configured: false, present: false };
       if (evNodeGroup) {
         evNodeGroup.classList.toggle('ev-hidden', !ev1.configured || (evHideIdle && !(ev1.power > 0 || ev1.switchOn || ev1.present)));
       }
@@ -3524,10 +3537,13 @@
       const period = this._scenePeriod(weatherState);
       const weatherGroup = this._weatherGroup(weatherState);
       this._setSceneTone(this._sceneTimeSlot(period), weatherGroup);
-      const sceneHref = this._resolveBackground(evSceneActive, useDualScene, ev2OnlyScene);
+      const sceneHref = this._resolveBackground(evSceneActive, useDualScene || ev2KeepPosition, ev2OnlyScene);
+      // Paths and text follow the dual scene when EV 2 keeps its position, so a
+      // custom ev2_only image drawn from the dual scene lines up.
+      const layoutHref = ev2KeepPosition ? this._resolveBackground(evSceneActive, true, false) : sceneHref;
       this._setBackground(sceneHref);
-      this._applySceneFlowPaths(sceneHref);
-      this._applySceneFlowComponents(sceneHref);
+      this._applySceneFlowPaths(layoutHref);
+      this._applySceneFlowComponents(layoutHref);
       // Heat pump sprite. Rain covers storm/snow too since there's no separate
       // art for those. heat_pump_icon_night.png exists but is unused here —
       // it's too dark to read against the night background (near-black on
@@ -3541,7 +3557,7 @@
       this._setHeatPumpIcon(joinAsset(cfg.background_asset_base, heatPumpIconFile));
       // Scene-specific placement (see HEAT_PUMP_SCENE_ORIGINS).
       if (heatPumpNodeGroup) {
-        const hpOrigin = heatPumpOrigin(sceneProfileKey(sceneHref));
+        const hpOrigin = heatPumpOrigin(sceneProfileKey(layoutHref));
         const hpTransform = `translate(${hpOrigin.x}, ${hpOrigin.y})`;
         if (heatPumpNodeGroup.getAttribute('transform') !== hpTransform) {
           heatPumpNodeGroup.setAttribute('transform', hpTransform);
@@ -3562,7 +3578,7 @@
       this._setText('#flow-heat-pump-label', cfg.heat_pump_label || this._t('card.node.heat_pump', 'Heat Pump'));
       this._setText('#flow-heat-pump-power', heatPumpConfigured ? this._formatKW(heatPumpPower) : '');
       if (heatPumpConfigured) {
-        const hpSceneKey = sceneProfileKey(sceneHref);
+        const hpSceneKey = sceneProfileKey(layoutHref);
         this._fitHeatPumpTextToViewBox(hpSceneKey, heatPumpOrigin(hpSceneKey));
       }
       this._setText('#flow-battery-power', batteryConfigured ? this._formatKW(batteryPower) : '');
@@ -4992,6 +5008,10 @@
               <div class="row">
                 <label>${this._t('editor.field_hide_ev_idle', 'Hide EV when idle')}</label>
                 <input type="checkbox" data-path="ev_hide_when_idle" ${cfg.ev_hide_when_idle ? 'checked' : ''}>
+              </div>
+              <div class="row">
+                <label>${this._t('editor.field_ev2_keep_position', 'Keep EV 2 in its own position when alone')}</label>
+                <input type="checkbox" data-path="ev2_keep_position" ${cfg.ev2_keep_position ? 'checked' : ''}>
               </div>
               <label>${this._t('editor.field_scene_scale', 'Scene Scale')}</label>
               <input type="number" step="0.01" data-path="scene_scale" value="${safeNum(cfg.scene_scale, 1)}">

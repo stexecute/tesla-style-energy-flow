@@ -55,6 +55,43 @@ assert.equal(selectedScene, '/local/my-second-car.png', 'EV 2 presence should se
 sceneCard.hass = evState(1500);
 assert.notEqual(selectedScene, '/local/my-second-car.png', 'EV 1 charging means EV 2 is not alone');
 
+// ev2_keep_position: a lone EV 2 keeps its dual-scene slot (#47).
+function loneEv2(extraConfig) {
+  const card = new Card();
+  const seen = { labels: new Map(), paths: [] };
+  card.setConfig({
+    language: 'en', ev2_label: 'Model 3',
+    entities: { grid_power: 'sensor.grid', ev_power: 'sensor.ev1', ev2_power: 'sensor.ev2', ev2_presence: 'binary_sensor.ev2' },
+    ...extraConfig
+  });
+  card._setBackground = (url) => { seen.background = url; };
+  card._applySceneFlowPaths = (url) => { seen.layout = url; };
+  card._setText = (id, value) => seen.labels.set(id, value);
+  card._activatePath = (id, cls, watts, threshold) => { if (watts >= threshold) seen.paths.push(id); };
+  card.hass = { language: 'en', states: {
+    'sun.sun': { state: 'above_horizon' },
+    'sensor.grid': { state: '3000', attributes: { unit_of_measurement: 'W' } },
+    'sensor.ev1': { state: '0', attributes: { unit_of_measurement: 'W' } },
+    'sensor.ev2': { state: '3000', attributes: { unit_of_measurement: 'W' } },
+    'binary_sensor.ev2': { state: 'on', attributes: {} }
+  } };
+  return seen;
+}
+const ev2Image = { background_map: { day_clear_ev2_only: '/local/my-second-car.png' } };
+const moved = loneEv2(ev2Image);
+assert.equal(moved.labels.get('#flow-ev-label'), 'Model 3', 'by default a lone EV 2 takes the EV 1 spot');
+assert.equal(moved.layout, '/local/my-second-car.png');
+assert.ok(moved.paths.includes('line-wallbox-ev') && !moved.paths.includes('line-wallbox-ev2'));
+const kept = loneEv2({ ...ev2Image, ev2_keep_position: true });
+assert.equal(kept.background, '/local/my-second-car.png', 'the EV 2 only image is still shown');
+assert.match(kept.layout, /scene_day_clear_dual_charging\.png$/, 'paths and text follow the dual scene');
+assert.equal(kept.labels.get('#flow-ev2-label'), 'Model 3');
+assert.equal(kept.labels.get('#flow-ev2-power'), '3.0 kW');
+assert.equal(kept.labels.get('#flow-ev-power'), '0 W', 'the EV 1 slot stays empty');
+assert.ok(kept.paths.includes('line-wallbox-ev2') && !kept.paths.includes('line-wallbox-ev'));
+const keptNoImage = loneEv2({ ev2_keep_position: true });
+assert.match(keptNoImage.background, /scene_day_clear_dual_charging\.png$/, 'without an EV 2 image the dual scene is used');
+
 const sceneDefaults = sceneCard._sceneFlowComponentMap();
 for (const scene of ['scene_day_clear_idle.png', 'scene_night_rain_dual_charging.png']) {
   assert.equal(sceneDefaults[scene]['heat-pump-label'], undefined, 'standard scenes omit heat pump positions');

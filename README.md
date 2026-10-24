@@ -139,6 +139,11 @@ when EV 2 is the sole present or charging vehicle. Weather-specific keys such
 as `day_rain_ev2_only` can be added in YAML; otherwise the clear variant is
 used. Without these overrides, existing scene selection is unchanged.
 
+By default a lone EV 2 takes the EV 1 spot of the single-car scene. Set
+`ev2_keep_position: true` to keep it at its own spot from the dual scene
+instead: labels and flow lines then use the dual-scene layout, and the
+background is your `ev2_only` image or, without one, the dual scene.
+
 `background_dim` scales the card's dark overlays. The default `1` preserves
 the normal scene tone; `0` removes the overlays for already-dark custom images.
 
